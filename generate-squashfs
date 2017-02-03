@@ -1,0 +1,25 @@
+#!/bin/sh
+
+help=$'Generate SquashFS image Script
+
+Generates a SquashFS image from the PNOR image
+
+usage: generate-squashfs [OPTION]
+
+Options:
+   -h, --help             Display this help text and exit.
+'
+
+while [[ $# -gt 0 ]]; do
+  key="$1"
+  case $key in
+    -h|--help)
+      echo "$help"
+      exit
+      ;;
+    *)
+      echo "Unknown option $1. Display available options with -h or --help"
+      exit
+      ;;
+  esac
+done
