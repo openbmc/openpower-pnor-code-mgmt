@@ -7,12 +7,47 @@ Generates a SquashFS image from the PNOR image
 usage: generate-squashfs [OPTION]
 
 Options:
+   -d, --dir <directory>  Specify destination directory. Defaults to /tmp if
+                          invalid or unspecified.
    -h, --help             Display this help text and exit.
 '
+
+declare -a partitions=(
+"HBB"
+"HBEL"
+"GUARD"
+"HBD"
+"DJVPD"
+"MVPD"
+"CVPD"
+"HBI"
+"SBE"
+"HCODE"
+"HBRT"
+"PAYLOAD"
+"TEST"
+"TESTRO"
+"HBBL"
+"GLOBAL"
+"RINGOVD"
+"SBKT"
+"OCC"
+)
+
+outdir="/tmp"
 
 while [[ $# -gt 0 ]]; do
   key="$1"
   case $key in
+    -d|--dir)
+      if [ -d "$2" ]; then
+        outdir="$2"
+      else
+        echo "Invalid or no destination directory specified."
+        break
+      fi
+      shift 2
+      ;;
     -h|--help)
       echo "$help"
       exit
@@ -23,3 +58,21 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+scratch_dir=/tmp/pnor_partitions/
+mkdir -p "${scratch_dir}"
+
+for partition in "${partitions[@]}"; do
+    echo "Reading ${partition}..."
+    pflash_cmd="pflash --partition=${partition} --read=${scratch_dir}${partition}"
+    ${pflash_cmd} || exit 1
+done
+
+echo "Creating SquashFS image..."
+
+cd "${scratch_dir}"
+squashfs_cmd="mksquashfs ${partitions[*]} ${outdir}/pnor"
+${squashfs_cmd} || exit 1
+
+echo "SquashFS Image at ${outdir}/pnor"
+rm -r "${scratch_dir}"
