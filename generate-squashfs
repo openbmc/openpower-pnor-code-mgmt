@@ -10,6 +10,28 @@ Options:
    -h, --help             Display this help text and exit.
 '
 
+declare -a partitions=(
+"HBB"
+"HBEL"
+"GUARD"
+"HBD"
+"DJVPD"
+"MVPD"
+"CVPD"
+"HBI"
+"SBE"
+"HCODE"
+"HBRT"
+"PAYLOAD"
+"TEST"
+"TESTRO"
+"HBBL"
+"GLOBAL"
+"RINGOVD"
+"SBKT"
+"OCC"
+)
+
 while [[ $# -gt 0 ]]; do
   key="$1"
   case $key in
@@ -22,4 +44,9 @@ while [[ $# -gt 0 ]]; do
       exit
       ;;
   esac
+done
+
+for partition in "${partitions[@]}"; do
+    echo "Reading ${partition}..."
+    pflash_cmd="pflash --partition=${partition} --read=/tmp/${partition}"
 done
