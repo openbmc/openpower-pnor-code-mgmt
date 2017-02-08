@@ -14,28 +14,6 @@ Options:
    -h, --help             Display this help text and exit.
 '
 
-declare -a partitions=(
-"HBB"
-"HBEL"
-"GUARD"
-"HBD"
-"DJVPD"
-"MVPD"
-"CVPD"
-"HBI"
-"SBE"
-"HCODE"
-"HBRT"
-"PAYLOAD"
-"TEST"
-"TESTRO"
-"HBBL"
-"GLOBAL"
-"RINGOVD"
-"SBKT"
-"OCC"
-)
-
 outdir="/tmp"
 outfile="pnor.xz.squashfs"
 
@@ -68,6 +46,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 scratch_dir=`mktemp -d` || exit 1
+partitions=($(pflash --info | grep ID | awk '{print $2}'))
 
 for partition in "${partitions[@]}"; do
   echo "Reading ${partition}..."
