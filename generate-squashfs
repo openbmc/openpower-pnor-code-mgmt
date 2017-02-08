@@ -12,28 +12,6 @@ Options:
    -h, --help             Display this help text and exit.
 '
 
-declare -a partitions=(
-"HBB"
-"HBEL"
-"GUARD"
-"HBD"
-"DJVPD"
-"MVPD"
-"CVPD"
-"HBI"
-"SBE"
-"HCODE"
-"HBRT"
-"PAYLOAD"
-"TEST"
-"TESTRO"
-"HBBL"
-"GLOBAL"
-"RINGOVD"
-"SBKT"
-"OCC"
-)
-
 outdir="/tmp"
 
 while [[ $# -gt 0 ]]; do
@@ -58,6 +36,8 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+partitions=($(pflash --info | grep ID | awk '{print $2}'))
 
 scratch_dir=/tmp/pnor_partitions/
 mkdir "${scratch_dir}"
