@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 help=$'Generate SquashFS image Script
 
@@ -13,6 +13,8 @@ Options:
 '
 
 outfile=`pwd`"/pnor.xz.squashfs"
+declare -a partitions=()
+tocfile="pnor.toc"
 
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -33,7 +35,33 @@ while [[ $# -gt 0 ]]; do
 done
 
 scratch_dir=`mktemp -d` || exit 1
-partitions=($(pflash --info | grep ID | awk '{print $2}'))
+
+echo "Parsing PNOR TOC..."
+{
+  while read line; do
+    case $line in
+      "Name"*)
+        echo "name=$(echo ${line##*=} | xargs)"
+        ;;
+      "Total size"*)
+        echo "size=$(echo ${line##*=} | xargs)"
+        ;;
+      "Erase granule"*)
+        echo "erase_granule=$(echo ${line##*=} | xargs)"
+        ;;
+      "ID="*)
+        # This line looks like "ID=05 MVPD 000d9000..00169000 (actual=00090000)"
+        read -r -a fields <<< "$line"
+        # Need the partition ID, name, start location, and end location
+        echo  "partition${fields[0]##*=}=${fields[1]},${fields[2]/../,}"
+        # Save the partition name
+        partitions+=(${fields[1]})
+        ;;
+      *)
+        ;;
+    esac
+  done < <(pflash --info)
+} > ${scratch_dir}/${tocfile}
 
 for partition in "${partitions[@]}"; do
   echo "Reading ${partition}..."
@@ -44,7 +72,7 @@ done
 echo "Creating SquashFS image..."
 
 cd "${scratch_dir}"
-squashfs_cmd="mksquashfs ${partitions[*]} ${outfile}"
+squashfs_cmd="mksquashfs ${tocfile} ${partitions[*]} ${outfile}"
 ${squashfs_cmd} || exit 1
 
 echo "SquashFS Image at ${outfile}"
