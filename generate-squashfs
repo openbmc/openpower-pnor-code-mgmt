@@ -42,8 +42,16 @@ echo "Parsing PNOR TOC..."
     if [[ $line == "ID="* ]]; then
         # This line looks like "ID=05 MVPD 000d9000..00169000 (actual=00090000)"
         read -r -a fields <<< "$line"
+
+        # Get any flags attached to end
+        flags=""
+        for flag in "${fields[@]:4}"
+        do
+          flags+=",${flag//[\[\]]/}"
+        done
+
         # Need the partition ID, name, start location, and end location
-        echo  "partition${fields[0]##*=}=${fields[1]},${fields[2]/../,}"
+        echo  "partition${fields[0]##*=}=${fields[1]},${fields[2]/../,}${flags}"
         # Save the partition name
         partitions+=(${fields[1]})
     fi
