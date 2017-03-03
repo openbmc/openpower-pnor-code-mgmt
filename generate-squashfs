@@ -4,7 +4,7 @@ help=$'Generate SquashFS image Script
 
 Generates a SquashFS image from the PNOR image
 
-usage: generate-squashfs [OPTION]
+usage: generate-squashfs [OPTION] <PNOR FILE>...
 
 Options:
    -f, --file <file>      Specify destination file. Defaults to
@@ -28,11 +28,19 @@ while [[ $# -gt 0 ]]; do
       exit
       ;;
     *)
-      echo "Unknown option $1. Display available options with -h or --help"
-      exit
+      if [ -f "$1" ]; then
+        pnorfile="$1"
+        shift 1
+      else
+        echo "No such file \"$1\"."
+        echo "Please enter a valid PNOR file."
+        exit
+      fi
       ;;
   esac
 done
+
+[ -z ${pnorfile} ] && echo "Must specify a PNOR file." && exit
 
 scratch_dir=`mktemp -d` || exit 1
 
@@ -55,12 +63,12 @@ echo "Parsing PNOR TOC..."
         # Save the partition name
         partitions+=(${fields[1]})
     fi
-  done < <(pflash --info)
+  done < <(pflash --info -F ${pnorfile})
 } > ${scratch_dir}/${tocfile}
 
 for partition in "${partitions[@]}"; do
   echo "Reading ${partition}..."
-  pflash_cmd="pflash --partition=${partition} --read=${scratch_dir}/${partition}"
+  pflash_cmd="pflash --partition=${partition} --read=${scratch_dir}/${partition} -F ${pnorfile}"
   ${pflash_cmd} || exit 1
 done
 
