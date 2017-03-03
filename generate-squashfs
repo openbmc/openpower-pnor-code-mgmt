@@ -4,7 +4,7 @@ help=$'Generate SquashFS image Script
 
 Generates a SquashFS image from the PNOR image
 
-usage: generate-squashfs [OPTION]
+usage: generate-squashfs [OPTION] <PNOR FILE>...
 
 Options:
    -f, --file <file>      Specify destination file. Defaults to
@@ -12,6 +12,8 @@ Options:
    -h, --help             Display this help text and exit.
 '
 
+let ffs_entry_size=128
+let miscflags_offset=112
 outfile=`pwd`"/pnor.xz.squashfs"
 declare -a partitions=()
 tocfile="pnor.toc"
@@ -28,15 +30,30 @@ while [[ $# -gt 0 ]]; do
       exit
       ;;
     *)
-      echo "Unknown option $1. Display available options with -h or --help"
-      exit
+      if [ -f "$1" ]; then
+        pnorfile="$1"
+        shift 1
+      else
+        echo "No such file \"$1\"."
+        echo "Please enter a valid PNOR file."
+        echo "$help"
+        exit 1
+      fi
       ;;
   esac
 done
 
+[ -z ${pnorfile} ] && echo "Must specify a PNOR file." && echo "$help" && exit 1
+
 scratch_dir=`mktemp -d` || exit 1
 
 echo "Parsing PNOR TOC..."
+
+# Needed to get the READONLY and PRESERVED flags
+# TODO: Get READONLY and PRESERVED flags from pflash instead.
+pflash_cmd="pflash --partition=part --read=${scratch_dir}/part -F ${pnorfile}"
+${pflash_cmd} || exit 1
+
 {
   while read line; do
     if [[ $line == "ID="* ]]; then
@@ -51,17 +68,30 @@ echo "Parsing PNOR TOC..."
           flags+=",${flag//[\[\]]/}"
         done
 
+        id=${fields[0]##*=}
+        offset=$((${ffs_entry_size} * 10#${id} + ${miscflags_offset}))
+        miscflags=0x$(xxd -p -l  0x1 -seek ${offset} ${scratch_dir}/part)
+        if ((miscflags & 0x80)); then
+          flags+=",PRESERVED"
+        fi
+        if ((miscflags & 0x40)); then
+          flags+=",READONLY"
+        fi
+
         # Need the partition ID, name, start location, end location, and flags
-        echo  "partition${fields[0]##*=}=${fields[1]},${fields[2]/../,}${flags}"
+        echo  "partition${id}=${fields[1]},${fields[2]/../,}${flags}"
+
         # Save the partition name
         partitions+=(${fields[1]})
     fi
-  done < <(pflash --info)
+  # Don't need the "part" or "BACKUP_PART" partition
+  done < <(pflash --info -F ${pnorfile} | grep -v -i "part")
 } > ${scratch_dir}/${tocfile}
 
 for partition in "${partitions[@]}"; do
   echo "Reading ${partition}..."
-  pflash_cmd="pflash --partition=${partition} --read=${scratch_dir}/${partition}"
+  pflash_cmd="pflash --partition=${partition} --read=${scratch_dir}/${partition}
+  -F ${pnorfile}"
   ${pflash_cmd} || exit 1
 done
 
