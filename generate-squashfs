@@ -12,6 +12,8 @@ Options:
    -h, --help             Display this help text and exit.
 '
 
+let ffs_entry_size=128
+let miscflags_offset=112
 outfile=`pwd`"/pnor.xz.squashfs"
 declare -a partitions=()
 tocfile="pnor.toc"
@@ -45,6 +47,12 @@ done
 scratch_dir=`mktemp -d` || exit 1
 
 echo "Parsing PNOR TOC..."
+
+# Needed to get the READONLY and PRESERVED flags
+# TODO: Get READONLY and PRESERVED flags from pflash instead.
+pflash_cmd="pflash --partition=part --read=${scratch_dir}/part -F ${pnorfile}"
+${pflash_cmd} || exit 1
+
 {
   while read line; do
     if [[ $line == "ID="* ]]; then
@@ -58,10 +66,23 @@ echo "Parsing PNOR TOC..."
           flags+=",${flag//[\[\]]/}"
         done
 
+        id=${fields[0]##*=}
+        offset=$((${ffs_entry_size} * 10#${id} + ${miscflags_offset}))
+        miscflags=0x$(xxd -p -l  0x1 -seek ${offset} ${scratch_dir}/part)
+        if ((miscflags & 0x80)); then
+          flags+=",PRESERVED"
+        fi
+        if ((miscflags & 0x40)); then
+          flags+=",READONLY"
+        fi
+
         # Need the partition ID, name, start location, and end location
-        echo  "partition${fields[0]##*=}=${fields[1]},${fields[2]/../,}${flags}"
+        echo  "partition${id}=${fields[1]},${fields[2]/../,}${flags}"
+
         # Save the partition name
-        partitions+=(${fields[1]})
+        if [[ "${fields[1]}" != "part" ]]; then
+          partitions+=(${fields[1]})
+        fi
     fi
   done < <(pflash --info -F ${pnorfile})
 } > ${scratch_dir}/${tocfile}
