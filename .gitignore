@@ -41,6 +41,7 @@ Makefile.in
 /config.h.in~
 /config.log
 /config.status
+/phosphor-version-host-software-manager
 Makefile
 .deps
 *-libtool
