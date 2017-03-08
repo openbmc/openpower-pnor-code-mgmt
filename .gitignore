@@ -41,6 +41,7 @@ Makefile.in
 /config.h.in~
 /config.log
 /config.status
+/openpower-version-host-software-manager
 Makefile
 .deps
 *-libtool
