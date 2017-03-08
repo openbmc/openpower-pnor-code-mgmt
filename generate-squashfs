@@ -1,4 +1,5 @@
 #!/bin/bash
+set -eo pipefail
 
 help=$'Generate SquashFS image Script
 
@@ -46,14 +47,13 @@ done
 
 [ -z ${pnorfile} ] && echo "Must specify a PNOR file." && echo "$help" && exit 1
 
-scratch_dir=`mktemp -d` || exit 1
+scratch_dir=`mktemp -d`
 
 echo "Parsing PNOR TOC..."
 
 # Needed to get the READONLY and PRESERVED flags
 # TODO: Get READONLY and PRESERVED flags from pflash instead.
-pflash_cmd="pflash --partition=part --read=${scratch_dir}/part -F ${pnorfile}"
-${pflash_cmd} || exit 1
+pflash --partition=part --read=${scratch_dir}/part -F ${pnorfile}
 
 {
   while read line; do
@@ -90,16 +90,13 @@ ${pflash_cmd} || exit 1
 
 for partition in "${partitions[@]}"; do
   echo "Reading ${partition}..."
-  pflash_cmd="pflash --partition=${partition} --read=${scratch_dir}/${partition}
-  -F ${pnorfile}"
-  ${pflash_cmd} || exit 1
+  pflash --partition=${partition} --read=${scratch_dir}/${partition} -F ${pnorfile}
 done
 
 echo "Creating SquashFS image..."
 
 cd "${scratch_dir}"
-squashfs_cmd="mksquashfs ${tocfile} ${partitions[*]} ${outfile}"
-${squashfs_cmd} || exit 1
+mksquashfs ${tocfile} ${partitions[*]} ${outfile}
 
 echo "SquashFS Image at ${outfile}"
 rm -r "${scratch_dir}"
