@@ -2,6 +2,7 @@
 
 #include <sdbusplus/bus.hpp>
 #include "xyz/openbmc_project/Software/Version/server.hpp"
+#include "xyz/openbmc_project/Software/Activation/server.hpp"
 
 namespace openpower
 {
@@ -11,7 +12,8 @@ namespace manager
 {
 
 using VersionInherit = sdbusplus::server::object::object<
-    sdbusplus::xyz::openbmc_project::Software::server::Version>;
+    sdbusplus::xyz::openbmc_project::Software::server::Version,
+    sdbusplus::xyz::openbmc_project::Software::server::Activation>;
 
 /** @class Version
  *  @brief OpenBMC version software management implementation.
