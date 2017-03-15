@@ -32,6 +32,11 @@ AC_ARG_VAR(SOFTWARE_OBJPATH, [The software manager Dbus root])
 AS_IF([test "x$SOFTWARE_OBJPATH" == "x"], [SOFTWARE_OBJPATH="/xyz/openbmc_project/software"])
 AC_DEFINE_UNQUOTED([SOFTWARE_OBJPATH], ["$SOFTWARE_OBJPATH"], [The software manager Dbus root])
 
+AC_DEFINE(BUSNAME_UPDATER, "org.open_power.Software.Host.Updater",
+    [The item updater DBus busname to own.])
+AC_DEFINE(OBJ_ACTIVATION, "/xyz/openbmc_project/software/active",
+    [The software activation DBus object path.])
+
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
