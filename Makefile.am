@@ -15,11 +15,13 @@ openpower_update_manager_SOURCES = \
 generic_cxxflags = \
 	$(SYSTEMD_CFLAGS) \
 	$(PHOSPHOR_DBUS_INTERFACES_CFLAGS) \
-	$(SDBUSPLUS_CFLAGS)
+	$(SDBUSPLUS_CFLAGS) \
+	$(PHOSPHOR_LOGGING_CFLAGS)
 generic_ldflags = \
 	$(SYSTEMD_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
-	$(SDBUSPLUS_LIBS)
+	$(SDBUSPLUS_LIBS) \
+	$(PHOSPHOR_LOGGING_LIBS)
 
 openpower_version_host_software_manager_CXXFLAGS = $(generic_cxxflags)
 openpower_version_host_software_manager_LDFLAGS = $(generic_ldflags)
