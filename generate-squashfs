@@ -50,8 +50,9 @@ echo "Parsing PNOR TOC..."
 # Needed to get the READONLY and PRESERVED flags
 # TODO: Get READONLY and PRESERVED flags from pflash instead.
 pflash --partition=part --read=${scratch_dir}/part -F ${pnorfile}
-
+pflash --partition=VERSION --read=${scratch_dir}/VERSION -F ${pnorfile}
 {
+  head -n 1 ${scratch_dir}/VERSION
   while read line; do
     if [[ $line == "ID="* ]]; then
         # This line looks like
@@ -81,7 +82,8 @@ pflash --partition=part --read=${scratch_dir}/part -F ${pnorfile}
         # Save the partition name
         partitions+=(${fields[1]})
     fi
-  done < <(pflash --info -F ${pnorfile} | grep -v -i "part")
+  # Don't need part, version, or backup_part partitions
+  done < <(pflash --info -F ${pnorfile} | grep -v -i "part\|version")
 } > ${scratch_dir}/${tocfile}
 
 for partition in "${partitions[@]}"; do
