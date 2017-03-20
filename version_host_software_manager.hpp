@@ -25,10 +25,26 @@ class Version : public VersionInherit
          *
          * @param[in] bus       - The Dbus bus object
          * @param[in] objPath   - The Dbus object path
+         * @param[in] versionId - The Host version identifier
          */
         Version(sdbusplus::bus::bus& bus,
-                const char* objPath) : VersionInherit(
-                    bus, objPath) {};
+                const std::string& objPath,
+                const std::string& versionId) : VersionInherit(
+                    bus, (objPath).c_str()) {};
+
+        /**
+         * @brief Get the code version identifier.
+         *
+         * @return The version identifier.
+         **/
+        static const std::string getVersion();
+
+        /**
+         * @brief Get the Host Version id.
+         *
+         * @return The id.
+         **/
+        static const std::string getId(const std::string version);
 };
 
 } // namespace manager
