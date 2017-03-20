@@ -28,7 +28,15 @@ class Version : public VersionInherit
          */
         Version(sdbusplus::bus::bus& bus,
                 const char* objPath) : VersionInherit(
-                    bus, (std::string{objPath} + '/' + getId()).c_str()) {};
+                    bus, (std::string{objPath} + '/' + getId()).c_str(), true)
+        {
+            // Set properties.
+            purpose(VersionPurpose::Host);
+            version(getVersion());
+
+            // Emit deferred signal.
+            emit_object_added();
+        }
 
     private:
         /**
