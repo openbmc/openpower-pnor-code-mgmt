@@ -15,6 +15,8 @@ PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces],,\
     AC_MSG_ERROR(["Requires phosphor-dbus-interfaces package."]))
 PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus],,
     AC_MSG_ERROR(["Requires sdbusplus package."]))
+PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging],,
+    [AC_MSG_ERROR([The openbmc/phosphor-logging package is required])])
 
 # Checks for library functions
 LT_INIT # Required for systemd linking
@@ -34,6 +36,10 @@ AC_DEFINE_UNQUOTED([SOFTWARE_OBJPATH], ["$SOFTWARE_OBJPATH"], [The software mana
 
 AC_DEFINE(BUSNAME_UPDATER, "org.open_power.Software.Host.Updater",
     [The item updater DBus busname to own.])
+
+AC_ARG_VAR(PNOR_DIR, [The path to the pnor partition files])
+AS_IF([test "x$PNOR_DIR" == "x"], [PNOR_DIR="/tmp/pnor/"])
+AC_DEFINE_UNQUOTED([PNOR_DIR], ["$PNOR_DIR"], [The path to the pnor partition files])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
