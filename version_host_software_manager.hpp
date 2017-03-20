@@ -28,7 +28,22 @@ class Version : public VersionInherit
          */
         Version(sdbusplus::bus::bus& bus,
                 const char* objPath) : VersionInherit(
-                    bus, objPath) {};
+                    bus, (std::string{objPath} + '/' + getId()).c_str()) {};
+
+    private:
+        /**
+         * @brief Get the code version identifier.
+         *
+         * @return The version identifier.
+         **/
+        const std::string getVersion() const;
+
+        /**
+         * @brief Get the Host Version id.
+         *
+         * @return The id.
+         **/
+        const std::string getId() const;
 };
 
 } // namespace manager
