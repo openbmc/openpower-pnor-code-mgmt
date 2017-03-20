@@ -10,8 +10,10 @@ int main(int argc, char* argv[])
     sdbusplus::server::manager::manager objManager(bus,
             SOFTWARE_OBJPATH);
 
+    auto version = openpower::software::manager::Version::getVersion();
+
     openpower::software::manager::Version manager(bus,
-            SOFTWARE_OBJPATH);
+            SOFTWARE_OBJPATH, version);
 
     bus.request_name(VERSION_BUSNAME);
 
