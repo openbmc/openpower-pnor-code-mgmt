@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
     auto id = openpower::software::manager::Version::getId(version);
 
     openpower::software::manager::Version manager(bus,
-            std::string{SOFTWARE_OBJPATH} + '/' + id);
+            std::string{SOFTWARE_OBJPATH} + '/' + id, version);
 
     bus.request_name(VERSION_BUSNAME);
 
