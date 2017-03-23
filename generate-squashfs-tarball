@@ -1,0 +1,111 @@
+#!/bin/bash
+set -eo pipefail
+
+help=$'Generate SquashFS image Script
+
+Generates a SquashFS image from the PNOR image
+
+usage: generate-squashfs [OPTION] <PNOR FILE>...
+
+Options:
+   -f, --file <file>      Specify destination file. Defaults to
+                          `pwd`/squashfs.tar if unspecified.
+   -h, --help             Display this help text and exit.
+'
+
+let ffs_entry_size=128
+let miscflags_offset=112
+outfile=`pwd`/squashfs.tar
+declare -a partitions=()
+tocfile="pnor.toc"
+
+while [[ $# -gt 0 ]]; do
+  key="$1"
+  case $key in
+    -f|--file)
+      outfile="$2"
+      shift 2
+      ;;
+    -h|--help)
+      echo "$help"
+      exit
+      ;;
+    *)
+      pnorfile="$1"
+      shift 1
+      ;;
+  esac
+done
+
+if [ ! -f "${pnorfile}" ]; then
+  echo "Please enter a valid PNOR file."
+  echo "$help"
+  exit 1
+fi
+
+scratch_dir=`mktemp -d`
+
+echo "Parsing PNOR TOC..."
+
+# Needed to get the READONLY and PRESERVED flags
+# TODO: Get READONLY and PRESERVED flags from pflash instead.
+pflash --partition=part --read=${scratch_dir}/part -F ${pnorfile}
+pflash --partition=VERSION --read=${scratch_dir}/VERSION -F ${pnorfile}
+{
+  version=$(head -n 1 ${scratch_dir}/VERSION)
+  echo "version=$version"
+  extended_version=$(head -n -1 ${scratch_dir}/VERSION)
+  echo "extended_version=$extended_version"
+  while read line; do
+    if [[ $line == "ID="* ]]; then
+        # This line looks like
+        # "ID=05 MVPD 000d9000..00169000 (actual=00090000) [ECC]"
+        read -r -a fields <<< "$line"
+
+        # Get any flags attached to end (e.g. [ECC])
+        flags=""
+        for flag in "${fields[@]:4}"
+        do
+          flags+=",${flag//[\[\]]/}"
+        done
+
+        id=${fields[0]##*=}
+        offset=$((${ffs_entry_size} * 10#${id} + ${miscflags_offset}))
+        miscflags=0x$(xxd -p -l  0x1 -seek ${offset} ${scratch_dir}/part)
+        if ((miscflags & 0x80)); then
+          flags+=",PRESERVED"
+        fi
+        if ((miscflags & 0x40)); then
+          flags+=",READONLY"
+        fi
+
+        # Need the partition ID, name, start location, end location, and flags
+        echo  "partition${id}=${fields[1]},${fields[2]/../,}${flags}"
+
+        # Save the partition name
+        partitions+=(${fields[1]})
+    fi
+  # Don't need part, version, or backup_part partitions
+  done < <(pflash --info -F ${pnorfile} | grep -v -i "part\|version")
+} > ${scratch_dir}/${tocfile}
+
+for partition in "${partitions[@]}"; do
+  echo "Reading ${partition}..."
+  pflash --partition=${partition} \
+    --read=${scratch_dir}/${partition} \
+    -F ${pnorfile}
+done
+
+echo "Creating SquashFS image..."
+cd "${scratch_dir}"
+mksquashfs ${tocfile} ${partitions[*]} ${scratch_dir}/pnor.xz.squashfs
+
+echo "Creating MANIFEST for the image"
+manifest_location="${scratch_dir}/MANIFEST"
+echo -e "purpose: host\nversion: $version" >> $manifest_location 
+
+echo "Generating tarball to contain the SquashFS image and its MANIFEST"
+tar -cvf $outfile $manifest_location ${scratch_dir}/pnor.xz.squashfs
+
+echo "SquashFSTarball at ${outfile}"
+rm -r "${scratch_dir}"
