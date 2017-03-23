@@ -54,6 +54,8 @@ pflash --partition=VERSION --read=${scratch_dir}/VERSION -F ${pnorfile}
 {
   version=$(head -n 1 ${scratch_dir}/VERSION)
   echo "version=$version"
+  extended_version=$(echo $(tail -n +2 ${scratch_dir}/VERSION)|tr ' ' ',')  
+  echo "extended_version=$extended_version"
   while read line; do
     if [[ $line == "ID="* ]]; then
         # This line looks like
