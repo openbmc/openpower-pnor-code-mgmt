@@ -1,21 +1,23 @@
 #!/bin/bash
 set -eo pipefail
 
-help=$'Generate SquashFS image Script
+help=$'Generate Tarball with SquashFS image and MANIFEST Script
 
 Generates a SquashFS image from the PNOR image
+Creates a MANIFEST for image verification
+Packages the SquashFS image and MANIFEST together in a tarball
 
 usage: generate-squashfs [OPTION] <PNOR FILE>...
 
 Options:
    -f, --file <file>      Specify destination file. Defaults to
-                          `pwd`/pnor.xz.squashfs if unspecified.
+                          `pwd`/pnor.squashfs.tar if unspecified.
    -h, --help             Display this help text and exit.
 '
 
 let ffs_entry_size=128
 let miscflags_offset=112
-outfile=`pwd`"/pnor.xz.squashfs"
+outfile=`pwd`"/pnor.squashfs.tar"
 declare -a partitions=()
 tocfile="pnor.toc"
 
@@ -97,9 +99,15 @@ for partition in "${partitions[@]}"; do
 done
 
 echo "Creating SquashFS image..."
-
 cd "${scratch_dir}"
-mksquashfs ${tocfile} ${partitions[*]} ${outfile}
+mksquashfs ${tocfile} ${partitions[*]} ${scratch_dir}/pnor.xz.squashfs
 
-echo "SquashFS Image at ${outfile}"
+echo "Creating MANIFEST for the image"
+manifest_location="${scratch_dir}/MANIFEST"
+echo -e "purpose: host\nversion: $version" >> $manifest_location
+
+echo "Generating tarball to contain the SquashFS image and its MANIFEST"
+tar -cvf $outfile $manifest_location ${scratch_dir}/pnor.xz.squashfs
+
+echo "SquashFSTarball at ${outfile}"
 rm -r "${scratch_dir}"
