@@ -15,6 +15,8 @@ PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces],,\
     AC_MSG_ERROR(["Requires phosphor-dbus-interfaces package."]))
 PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus],,
     AC_MSG_ERROR(["Requires sdbusplus package."]))
+PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging],,\
+    [AC_MSG_ERROR(["Requires phosphor-logging package."])])
 
 # Checks for library functions
 LT_INIT # Required for systemd linking
@@ -32,8 +34,18 @@ AC_ARG_VAR(SOFTWARE_OBJPATH, [The software manager Dbus root])
 AS_IF([test "x$SOFTWARE_OBJPATH" == "x"], [SOFTWARE_OBJPATH="/xyz/openbmc_project/software"])
 AC_DEFINE_UNQUOTED([SOFTWARE_OBJPATH], ["$SOFTWARE_OBJPATH"], [The software manager Dbus root])
 
+AC_DEFINE(VERSION_IFACE, "xyz.openbmc_project.Software.Version",
+    [The software version manager interface])
+
 AC_DEFINE(BUSNAME_UPDATER, "org.open_power.Software.Host.Updater",
     [The item updater DBus busname to own.])
+
+AC_DEFINE(MAPPER_BUSNAME, "xyz.openbmc_project.ObjectMapper",
+    [The object mapper busname.])
+AC_DEFINE(MAPPER_PATH, "/xyz/openbmc_project/object_mapper",
+    [The object mapper path.])
+AC_DEFINE(MAPPER_INTERFACE, "xyz.openbmc_project.ObjectMapper",
+    [The object mapper interface.])
 
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
