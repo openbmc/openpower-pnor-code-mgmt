@@ -21,10 +21,12 @@ generic_ldflags = \
 	$(SYSTEMD_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	$(SDBUSPLUS_LIBS) \
-	$(PHOSPHOR_LOGGING_LIBS)
+	$(PHOSPHOR_LOGGING_LIBS) -lstdc++fs
 
 openpower_version_host_software_manager_CXXFLAGS = $(generic_cxxflags)
 openpower_version_host_software_manager_LDFLAGS = $(generic_ldflags)
 openpower_update_manager_CXXFLAGS = $(generic_cxxflags)
 openpower_update_manager_LDFLAGS = $(generic_ldflags)
+
+SUBDIRS = test
 
