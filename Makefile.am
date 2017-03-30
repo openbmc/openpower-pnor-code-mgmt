@@ -2,11 +2,16 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 
 sbin_PROGRAMS = \
 	openpower-version-host-software-manager \
-	openpower-update-manager
+	openpower-update-manager \
+	openpower-download-manager
 
 openpower_version_host_software_manager_SOURCES = \
 	version_host_software_manager.cpp \
 	version_host_software_manager_main.cpp
+
+openpower_download_manager_SOURCES = \
+	download_manager.cpp \
+	download_manager.cpp
 
 openpower_update_manager_SOURCES = \
 	item_updater.cpp \
@@ -28,6 +33,8 @@ openpower_version_host_software_manager_CXXFLAGS = $(generic_cxxflags)
 openpower_version_host_software_manager_LDFLAGS = $(generic_ldflags)
 openpower_update_manager_CXXFLAGS = $(generic_cxxflags)
 openpower_update_manager_LDFLAGS = $(generic_ldflags)
+openpower_download_manager_CXXFLAGS = $(generic_cxxflags)
+openpower_download_manager_LDFLAGS = $(generic_ldflags)
 
 SUBDIRS = test
 
