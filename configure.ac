@@ -51,6 +51,11 @@ AS_IF([test "x$VERSION_BUSNAME" == "x"],
     [VERSION_BUSNAME="org.open_power.Software.Host.Version"])
 AC_DEFINE_UNQUOTED([VERSION_BUSNAME], ["$VERSION_BUSNAME"], [The DBus busname to own])
 
+AC_ARG_VAR(DOWNLOAD_BUSNAME, [The Dbus busname to own])
+AS_IF([test "x$DOWNLOAD_BUSNAME" == "x"],
+    [DOWNLOAD_BUSNAME="org.open_power.Software.Download"])
+AC_DEFINE_UNQUOTED([DOWNLOAD_BUSNAME], ["$DOWNLOAD_BUSNAME"], [The DBus busname to own])
+
 AC_ARG_VAR(SOFTWARE_OBJPATH, [The software manager Dbus root])
 AS_IF([test "x$SOFTWARE_OBJPATH" == "x"], [SOFTWARE_OBJPATH="/xyz/openbmc_project/software"])
 AC_DEFINE_UNQUOTED([SOFTWARE_OBJPATH], ["$SOFTWARE_OBJPATH"], [The software manager Dbus root])
