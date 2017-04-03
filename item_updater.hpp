@@ -52,6 +52,14 @@ class ItemUpdater
                                     void* userData,
                                     sd_bus_error* retError);
 
+        /** @brief Validated the PNOR squashFS image version with the MANIFEST
+         *
+         * @param[in] void
+         * @param[out] int      0--> Validation successful
+         *                     -1--> Validation Failed
+         */
+        static int validateVersion(void); 
+
         /** @brief Persistent sdbusplus DBus bus connection. */
         sdbusplus::bus::bus& busItem;
 

@@ -104,7 +104,7 @@ mksquashfs ${tocfile} ${partitions[*]} ${scratch_dir}/pnor.xz.squashfs
 
 echo "Creating MANIFEST for the image"
 manifest_location="${scratch_dir}/MANIFEST"
-echo -e "purpose: host\nversion: $version" >> $manifest_location
+echo -e "purpose=host\nversion=$version" >> $manifest_location
 
 echo "Generating tarball to contain the SquashFS image and its MANIFEST"
 tar -cvf $outfile $manifest_location ${scratch_dir}/pnor.xz.squashfs
