@@ -45,7 +45,7 @@ class Version : public VersionInherit
          *
          * @return The version identifier.
          **/
-        static std::string getVersion(const std::string& tocFilePath);
+        static std::string getVersion(const std::string& manifestFilePath);
 
         /**
          * @brief Get the Host Version id.

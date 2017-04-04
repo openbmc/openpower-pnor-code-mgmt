@@ -15,15 +15,15 @@ namespace manager
 
 using namespace phosphor::logging;
 
-std::string Version::getVersion(const std::string& tocFilePath)
+std::string Version::getVersion(const std::string& manifestFilePath)
 {
     constexpr auto versionKey = "version=";
     constexpr auto versionKeySize = strlen(versionKey);
 
-    if (tocFilePath.empty())
+    if (manifestFilePath.empty())
     {
-        log<level::ERR>("Error TocFilePath is empty");
-        throw std::runtime_error("TocFilePath is empty");
+        log<level::ERR>("Error MANIFESTFilePath is empty");
+        throw std::runtime_error("MANIFESTFilePath is empty");
     }
 
     std::string version{};
@@ -36,7 +36,7 @@ std::string Version::getVersion(const std::string& tocFilePath)
     // Too many GCC bugs (53984, 66145) to do this the right way...
     try
     {
-        efile.open(tocFilePath);
+        efile.open(manifestFilePath);
         while (getline(efile, line))
         {
             if (line.compare(0, versionKeySize, versionKey) == 0)
@@ -49,7 +49,7 @@ std::string Version::getVersion(const std::string& tocFilePath)
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Error in reading Host pnor.toc file");
+        log<level::ERR>("Error in reading Host MANIFEST file");
     }
 
     return version;
