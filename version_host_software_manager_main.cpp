@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
     sdbusplus::server::manager::manager objManager(bus,
             SOFTWARE_OBJPATH);
 
-    auto version = openpower::software::manager::Version::getVersion(TOC_FILE);
+    auto version = openpower::software::manager::Version::getVersion(MANIFEST_FILE);
     auto id = openpower::software::manager::Version::getId(version);
 
     openpower::software::manager::Version manager(bus,

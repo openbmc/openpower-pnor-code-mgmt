@@ -61,9 +61,9 @@ AC_DEFINE(VERSION_IFACE, "xyz.openbmc_project.Software.Version",
 AC_DEFINE(BUSNAME_UPDATER, "org.open_power.Software.Host.Updater",
     [The item updater DBus busname to own.])
 
-AC_ARG_VAR(TOC_FILE, [The path to the pnor toc file])
-AS_IF([test "x$TOC_FILE" == "x"], [TOC_FILE="/tmp/pnor/pnor.toc"])
-AC_DEFINE_UNQUOTED([TOC_FILE], ["$TOC_FILE"], [The path to the pnor toc file])
+AC_ARG_VAR(MANIFEST_FILE, [The path to the MANIFEST file])
+AS_IF([test "x$MANIFEST_FILE" == "x"], [MANIFEST_FILE="/tmp/pnor/MANIFEST"])
+AC_DEFINE_UNQUOTED([MANIFEST_FILE], ["$MANIFEST_FILE"], [The path to the MANIFEST file])
 
 AC_DEFINE(MAPPER_BUSNAME, "xyz.openbmc_project.ObjectMapper",
     [The object mapper busname.])

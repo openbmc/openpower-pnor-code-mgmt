@@ -37,17 +37,17 @@ class VersionTest : public testing::Test
 /** @brief Make sure we correctly get the version from getVersion()*/
 TEST_F(VersionTest, TestGetVersion)
 {
-    auto tocFilePath = _directory + "/" + "pnor.toc";
+    auto manifestFilePath = _directory + "/" + "MANIFEST";
     auto version = "test-version";
 
     std::ofstream file;
-    file.open(tocFilePath, std::ofstream::out);
+    file.open(manifestFilePath, std::ofstream::out);
     ASSERT_TRUE(file.is_open());
 
     file << "version=" << version << std::endl;
     file.close();
 
-    EXPECT_EQ(Version::getVersion(tocFilePath), version);
+    EXPECT_EQ(Version::getVersion(manifestFilePath), version);
 }
 
 /** @brief Make sure we correctly get the Id from getId()*/
