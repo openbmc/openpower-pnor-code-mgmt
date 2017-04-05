@@ -2,6 +2,7 @@
 
 #include <sdbusplus/bus.hpp>
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
+#include <xyz/openbmc_project/Software/ActivationBlocksTransition/server.hpp>
 
 namespace openpower
 {
@@ -12,6 +13,8 @@ namespace manager
 
 using ActivationInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Software::server::Activation>;
+using ActivationBlocksTransitionInherit = sdbusplus::server::object::object<
+ sdbusplus::xyz::openbmc_project::Software::server::ActivationBlocksTransition>;
 
 /** @class Activation
  *  @brief OpenBMC activation software management implementation.
@@ -28,6 +31,24 @@ class Activation : public ActivationInherit
          */
         Activation(sdbusplus::bus::bus& bus, const std::string& path) :
                    ActivationInherit(bus, path.c_str()) {};
+};
+
+/** @class ActivationBlocksTransition
+ *  @brief OpenBMC ActivationBlocksTransition implementation.
+ *  @details A concrete implementation for
+ *  xyz.openbmc_project.Software.ActivationBlocksTransition DBus API.
+ */
+class ActivationBlocksTransition : public ActivationBlocksTransitionInherit
+{
+    public:
+        /** @brief Constructs ActivationBlocksTransition.
+         *
+         * @param[in] bus    - The Dbus bus object
+         * @param[in] path   - The Dbus object path
+         */
+        ActivationBlocksTransition(sdbusplus::bus::bus& bus,
+                                   const std::string& path) :
+                   ActivationBlocksTransitionInherit(bus, path.c_str()) {}
 };
 
 } // namespace manager
