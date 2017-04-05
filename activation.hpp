@@ -2,6 +2,7 @@
 
 #include <sdbusplus/bus.hpp>
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
+#include "xyz/openbmc_project/Software/ExtendedVersion/server.hpp"
 
 namespace openpower
 {
@@ -11,6 +12,7 @@ namespace manager
 {
 
 using ActivationInherit = sdbusplus::server::object::object<
+    sdbusplus::xyz::openbmc_project::Software::server::ExtendedVersion,
     sdbusplus::xyz::openbmc_project::Software::server::Activation>;
 
 /** @class Activation
