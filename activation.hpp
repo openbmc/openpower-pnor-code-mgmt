@@ -29,7 +29,8 @@ class Activation : public ActivationInherit
          * @param[in] bus    - The Dbus bus object
          * @param[in] path   - The Dbus object path
          */
-        Activation(sdbusplus::bus::bus& bus, const std::string& path) :
+        Activation(sdbusplus::bus::bus& bus, const std::string& path,
+                   std::string& versionId) :
                    ActivationInherit(bus, path.c_str()),
                    activationChanged(
                         bus,
@@ -37,7 +38,8 @@ class Activation : public ActivationInherit
                         handleActivationChangedSignal,
                         this),
                    busActivation(bus),
-                   pathActivation(path)
+                   pathActivation(path),
+                   versionId(versionId)
         {}
 
     private:
@@ -77,6 +79,9 @@ class Activation : public ActivationInherit
 
         /** @brief Persistent DBus object path */
         std::string pathActivation;
+
+        /** @brief Version id */
+        std::string versionId;
 };
 
 /** @class ActivationBlocksTransition
