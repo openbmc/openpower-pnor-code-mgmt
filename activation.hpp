@@ -8,7 +8,7 @@ namespace openpower
 {
 namespace software
 {
-namespace manager
+namespace updater
 {
 
 using ActivationInherit = sdbusplus::server::object::object<
@@ -30,7 +30,52 @@ class Activation : public ActivationInherit
          * @param[in] path   - The Dbus object path
          */
         Activation(sdbusplus::bus::bus& bus, const std::string& path) :
-                   ActivationInherit(bus, path.c_str()) {};
+                   ActivationInherit(bus, path.c_str()),
+                   activationChanged(
+                        bus,
+                        matchStr(path).c_str(),
+                        handleActivationChangedSignal,
+                        this),
+                   busActivation(bus),
+                   pathActivation(path) {}
+
+    private:
+        /** @brief Callback function for Activation PropertiesChanged
+         *
+         * @param[in]  msg   - Data associated with subscribed signal
+         * @param[in]  data  - Pointer to this object instance
+         * @param[out] err   - The sdbus error reference
+         */
+        static int handleActivationChangedSignal(sd_bus_message* msg,
+                                                 void* data,
+                                                 sd_bus_error* err);
+
+        /**
+         * @brief Handle when Activation value changes
+         *
+         * @param[in] msg - Expanded sdbusplus message data
+         * @param[in] err - Contains any sdbus error reference if occurred
+         */
+        void handleActivationChanged(sdbusplus::message::message& msg,
+                                     sd_bus_error* err);
+
+        /** @brief Constructs the sdbusplus signal match string */
+        static const std::string matchStr (const std::string& path)
+        {
+            return std::string("type='signal',"
+                               "member='PropertiesChanged',"
+                               "path='" + path + "',"
+                               "interface='org.freedesktop.DBus.Properties',");
+        }
+
+        /** @brief sdbusplus signal match for PropertiesChanged */
+        sdbusplus::server::match::match activationChanged;
+
+        /** @brief Persistent sdbusplus DBus bus connection */
+        sdbusplus::bus::bus& busActivation;
+
+        /** @brief Persistent DBus object path */
+        std::string pathActivation;
 };
 
 /** @class ActivationBlocksTransition
@@ -51,7 +96,7 @@ class ActivationBlocksTransition : public ActivationBlocksTransitionInherit
                    ActivationBlocksTransitionInherit(bus, path.c_str()) {}
 };
 
-} // namespace manager
+} // namespace updater
 } // namespace software
 } // namespace openpower
 

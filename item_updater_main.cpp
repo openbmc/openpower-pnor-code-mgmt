@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     // Add sdbusplus ObjectManager.
     sdbusplus::server::manager::manager objManager(bus, SOFTWARE_OBJPATH);
 
-    openpower::software::manager::ItemUpdater updater(bus);
+    openpower::software::updater::ItemUpdater updater(bus);
 
     bus.request_name(BUSNAME_UPDATER);
 
