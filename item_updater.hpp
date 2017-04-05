@@ -57,7 +57,7 @@ class ItemUpdater
 
         /** @brief Persistent map of Activation dbus objects and their
           * version id */
-        std::map<uint32_t, std::unique_ptr<Activation>> activations;
+        std::map<std::string, std::unique_ptr<Activation>> activations;
 
         /** @brief sdbusplus signal match for Software.Version */
         sdbusplus::server::match::match versionMatch;

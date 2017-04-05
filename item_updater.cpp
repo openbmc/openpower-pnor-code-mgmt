@@ -55,7 +55,7 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
             return -1;
         }
 
-        auto versionId = std::stoi(resp.substr(pos + 1), nullptr, 16);
+        auto versionId = resp.substr(pos + 1);
         if (updater->activations.find(versionId) == updater->activations.end())
         {
             updater->activations.insert(std::make_pair(
