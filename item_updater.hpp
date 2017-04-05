@@ -7,7 +7,7 @@ namespace openpower
 {
 namespace software
 {
-namespace manager
+namespace updater
 {
 
 /** @class ItemUpdater
@@ -63,7 +63,7 @@ class ItemUpdater
         sdbusplus::server::match::match versionMatch;
 };
 
-} // namespace manager
+} // namespace updater
 } // namespace software
 } // namespace openpower
 

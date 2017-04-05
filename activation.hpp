@@ -8,7 +8,7 @@ namespace openpower
 {
 namespace software
 {
-namespace manager
+namespace updater
 {
 
 using ActivationInherit = sdbusplus::server::object::object<
@@ -31,6 +31,24 @@ class Activation : public ActivationInherit
          */
         Activation(sdbusplus::bus::bus& bus, const std::string& path) :
                    ActivationInherit(bus, path.c_str()) {};
+
+        /** @brief Overloaded Activation property setter function
+         *
+         *  @param[in] value - One of Activation::Activations
+         *
+         *  @return Success or exception thrown
+         */
+        Activations activation(Activations value) override;
+
+        /** @brief Overloaded requestedActivation property setter function
+         *
+         *  @param[in] value - One of Activation::RequestedActivations
+         *
+         *  @return Success or exception thrown
+         */
+        RequestedActivations requestedActivation(RequestedActivations value)
+                override;
+
 };
 
 /** @class ActivationBlocksTransition
@@ -51,7 +69,7 @@ class ActivationBlocksTransition : public ActivationBlocksTransitionInherit
                    ActivationBlocksTransitionInherit(bus, path.c_str()) {}
 };
 
-} // namespace manager
+} // namespace updater
 } // namespace software
 } // namespace openpower
 
