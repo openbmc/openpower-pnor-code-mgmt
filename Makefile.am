@@ -11,6 +11,7 @@ openpower_version_host_software_manager_SOURCES = \
 	version_host_software_manager_main.cpp
 
 openpower_update_manager_SOURCES = \
+	activation.cpp \
 	item_updater.cpp \
 	item_updater_main.cpp
 

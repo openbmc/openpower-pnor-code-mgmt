@@ -6,7 +6,7 @@ namespace openpower
 {
 namespace software
 {
-namespace manager
+namespace updater
 {
 
 using namespace phosphor::logging;
@@ -68,7 +68,7 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
     return 0;
 }
 
-} // namespace manager
+} // namespace updater
 } // namespace software
 } // namespace openpower
 
