@@ -62,7 +62,8 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
                     versionId,
                     std::make_unique<Activation>(
                             updater->busItem,
-                            resp)));
+                            resp,
+                            versionId)));
         }
     }
     return 0;
