@@ -1,4 +1,5 @@
 #include "activation.hpp"
+#include "config.h"
 
 namespace openpower
 {
@@ -19,27 +20,53 @@ int Activation::handleActivationChangedSignal(sd_bus_message* msg,
 void Activation::handleActivationChanged(sdbusplus::message::message& msg,
                                          sd_bus_error* err)
 {
+    constexpr const auto propertyActivation = "Activation";
+    constexpr const auto propertyRequestedActivation = "RequestedActivation";
     std::string key;
     std::map<std::string, sdbusplus::message::variant<std::string>> msgData;
     msg.read(key, msgData);
     std::string value = sdbusplus::message::variant_ns::get<std::string>(
                                 msgData.begin()->second);
 
-    if (!value.compare(convertForMessage(
-                Activation::Activations::Activating).c_str()))
+    // Activation Property
+    if (!(msgData.begin()->first).compare(propertyActivation))
     {
-        activationBlocksTransitions.insert(std::make_pair(
-                  versionId,
-                  std::make_unique<ActivationBlocksTransition>(
-                            busActivation,
-                            pathActivation)));
-    }
-    else
-    {
-        auto block = activationBlocksTransitions.find(versionId);
-        if (block != activationBlocksTransitions.end())
+        if (!value.compare(convertForMessage(
+                    Activation::Activations::Activating).c_str()))
         {
-            activationBlocksTransitions.erase(block);
+            activationBlocksTransitions.insert(std::make_pair(
+                    versionId,
+                    std::make_unique<ActivationBlocksTransition>(
+                                busActivation,
+                                pathActivation)));
+        }
+        else
+        {
+            auto block = activationBlocksTransitions.find(versionId);
+            if (block != activationBlocksTransitions.end())
+            {
+                activationBlocksTransitions.erase(block);
+            }
+        }
+    }
+    // RequestedActivation Property
+    else if (!(msgData.begin()->first).compare(propertyRequestedActivation))
+    {
+        if (!value.compare(convertForMessage(
+                    Activation::RequestedActivations::Active).c_str()))
+        {
+            constexpr const auto ubimountService = "obmc-flash-bios-ubimount@";
+            auto ubimountServiceFile = std::string(ubimountService) +
+                                       versionId +
+                                       ".service";
+            auto method = busActivation.new_method_call(
+                    SYSTEMD_BUSNAME,
+                    SYSTEMD_PATH,
+                    SYSTEMD_INTERFACE,
+                    "StartUnit");
+            method.append(ubimountServiceFile,
+                          "replace");
+            busActivation.call_noreply(method);
         }
     }
 }
