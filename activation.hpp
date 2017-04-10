@@ -28,9 +28,12 @@ class Activation : public ActivationInherit
          *
          * @param[in] bus    - The Dbus bus object
          * @param[in] path   - The Dbus object path
+         * @param[in] versionId - The software version id
          */
-        Activation(sdbusplus::bus::bus& bus, const std::string& path) :
-                   ActivationInherit(bus, path.c_str()) {};
+        Activation(sdbusplus::bus::bus& bus, const std::string& path,
+                   std::string& versionId) :
+                   ActivationInherit(bus, path.c_str()),
+                   versionId(versionId) {}
 
         /** @brief Overloaded Activation property setter function
          *
@@ -49,6 +52,8 @@ class Activation : public ActivationInherit
         RequestedActivations requestedActivation(RequestedActivations value)
                 override;
 
+        /** @brief Version id */
+        std::string versionId;
 };
 
 /** @class ActivationBlocksTransition
