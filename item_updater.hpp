@@ -52,6 +52,14 @@ class ItemUpdater
                                     void* userData,
                                     sd_bus_error* retError);
 
+        /**
+         * @brief Get the code extended version identifier.
+         *
+         * @return The extended version identifier.
+         */
+        static std::string getExtendedVersion(const std::string&
+                                               manifestFilePath);
+
         /** @brief Persistent sdbusplus DBus bus connection. */
         sdbusplus::bus::bus& busItem;
 
