@@ -1,3 +1,5 @@
+#include <string>
+#include <fstream>
 #include <phosphor-logging/log.hpp>
 #include "config.h"
 #include "item_updater.hpp"
@@ -44,6 +46,7 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
         return -1;
     }
 
+    auto extendedVersion = ItemUpdater::getExtendedVersion(MANIFEST_FILE);
     for (const auto& resp : mapperResponse)
     {
         // Version id is the last item in the path
@@ -63,10 +66,51 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
                     std::make_unique<Activation>(
                             updater->busItem,
                             resp,
-                            versionId)));
+                            versionId,
+                            extendedVersion)));
         }
     }
     return 0;
+}
+
+std::string ItemUpdater::getExtendedVersion(const std::string& manifestFilePath)
+{
+    constexpr auto extendedVersionKey = "extended_version=";
+    constexpr auto extendedVersionKeySize = strlen(extendedVersionKey);
+
+    if (manifestFilePath.empty())
+    {
+        log<level::ERR>("Error MANIFESTFilePath is empty");
+        throw std::runtime_error("MANIFESTFilePath is empty");
+    }
+
+    std::string extendedVersion{};
+    std::ifstream efile;
+    std::string line;
+    efile.exceptions(std::ifstream::failbit
+                     | std::ifstream::badbit
+                     | std::ifstream::eofbit);
+
+    try
+    {
+        efile.open(manifestFilePath);
+        while (getline(efile, line))
+        {
+            if (line.compare(0, extendedVersionKeySize,
+                             extendedVersionKey) == 0)
+            {
+                extendedVersion = line.substr(extendedVersionKeySize);
+                break;
+            }
+        }
+        efile.close();
+    }
+    catch (const std::exception& e)
+    {
+        log<level::ERR>("Error in reading Host MANIFEST file");
+    }
+
+    return extendedVersion;
 }
 
 } // namespace updater
