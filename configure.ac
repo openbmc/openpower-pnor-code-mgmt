@@ -64,7 +64,7 @@ AC_DEFINE(BUSNAME_UPDATER, "org.open_power.Software.Host.Updater",
     [The item updater DBus busname to own.])
 
 AC_ARG_VAR(MANIFEST_FILE, [The path to the MANIFEST file])
-AS_IF([test "x$MANIFEST_FILE" == "x"], [MANIFEST_FILE="/tmp/pnor/MANIFEST"])
+AS_IF([test "x$MANIFEST_FILE" == "x"], [MANIFEST_FILE="/tmp/images/MANIFEST"])
 AC_DEFINE_UNQUOTED([MANIFEST_FILE], ["$MANIFEST_FILE"], [The path to the MANIFEST file])
 
 AC_DEFINE(MAPPER_BUSNAME, "xyz.openbmc_project.ObjectMapper",

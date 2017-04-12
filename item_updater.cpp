@@ -1,6 +1,8 @@
+#include <fstream>
 #include <phosphor-logging/log.hpp>
 #include "config.h"
 #include "item_updater.hpp"
+#include "activation.hpp"
 
 namespace openpower
 {
@@ -9,7 +11,13 @@ namespace software
 namespace updater
 {
 
+// When you see server:: you know we're referencing our base class
+namespace server = sdbusplus::xyz::openbmc_project::Software::server;
+
 using namespace phosphor::logging;
+
+constexpr auto PNOR_SQUASHFS_IMAGE = "pnor.xz.squashfs";
+constexpr auto IMAGES_DIR = "/tmp/images/";
 
 int ItemUpdater::createActivation(sd_bus_message* msg,
                                   void* userData,
@@ -56,6 +64,14 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
         }
 
         auto versionId = resp.substr(pos + 1);
+
+        // Determine the Activation state by processing the given image dir.
+        auto activationState = server::Activation::Activations::Invalid;
+        if (ItemUpdater::validateSquashFSImage(versionId) == 0)
+        {
+            activationState = server::Activation::Activations::Ready;
+        }
+
         if (updater->activations.find(versionId) == updater->activations.end())
         {
             updater->activations.insert(std::make_pair(
@@ -63,10 +79,27 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
                     std::make_unique<Activation>(
                             updater->busItem,
                             resp,
-                            versionId)));
+                            versionId,
+                            activationState)));
         }
     }
     return 0;
+}
+
+int ItemUpdater::validateSquashFSImage(const std::string& versionId)
+{
+    auto file = std::string(IMAGES_DIR) + versionId;
+    std::ifstream efile(file.c_str());
+
+    if (efile.good() == 1)
+    {
+        return 0;
+    }
+    else
+    {
+        log<level::ERR>("Failed to find the SquashFS image.");
+        return -1;
+    }
 }
 
 } // namespace updater
