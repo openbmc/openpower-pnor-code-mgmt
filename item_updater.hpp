@@ -52,6 +52,49 @@ class ItemUpdater
                                     void* userData,
                                     sd_bus_error* retError);
 
+        /**
+         * @brief process the tarball provided by validating its
+         *        contents, performing untar and then unsquashing
+         *        the pnor squashfs image
+         *
+         * @param[in]  tarballFilePath  - Path to the tarball.
+         * @param[in]  versionId        - The software version ID.
+         * @param[out] result    - 0 --> if Image Processing Passed.
+         *                       - -1--> if Failed.
+         */
+        static int processImage(const std::string& tarballFilePath,
+                                std::string& versionId);
+
+        /**
+         * @brief Creates a folder in the default location where
+         *        all images will be stored.
+         *
+         * @param[in] versionId        - The software version ID.
+         * @param[out] result    - 0 --> if Untar Passed.
+         *                       - -1--> if Failed.
+         */
+        static int createFolder(std::string& imageFolder);
+
+        /**
+         * @brief Untar the tarball to extract MANIFEST and squashfs image
+         *
+         * @param[in]  tarballFilePath  - Path to the tarball.
+         * @param[in]  versionId        - The software version ID.
+         * @param[out] result    - 0 --> if Untar Passed.
+         *                       - -1--> if Failed.
+         */
+        static int unTAR(const std::string& tarballFilePath,
+                         std::string& versionId);
+
+        /**
+         * @brief Validates the given tarball by checking files.
+         *
+         * @param[in]  tarballFilePath  - Path to the tarball.
+         * @param[out] result    - 0 --> if validation was successful
+         *                       - -1--> Otherwise
+         */
+        static int validateTarball(const std::string& tarballFilePath);
+
         /** @brief Persistent sdbusplus DBus bus connection. */
         sdbusplus::bus::bus& busItem;
 

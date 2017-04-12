@@ -25,9 +25,18 @@ class Activation : public ActivationInherit
          *
          * @param[in] bus    - The Dbus bus object
          * @param[in] path   - The Dbus object path
+         * @param[in] activationStatus  - The Status of Activation
          */
-        Activation(sdbusplus::bus::bus& bus, const std::string& path) :
-                   ActivationInherit(bus, path.c_str()) {};
+        Activation(sdbusplus::bus::bus& bus, const std::string& path,
+                   sdbusplus::xyz::openbmc_project::Software::
+                   server::Activation::Activations activationStatus) :
+                   ActivationInherit(bus, path.c_str(), true)
+        {
+            // Set Properties.
+            activation(activationStatus);
+            // Emit deferred signal.
+            emit_object_added();
+        }
 };
 
 } // namespace manager
