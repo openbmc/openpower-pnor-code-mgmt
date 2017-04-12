@@ -1,6 +1,13 @@
+#include <sys/wait.h>
+#include <time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string>
 #include <phosphor-logging/log.hpp>
 #include "config.h"
 #include "item_updater.hpp"
+#include "activation.hpp"
 
 namespace openpower
 {
@@ -9,7 +16,12 @@ namespace software
 namespace manager
 {
 
+// When you see server:: you know we're referencing our base class
+namespace server = sdbusplus::xyz::openbmc_project::Software::server;
+
 using namespace phosphor::logging;
+
+constexpr auto PNOR_SQUASHFS_IMAGE = "pnor.xz.squashfs";
 
 int ItemUpdater::createActivation(sd_bus_message* msg,
                                   void* userData,
@@ -55,6 +67,11 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
             return -1;
         }
 
+        auto activationState = server::Activation::Activations::Invalid;
+        if (ItemUpdater::processImage() == true)
+        {
+            activationState = server::Activation::Activations::Ready;
+        }
         auto versionId = resp.substr(pos + 1);
         if (updater->activations.find(versionId) == updater->activations.end())
         {
@@ -62,11 +79,73 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
                     versionId,
                     std::make_unique<Activation>(
                             updater->busItem,
-                            resp)));
+                            resp,
+                            activationState)));
         }
     }
     return 0;
 }
+
+bool ItemUpdater::processImage()
+{
+    if (ItemUpdater::validateTarball() != 0)
+    {
+        log<level::ERR>("Failed to validate the tarball.");
+        return false;
+    }
+    return true;
+}
+
+
+
+int ItemUpdater::validateTarball()
+{
+    int link[2];
+    pid_t pid;
+    char foo[4096];
+
+    if (pipe(link)==-1)
+    {
+        log<level::ERR>("Pipe failed.");
+        return -1;
+    }
+
+    if ((pid = fork()) < 0)
+    {
+        log<level::ERR>("fork() failed.");
+        return -1;
+    }
+    if(pid == 0)
+    {
+        // Child Process.
+        dup2 (link[1], STDOUT_FILENO);
+        close(link[0]);
+        close(link[1]);
+        execl("/bin/tar", "tar", "-t", "-f", TARBALL, (char *)0);
+        return -1;
+    }
+    else
+    {
+        // Parent Process.
+        close(link[1]);
+        read(link[0], foo, sizeof(foo));
+        std::string str(foo); 
+        if(str.find(PNOR_SQUASHFS_IMAGE) != std::string::npos)
+        {
+            // Found squashfs image in the tarball
+            return 0;
+        }
+        else
+        {
+            // Unable to find the squashfs image in tarball
+            log<level::ERR>("Unable to find the squashfs image in tarball.");
+            return -1;
+        }
+        wait(NULL);
+    }
+    return -1;
+}
+
 
 } // namespace manager
 } // namespace software
