@@ -65,6 +65,10 @@ AC_ARG_VAR(MANIFEST_FILE, [The path to the MANIFEST file])
 AS_IF([test "x$MANIFEST_FILE" == "x"], [MANIFEST_FILE="/tmp/pnor/MANIFEST"])
 AC_DEFINE_UNQUOTED([MANIFEST_FILE], ["$MANIFEST_FILE"], [The path to the MANIFEST file])
 
+AC_ARG_VAR(TARBALLE, [The path to the TARBALL file])
+AS_IF([test "x$TARBALL" == "x"], [TARBALL="/tmp/pnor/pnor.squashfs.tar"])
+AC_DEFINE_UNQUOTED([TARBALL], ["$TARBALL"], [The path to the TARBALL file])
+
 AC_DEFINE(MAPPER_BUSNAME, "xyz.openbmc_project.ObjectMapper",
     [The object mapper busname.])
 AC_DEFINE(MAPPER_PATH, "/xyz/openbmc_project/object_mapper",

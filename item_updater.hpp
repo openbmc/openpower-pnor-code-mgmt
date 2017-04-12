@@ -51,6 +51,11 @@ class ItemUpdater
         static int createActivation(sd_bus_message* msg,
                                     void* userData,
                                     sd_bus_error* retError);
+        /**
+         * @brief Validates the given tarball by checking files
+         *
+         */
+        static int validateTarball();
 
         /** @brief Persistent sdbusplus DBus bus connection. */
         sdbusplus::bus::bus& busItem;
