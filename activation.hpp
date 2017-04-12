@@ -29,11 +29,20 @@ class Activation : public ActivationInherit
          * @param[in] bus    - The Dbus bus object
          * @param[in] path   - The Dbus object path
          * @param[in] versionId - The software version id
+         * @param[in] activationStatus - The status of Activation
          */
         Activation(sdbusplus::bus::bus& bus, const std::string& path,
-                   std::string& versionId) :
-                   ActivationInherit(bus, path.c_str()),
-                   versionId(versionId) {}
+                   std::string& versionId,
+                   sdbusplus::xyz::openbmc_project::Software::
+                   server::Activation::Activations activationStatus) :
+                   ActivationInherit(bus, path.c_str(), true),
+                   versionId(versionId)
+        {
+            // Set Properties.
+            activation(activationStatus);
+            // Emit deferred signal.
+            emit_object_added();
+        }
 
         /** @brief Overloaded Activation property setter function
          *
