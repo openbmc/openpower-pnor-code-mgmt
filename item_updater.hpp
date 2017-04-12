@@ -52,6 +52,23 @@ class ItemUpdater
                                     void* userData,
                                     sd_bus_error* retError);
 
+        /**
+         * @brief process the tarball provided by validating its
+         *        contents, performing untar and then unsquashing
+         *        the pnor squashfs image
+         *
+         * @param[out] result    - true if passed, otherwise failed
+         */
+        static bool processImage();
+
+        /**
+         * @brief Validates the given tarball by checking files
+         *
+         * @param[out] result    - 0 --> if validation was successful
+         *                       - -1--> Otherwise
+         */
+        static int validateTarball();
+
         /** @brief Persistent sdbusplus DBus bus connection. */
         sdbusplus::bus::bus& busItem;
 
