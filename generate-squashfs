@@ -79,6 +79,8 @@ pflash --partition=VERSION --read=${scratch_dir}/VERSION -F ${pnorfile}
         fi
         if ((miscflags & 0x40)); then
           flags+=",READONLY"
+        else
+          flags+=",READWRITE"
         fi
 
         # Need the partition ID, name, start location, end location, and flags
@@ -100,14 +102,14 @@ done
 
 echo "Creating SquashFS image..."
 cd "${scratch_dir}"
-mksquashfs ${tocfile} ${partitions[*]} ${scratch_dir}/pnor.xz.squashfs
+mksquashfs ${tocfile} ${partitions[*]} pnor.xz.squashfs
 
 echo "Creating MANIFEST for the image"
-manifest_location="${scratch_dir}/MANIFEST"
+manifest_location="MANIFEST"
 echo -e "purpose=host\nversion=$version" >> $manifest_location
 
 echo "Generating tarball to contain the SquashFS image and its MANIFEST"
-tar -cvf $outfile $manifest_location ${scratch_dir}/pnor.xz.squashfs
+tar -cvf $outfile $manifest_location pnor.xz.squashfs
 
 echo "SquashFSTarball at ${outfile}"
 rm -r "${scratch_dir}"
