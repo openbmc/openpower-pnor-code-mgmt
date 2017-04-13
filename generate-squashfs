@@ -49,17 +49,30 @@ scratch_dir=`mktemp -d`
 
 echo "Parsing PNOR TOC..."
 
+# Default PNOR side
+side=0
 # Needed to get the READONLY and PRESERVED flags
 # TODO: Get READONLY and PRESERVED flags from pflash instead.
-pflash --partition=part --read=${scratch_dir}/part -F ${pnorfile}
-pflash --partition=VERSION --read=${scratch_dir}/VERSION -F ${pnorfile}
+pflash --partition=part --read=${scratch_dir}/part${side} -F ${pnorfile} \
+    -S $side
+# Only read the VERSION from the default side 0 for now as there's no current
+# use for the VERSION of the other side.
+pflash --partition=VERSION --read=${scratch_dir}/VERSION${side} -F ${pnorfile} \
+    -S $side
 {
-  version=$(head -n 1 ${scratch_dir}/VERSION)
+  version=$(head -n 1 ${scratch_dir}/VERSION${side})
   echo "version=$version"
-  extended_version=$(echo $(tail -n +2 ${scratch_dir}/VERSION)|tr ' ' ',')
+  extended_version=$(echo $(tail -n +2 ${scratch_dir}/VERSION${side})|tr ' ' ',')
   echo "extended_version=$extended_version"
   while read line; do
-    if [[ $line == "ID="* ]]; then
+    if [[ $line == "TOC"* ]]; then
+        if [[ $line != "TOC@0x00000000"* ]]; then
+          # Other side, increase side number and read the part partition
+          side=$((side+1))
+          pflash --partition=part --read=${scratch_dir}/part${side} \
+            -F ${pnorfile} -S $side >/dev/null
+        fi
+    elif [[ $line == "ID="* ]]; then
         # This line looks like
         # "ID=05 MVPD 000d9000..00169000 (actual=00090000) [ECC]"
         read -r -a fields <<< "$line"
@@ -73,41 +86,48 @@ pflash --partition=VERSION --read=${scratch_dir}/VERSION -F ${pnorfile}
 
         id=${fields[0]##*=}
         offset=$((${ffs_entry_size} * 10#${id} + ${miscflags_offset}))
-        miscflags=0x$(xxd -p -l  0x1 -seek ${offset} ${scratch_dir}/part)
+        miscflags=0x$(xxd -p -l  0x1 -seek ${offset} ${scratch_dir}/part${side})
         if ((miscflags & 0x80)); then
           flags+=",PRESERVED"
-        fi
-        if ((miscflags & 0x40)); then
+        elif ((miscflags & 0x40)); then
           flags+=",READONLY"
+        elif ((miscflags & 0x20)); then
+          flags+=",BACKUP"
+        elif ((miscflags & 0x10)); then
+          flags+=",REPROVISION"
+        else
+          flags+=",READWRITE"
         fi
 
         # Need the partition ID, name, start location, end location, and flags
-        echo  "partition${id}=${fields[1]},${fields[2]/../,}${flags}"
+        echo  "partition${side}_${id}=${fields[1]},${fields[2]/../,}${flags}"
 
-        # Save the partition name
-        partitions+=(${fields[1]})
+        # Save the partition name with its associated side
+        partitions+=(${fields[1]}${side})
     fi
-  # Don't need part, version, or backup_part partitions
-  done < <(pflash --info -F ${pnorfile} | grep -v -i "part\|version")
+  # Don't need part, VERSION, or BACKUP_PART partitions
+  done < <(pflash --info -F ${pnorfile} | grep -v "part\|PART\|VERSION")
 } > ${scratch_dir}/${tocfile}
 
 for partition in "${partitions[@]}"; do
-  echo "Reading ${partition}..."
-  pflash --partition=${partition} \
-    --read=${scratch_dir}/${partition} \
-    -F ${pnorfile}
+  partname=${partition%?}
+  partside=${partition: -1}
+  echo "Reading ${partname}..."
+  pflash --partition=${partname} \
+    --read=${scratch_dir}/${partname}${partside} \
+    -F ${pnorfile} -S ${partside}
 done
 
 echo "Creating SquashFS image..."
 cd "${scratch_dir}"
-mksquashfs ${tocfile} ${partitions[*]} ${scratch_dir}/pnor.xz.squashfs
+mksquashfs ${tocfile} ${partitions[*]} pnor.xz.squashfs
 
 echo "Creating MANIFEST for the image"
-manifest_location="${scratch_dir}/MANIFEST"
+manifest_location="MANIFEST"
 echo -e "purpose=host\nversion=$version" >> $manifest_location
 
 echo "Generating tarball to contain the SquashFS image and its MANIFEST"
-tar -cvf $outfile $manifest_location ${scratch_dir}/pnor.xz.squashfs
+tar -cvf $outfile $manifest_location pnor.xz.squashfs
 
 echo "SquashFSTarball at ${outfile}"
 rm -r "${scratch_dir}"
