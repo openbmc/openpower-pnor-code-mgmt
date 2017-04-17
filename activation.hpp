@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sdbusplus/bus.hpp>
+#include <sdbusplus/server.hpp>
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
 #include <xyz/openbmc_project/Software/ActivationBlocksTransition/server.hpp>
 #include "xyz/openbmc_project/Software/ExtendedVersion/server.hpp"
@@ -17,6 +17,24 @@ using ActivationInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Software::server::Activation>;
 using ActivationBlocksTransitionInherit = sdbusplus::server::object::object<
  sdbusplus::xyz::openbmc_project::Software::server::ActivationBlocksTransition>;
+
+/** @class ActivationBlocksTransition
+ *  @brief OpenBMC ActivationBlocksTransition implementation.
+ *  @details A concrete implementation for
+ *  xyz.openbmc_project.Software.ActivationBlocksTransition DBus API.
+ */
+class ActivationBlocksTransition : public ActivationBlocksTransitionInherit
+{
+    public:
+        /** @brief Constructs ActivationBlocksTransition.
+         *
+         * @param[in] bus    - The Dbus bus object
+         * @param[in] path   - The Dbus object path
+         */
+        ActivationBlocksTransition(sdbusplus::bus::bus& bus,
+                                   const std::string& path) :
+                   ActivationBlocksTransitionInherit(bus, path.c_str()) {}
+};
 
 /** @class Activation
  *  @brief OpenBMC activation software management implementation.
@@ -37,6 +55,8 @@ class Activation : public ActivationInherit
                    std::string& versionId,
                    std::string& extVersion) :
                    ActivationInherit(bus, path.c_str(), true),
+                   bus(bus),
+                   path(path),
                    versionId(versionId)
         {
             // Set Properties.
@@ -63,26 +83,17 @@ class Activation : public ActivationInherit
         RequestedActivations requestedActivation(RequestedActivations value)
                 override;
 
+        /** @brief Persistent sdbusplus DBus bus connection */
+        sdbusplus::bus::bus& bus;
+
+        /** @brief Persistent DBus object path */
+        std::string path;
+
         /** @brief Version id */
         std::string versionId;
-};
 
-/** @class ActivationBlocksTransition
- *  @brief OpenBMC ActivationBlocksTransition implementation.
- *  @details A concrete implementation for
- *  xyz.openbmc_project.Software.ActivationBlocksTransition DBus API.
- */
-class ActivationBlocksTransition : public ActivationBlocksTransitionInherit
-{
-    public:
-        /** @brief Constructs ActivationBlocksTransition.
-         *
-         * @param[in] bus    - The Dbus bus object
-         * @param[in] path   - The Dbus object path
-         */
-        ActivationBlocksTransition(sdbusplus::bus::bus& bus,
-                                   const std::string& path) :
-                   ActivationBlocksTransitionInherit(bus, path.c_str()) {}
+        /** @brief Persistent ActivationBlocksTransition dbus object */
+        std::unique_ptr<ActivationBlocksTransition> activationBlocksTransition;
 };
 
 } // namespace updater
