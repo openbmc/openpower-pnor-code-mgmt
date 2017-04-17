@@ -78,6 +78,13 @@ AC_DEFINE(MAPPER_PATH, "/xyz/openbmc_project/object_mapper",
 AC_DEFINE(MAPPER_INTERFACE, "xyz.openbmc_project.ObjectMapper",
     [The object mapper interface.])
 
+AC_DEFINE(SYSTEMD_BUSNAME, "org.freedesktop.systemd1",
+    [systemd busname.])
+AC_DEFINE(SYSTEMD_PATH, "/org/freedesktop/systemd1",
+    [systemd path.])
+AC_DEFINE(SYSTEMD_INTERFACE, "org.freedesktop.systemd1.Manager",
+    [systemd interface.])
+
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
 
