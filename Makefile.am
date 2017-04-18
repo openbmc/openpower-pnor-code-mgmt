@@ -1,5 +1,7 @@
 AM_DEFAULT_SOURCE_EXT = .cpp
 
+ACLOCAL_AMFLAGS = -Im4
+
 sbin_PROGRAMS = \
 	openpower-version-host-software-manager \
 	openpower-update-manager

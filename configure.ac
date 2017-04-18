@@ -5,6 +5,8 @@ AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE([subdir-objects -Wall -Werror foreign dist-xz])
 AM_SILENT_RULES([yes])
 
+AC_CONFIG_MACRO_DIRS([m4])
+
 # Checks for programs
 AC_PROG_CXX
 AC_PROG_INSTALL #Checks/sets the install variable to be used
