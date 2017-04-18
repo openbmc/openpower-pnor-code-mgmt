@@ -22,6 +22,19 @@ auto Activation::activation(Activations value) ->
                                 bus,
                                 path);
         }
+
+        // Creating a mount point to access squashfs image.
+        constexpr auto squashfsMountService = "obmc-flash-bios-squashfsmount@";
+        auto squashfsMountServiceFile = std::string(squashfsMountService) +
+                                                    versionId + ".service";
+        auto method = bus.new_method_call(
+                SYSTEMD_BUSNAME,
+                SYSTEMD_PATH,
+                SYSTEMD_INTERFACE,
+                "StartUnit");
+        method.append(squashfsMountServiceFile,
+                      "replace");
+        bus.call_noreply(method);
     }
     else
     {
