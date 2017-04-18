@@ -39,6 +39,20 @@ void Activation::handleActivationChanged(sdbusplus::message::message& msg,
                     std::make_unique<ActivationBlocksTransition>(
                                 busActivation,
                                 pathActivation)));
+
+            // Creating a mount point to access squashfs image
+            constexpr auto squashfsmountService = "obmc-flash-bios-squashfsmount@";
+            auto squashfsServiceFile = std::string(squashfsmountService) +
+                                       versionId +
+                                       ".service";
+            auto method = busActivation.new_method_call(
+                    SYSTEMD_BUSNAME,
+                    SYSTEMD_PATH,
+                    SYSTEMD_INTERFACE,
+                    "StartUnit");
+            method.append(squashfsmountServiceFile,
+                          "replace");
+            busActivation.call_noreply(method);
         }
         else
         {
