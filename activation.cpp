@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <experimental/filesystem>
 #include <fstream>
 #include <sstream>
 #include "activation.hpp"
@@ -128,7 +129,16 @@ auto Activation::requestedActivation(RequestedActivations value) ->
                       "replace");
         bus.call_noreply(method);
         auto rc = writePartition();
-        if (rc != 0)
+        if (rc == 0)
+        {
+            std::string target("/media/pnor-ro-" + versionId);
+            std::experimental::filesystem::create_directory_symlink(
+                    target, ACTIVE_PNOR_RO);
+            target = "/media/pnor-rw-" + versionId;
+            std::experimental::filesystem::create_directory_symlink(
+                    target, ACTIVE_PNOR_RW);
+        }
+        else
         {
             // Handle error
         }

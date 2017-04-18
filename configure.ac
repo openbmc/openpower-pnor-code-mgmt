@@ -81,6 +81,11 @@ AC_DEFINE(SYSTEMD_PATH, "/org/freedesktop/systemd1",
 AC_DEFINE(SYSTEMD_INTERFACE, "org.freedesktop.systemd1.Manager",
     [systemd interface.])
 
+AC_DEFINE(ACTIVE_PNOR_RO, "/run/initramfs/pnor-ro",
+    [Active read-only pnor partitions.])
+AC_DEFINE(ACTIVE_PNOR_RW, "/run/initramfs/pnor-rw",
+    [Active read-write pnor partitions.])
+
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
 
