@@ -83,6 +83,13 @@ class Activation : public ActivationInherit
 
         /** @brief Persistent ActivationBlocksTransition dbus object */
         std::unique_ptr<ActivationBlocksTransition> activationBlocksTransition;
+
+    private:
+        /** @brief Writes the PNOR partitions to flash
+         *
+         *  @return Success or error
+         */
+        int writePartition();
 };
 
 } // namespace updater
