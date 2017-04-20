@@ -48,11 +48,6 @@ AS_IF([test "x$enable_oe_sdk" == "xyes"],
 AX_CXX_COMPILE_STDCXX_14([noext])
 AX_APPEND_COMPILE_FLAGS([-Wall -Werror], [CXXFLAGS])
 
-AC_ARG_VAR(VERSION_BUSNAME, [The Dbus busname to own])
-AS_IF([test "x$VERSION_BUSNAME" == "x"],
-    [VERSION_BUSNAME="org.open_power.Software.Host.Version"])
-AC_DEFINE_UNQUOTED([VERSION_BUSNAME], ["$VERSION_BUSNAME"], [The DBus busname to own])
-
 AC_ARG_VAR(SOFTWARE_OBJPATH, [The software manager Dbus root])
 AS_IF([test "x$SOFTWARE_OBJPATH" == "x"], [SOFTWARE_OBJPATH="/xyz/openbmc_project/software"])
 AC_DEFINE_UNQUOTED([SOFTWARE_OBJPATH], ["$SOFTWARE_OBJPATH"], [The software manager Dbus root])
