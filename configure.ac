@@ -80,6 +80,13 @@ AC_DEFINE(SYSTEMD_PATH, "/org/freedesktop/systemd1",
 AC_DEFINE(SYSTEMD_INTERFACE, "org.freedesktop.systemd1.Manager",
     [systemd interface.])
 
+AC_DEFINE(PNOR_TOC_FILE, "pnor.toc",
+    [The name of the PNOR table of contents file])
+AC_DEFINE(PNOR_RO_PREFIX, "/media/pnor-ro-",
+    [The prefix path for the versioned read-only pnor partitions])
+AC_DEFINE(PNOR_RW_PREFIX, "/media/pnor-rw-",
+    [The prefix path for the versioned read-write pnor partitions])
+
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
 

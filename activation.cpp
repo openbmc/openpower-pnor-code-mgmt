@@ -1,3 +1,6 @@
+#include <experimental/filesystem>
+#include <fstream>
+#include <regex>
 #include "activation.hpp"
 #include "config.h"
 
@@ -8,7 +11,50 @@ namespace software
 namespace updater
 {
 
+namespace fs = std::experimental::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
+
+int Activation::writePartitions()
+{
+    constexpr auto rwFlag = "READWRITE";
+    std::string line;
+    std::smatch match;
+
+    // Partition line format: partitionXX=name,startAddr,endAddr,flag,[flag,..]
+    std::regex regex
+    {
+        "^partition([0-9]+)=([A-Za-z0-9_]+),",
+        std::regex::extended
+    };
+
+    fs::path toc = PNOR_RO_PREFIX;
+    toc += versionId;
+    toc /= PNOR_TOC_FILE;
+    std::ifstream file(toc.c_str());
+
+    while (std::getline(file, line))
+    {
+        if (std::regex_search(line, match, regex))
+        {
+            auto name = match[2].str();
+            auto suffix = match.suffix().str();
+
+            if (std::string::npos != suffix.find(rwFlag))
+            {
+                fs::path source = PNOR_RO_PREFIX;
+                source += versionId;
+                source /= name;
+                fs::path target = PNOR_RW_PREFIX;
+                target += versionId;
+                target /= name;
+                fs::copy_file(source, target,
+                        fs::copy_options::overwrite_existing);
+            }
+        }
+    }
+
+    return 0;
+}
 
 auto Activation::activation(Activations value) ->
         Activations
@@ -62,6 +108,13 @@ auto Activation::requestedActivation(RequestedActivations value) ->
         method.append(ubimountServiceFile,
                       "replace");
         bus.call_noreply(method);
+
+        auto rc = writePartitions();
+        if (rc != 0)
+        {
+            Activation::activation(
+                    softwareServer::Activation::Activations::Failed);
+        }
     }
     return softwareServer::Activation::requestedActivation(value);
 }
