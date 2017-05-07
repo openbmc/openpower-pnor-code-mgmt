@@ -15,8 +15,6 @@ Options:
    -h, --help             Display this help text and exit.
 '
 
-let ffs_entry_size=128
-let miscflags_offset=112
 outfile=`pwd`"/pnor.squashfs.tar"
 declare -a partitions=()
 tocfile="pnor.toc"
@@ -49,9 +47,6 @@ scratch_dir=`mktemp -d`
 
 echo "Parsing PNOR TOC..."
 
-# Needed to get the READONLY and PRESERVED flags
-# TODO: Get READONLY and PRESERVED flags from pflash instead.
-pflash --partition=part --read=${scratch_dir}/part -F ${pnorfile}
 pflash --partition=VERSION --read=${scratch_dir}/VERSION -F ${pnorfile}
 {
   version=$(head -n 1 ${scratch_dir}/VERSION)
@@ -64,22 +59,15 @@ pflash --partition=VERSION --read=${scratch_dir}/VERSION -F ${pnorfile}
         # "ID=05 MVPD 000d9000..00169000 (actual=00090000) [ECC]"
         read -r -a fields <<< "$line"
 
-        # Get any flags attached to end (e.g. [ECC])
-        flags=""
-        for flag in "${fields[@]:4}"
-        do
-          flags+=",${flag//[\[\]]/}"
-        done
-
         id=${fields[0]##*=}
-        offset=$((${ffs_entry_size} * 10#${id} + ${miscflags_offset}))
-        miscflags=0x$(xxd -p -l  0x1 -seek ${offset} ${scratch_dir}/part)
-        if ((miscflags & 0x80)); then
-          flags+=",PRESERVED"
-        elif ((miscflags & 0x40)); then
-          flags+=",READONLY"
-        else
-          flags+=",READWRITE"
+        flags=$(pflash -m $((10#$id)) -F ${pnorfile})
+        if [[ $flags != "" ]]; then
+            flags=,$flags
+        fi
+
+        if [[ $(echo $flags | grep "READONLY") == "" &&
+              $(echo $flags | grep "PRESERVED") == "" ]]; then
+            flags=$flags,READWRITE
         fi
 
         # Need the partition ID, name, start location, end location, and flags
