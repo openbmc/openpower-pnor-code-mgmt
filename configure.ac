@@ -86,6 +86,12 @@ AC_DEFINE(PNOR_RO_PREFIX, "/media/pnor-ro-",
     [The prefix path for the versioned read-only pnor partitions])
 AC_DEFINE(PNOR_RW_PREFIX, "/media/pnor-rw-",
     [The prefix path for the versioned read-write pnor partitions])
+AC_DEFINE(PNOR_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/",
+    [Path to the active pnor partitions])
+AC_DEFINE(PNOR_RO_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/ro",
+    [Path to the active read-only pnor partitions])
+AC_DEFINE(PNOR_RW_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/rw",
+    [Path to the active read-write pnor partitions])
 
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT

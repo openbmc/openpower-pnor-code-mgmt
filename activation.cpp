@@ -110,7 +110,17 @@ auto Activation::requestedActivation(RequestedActivations value) ->
         bus.call_noreply(method);
 
         auto rc = writePartitions();
-        if (rc != 0)
+        if (rc == 0)
+        {
+            fs::create_directories(PNOR_ACTIVE_PATH);
+
+            std::string target(PNOR_RO_PREFIX + versionId);
+            fs::create_directory_symlink(target, PNOR_RO_ACTIVE_PATH);
+
+            target = PNOR_RW_PREFIX + versionId;
+            fs::create_directory_symlink(target, PNOR_RW_ACTIVE_PATH);
+        }
+        else
         {
             Activation::activation(
                     softwareServer::Activation::Activations::Failed);
