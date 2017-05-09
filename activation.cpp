@@ -69,18 +69,38 @@ auto Activation::activation(Activations value) ->
                                 path);
         }
 
-        // Creating a mount point to access squashfs image.
-        constexpr auto squashfsMountService = "obmc-flash-bios-squashfsmount@";
-        auto squashfsMountServiceFile = std::string(squashfsMountService) +
-                                                    versionId + ".service";
+        constexpr auto ubimountService = "obmc-flash-bios-ubimount@";
+        auto ubimountServiceFile = std::string(ubimountService) +
+                                   versionId +
+                                   ".service";
         auto method = bus.new_method_call(
-                SYSTEMD_BUSNAME,
-                SYSTEMD_PATH,
-                SYSTEMD_INTERFACE,
-                "StartUnit");
-        method.append(squashfsMountServiceFile,
+                            SYSTEMD_BUSNAME,
+                            SYSTEMD_PATH,
+                            SYSTEMD_INTERFACE,
+                            "StartUnit");
+        method.append(ubimountServiceFile,
                       "replace");
         bus.call_noreply(method);
+
+        auto rc = writePartitions();
+        if (rc == 0)
+        {
+            fs::create_directories(PNOR_ACTIVE_PATH);
+
+            std::string target(PNOR_RO_PREFIX + versionId);
+            fs::create_directory_symlink(target, PNOR_RO_ACTIVE_PATH);
+
+            target = PNOR_RW_PREFIX + versionId;
+            fs::create_directory_symlink(target, PNOR_RW_ACTIVE_PATH);
+
+            Activation::activation(
+                    softwareServer::Activation::Activations::Active);
+        }
+        else
+        {
+            Activation::activation(
+                    softwareServer::Activation::Activations::Failed);
+        }
     }
     else
     {
@@ -96,34 +116,14 @@ auto Activation::requestedActivation(RequestedActivations value) ->
         (softwareServer::Activation::requestedActivation() !=
                   softwareServer::Activation::RequestedActivations::Active))
     {
-        constexpr auto ubimountService = "obmc-flash-bios-ubimount@";
-        auto ubimountServiceFile = std::string(ubimountService) +
-                                   versionId +
-                                   ".service";
-        auto method = bus.new_method_call(
-                SYSTEMD_BUSNAME,
-                SYSTEMD_PATH,
-                SYSTEMD_INTERFACE,
-                "StartUnit");
-        method.append(ubimountServiceFile,
-                      "replace");
-        bus.call_noreply(method);
-
-        auto rc = writePartitions();
-        if (rc == 0)
-        {
-            fs::create_directories(PNOR_ACTIVE_PATH);
-
-            std::string target(PNOR_RO_PREFIX + versionId);
-            fs::create_directory_symlink(target, PNOR_RO_ACTIVE_PATH);
-
-            target = PNOR_RW_PREFIX + versionId;
-            fs::create_directory_symlink(target, PNOR_RW_ACTIVE_PATH);
-        }
-        else
+        if ((softwareServer::Activation::activation() ==
+                    softwareServer::Activation::Activations::Ready) ||
+            (softwareServer::Activation::activation() ==
+                    softwareServer::Activation::Activations::Failed))
         {
             Activation::activation(
-                    softwareServer::Activation::Activations::Failed);
+                    softwareServer::Activation::Activations::Activating);
+
         }
     }
     return softwareServer::Activation::requestedActivation(value);
