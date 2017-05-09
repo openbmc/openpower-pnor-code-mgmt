@@ -17,6 +17,7 @@ namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
 int Activation::writePartitions()
 {
     constexpr auto rwFlag = "READWRITE";
+    constexpr auto prsvFlag = "PRESERVED";
     std::string line;
     std::smatch match;
 
@@ -39,16 +40,24 @@ int Activation::writePartitions()
             auto name = match[2].str();
             auto suffix = match.suffix().str();
 
+            fs::path source = PNOR_RO_PREFIX;
+            source += versionId;
+            source /= name;
+
             if (std::string::npos != suffix.find(rwFlag))
             {
-                fs::path source = PNOR_RO_PREFIX;
-                source += versionId;
-                source /= name;
                 fs::path target = PNOR_RW_PREFIX;
                 target += versionId;
                 target /= name;
                 fs::copy_file(source, target,
                         fs::copy_options::overwrite_existing);
+            }
+            else if (std::string::npos != suffix.find(prsvFlag))
+            {
+                fs::path target = PNOR_PRSV;
+                target /= name;
+                fs::copy_file(source, target,
+                        fs::copy_options::skip_existing);
             }
         }
     }
@@ -88,10 +97,15 @@ auto Activation::activation(Activations value) ->
             fs::create_directories(PNOR_ACTIVE_PATH);
 
             std::string target(PNOR_RO_PREFIX + versionId);
+            fs::remove(PNOR_RO_ACTIVE_PATH);
             fs::create_directory_symlink(target, PNOR_RO_ACTIVE_PATH);
 
+            fs::remove(PNOR_RW_ACTIVE_PATH);
             target = PNOR_RW_PREFIX + versionId;
             fs::create_directory_symlink(target, PNOR_RW_ACTIVE_PATH);
+
+            fs::remove(PNOR_PRSV_ACTIVE_PATH);
+            fs::create_directory_symlink(PNOR_PRSV, PNOR_PRSV_ACTIVE_PATH);
 
             Activation::activation(
                     softwareServer::Activation::Activations::Active);
