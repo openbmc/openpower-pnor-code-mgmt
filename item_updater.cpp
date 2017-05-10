@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <phosphor-logging/log.hpp>
+#include <xyz/openbmc_project/Software/Version/server.hpp>
 #include "config.h"
 #include "item_updater.hpp"
 #include "activation.hpp"
@@ -24,83 +25,83 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
                                   sd_bus_error* retErr)
 {
     auto* updater = static_cast<ItemUpdater*>(userData);
-    auto mapper = updater->busItem.new_method_call(
-            MAPPER_BUSNAME,
-            MAPPER_PATH,
-            MAPPER_INTERFACE,
-            "GetSubTreePaths");
-    mapper.append(SOFTWARE_OBJPATH,
-                  1, // Depth
-                  std::vector<std::string>({VERSION_IFACE}));
+    auto m = sdbusplus::message::message(msg);
 
-    auto mapperResponseMsg = updater->busItem.call(mapper);
-    if (mapperResponseMsg.is_method_error())
-    {
-        log<level::ERR>("Error in mapper call",
-                        entry("PATH=%s", SOFTWARE_OBJPATH),
-                        entry("INTERFACE=%s", VERSION_IFACE));
-        return -1;
-    }
+    sdbusplus::message::object_path objPath;
+    std::map<std::string,
+             std::map<std::string,
+                      sdbusplus::message::variant<std::string>>> interfaces;
+    m.read(objPath, interfaces);
+    std::string path(std::move(objPath));
 
-    std::vector<std::string> mapperResponse;
-    mapperResponseMsg.read(mapperResponse);
-    if (mapperResponse.empty())
+    for (const auto& intf : interfaces)
     {
-        log<level::ERR>("Error reading mapper response",
-                        entry("PATH=%s", SOFTWARE_OBJPATH),
-                        entry("INTERFACE=%s", VERSION_IFACE));
-        return -1;
+        if (intf.first.compare(VERSION_IFACE))
+        {
+            continue;
+        }
+
+        for (const auto& property : intf.second)
+        {
+            if (!property.first.compare("Purpose"))
+            {
+                std::string value = sdbusplus::message::variant_ns::get<
+                        std::string>(property.second);
+                if (value.compare(convertForMessage(
+                        server::Version::VersionPurpose::Host).c_str()))
+                {
+                    return 0;
+                }
+            }
+        }
     }
 
     auto extendedVersion = ItemUpdater::getExtendedVersion(MANIFEST_FILE);
-    for (const auto& resp : mapperResponse)
+    // Version id is the last item in the path
+    auto pos = path.rfind("/");
+    if (pos == std::string::npos)
     {
-        // Version id is the last item in the path
-        auto pos = resp.rfind("/");
-        if (pos == std::string::npos)
+        log<level::ERR>("No version id found in object path",
+                entry("OBJPATH=%s", path));
+        return -1;
+    }
+
+    auto versionId = path.substr(pos + 1);
+
+    if (updater->activations.find(versionId) == updater->activations.end())
+    {
+        // Determine the Activation state by processing the given image dir.
+        auto activationState = server::Activation::Activations::Invalid;
+        if (ItemUpdater::validateSquashFSImage(versionId) == 0)
         {
-            log<level::ERR>("No version id found in object path",
-                    entry("OBJPATH=%s", resp));
-            return -1;
+            activationState = server::Activation::Activations::Ready;
+
+            // Load the squashfs image to pnor so that it is available to be
+            // activated when requested.
+            // This is done since the image on the BMC can be removed.
+            constexpr auto squashfsMountService =
+                                "obmc-flash-bios-squashfsmount@";
+            auto squashfsMountServiceFile =
+                                std::string(squashfsMountService) +
+                                versionId +
+                                ".service";
+            auto method = updater->bus.new_method_call(
+                                SYSTEMD_BUSNAME,
+                                SYSTEMD_PATH,
+                                SYSTEMD_INTERFACE,
+                                "StartUnit");
+            method.append(squashfsMountServiceFile, "replace");
+            updater->bus.call_noreply(method);
         }
 
-        auto versionId = resp.substr(pos + 1);
-
-        if (updater->activations.find(versionId) == updater->activations.end())
-        {
-            // Determine the Activation state by processing the given image dir.
-            auto activationState = server::Activation::Activations::Invalid;
-            if (ItemUpdater::validateSquashFSImage(versionId) == 0)
-            {
-                activationState = server::Activation::Activations::Ready;
-
-                // Load the squashfs image to pnor so that it is available to be
-                // activated when requested.
-                // This is done since the image on the BMC can be removed.
-                constexpr auto squashfsMountService =
-                                    "obmc-flash-bios-squashfsmount@";
-                auto squashfsMountServiceFile =
-                                    std::string(squashfsMountService) +
-                                    versionId +
-                                    ".service";
-                auto method = updater->busItem.new_method_call(
-                                    SYSTEMD_BUSNAME,
-                                    SYSTEMD_PATH,
-                                    SYSTEMD_INTERFACE,
-                                    "StartUnit");
-                method.append(squashfsMountServiceFile, "replace");
-                updater->busItem.call_noreply(method);
-            }
-
-            updater->activations.insert(std::make_pair(
-                    versionId,
-                    std::make_unique<Activation>(
-                            updater->busItem,
-                            resp,
-                            versionId,
-                            extendedVersion,
-                            activationState)));
-        }
+        updater->activations.insert(std::make_pair(
+                versionId,
+                std::make_unique<Activation>(
+                        updater->bus,
+                        path,
+                        versionId,
+                        extendedVersion,
+                        activationState)));
     }
     return 0;
 }
