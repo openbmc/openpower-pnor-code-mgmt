@@ -16,7 +16,7 @@ Options:
 '
 
 let ffs_entry_size=128
-let miscflags_offset=112
+let miscflags_offset=113
 outfile=`pwd`"/pnor.squashfs.tar"
 declare -a partitions=()
 tocfile="pnor.toc"
