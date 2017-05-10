@@ -28,7 +28,7 @@ class ItemUpdater
          * @param[in] bus    - The Dbus bus object
          */
         ItemUpdater(sdbusplus::bus::bus& bus) :
-                    busItem(bus),
+                    bus(bus),
                     versionMatch(
                             bus,
                            "type='signal',"
@@ -71,7 +71,7 @@ class ItemUpdater
         static int validateSquashFSImage(const std::string& versionId);
 
         /** @brief Persistent sdbusplus DBus bus connection. */
-        sdbusplus::bus::bus& busItem;
+        sdbusplus::bus::bus& bus;
 
         /** @brief Persistent map of Activation dbus objects and their
           * version id */
