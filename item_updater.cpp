@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <phosphor-logging/log.hpp>
+#include <xyz/openbmc_project/Software/Version/server.hpp>
 #include "config.h"
 #include "item_updater.hpp"
 #include "activation.hpp"
@@ -19,79 +20,84 @@ using namespace phosphor::logging;
 
 constexpr auto squashFSImage = "pnor.xz.squashfs";
 
-void ItemUpdater::createActivation(sdbusplus::message::message&)
+void ItemUpdater::createActivation(sdbusplus::message::message& m)
 {
-    auto mapper = busItem.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
-                                          MAPPER_INTERFACE, "GetSubTreePaths");
-    mapper.append(SOFTWARE_OBJPATH, /* Depth */ 1,
-                  std::vector<std::string>({VERSION_IFACE}));
+    sdbusplus::message::object_path objPath;
+    std::map<std::string,
+             std::map<std::string,
+                      sdbusplus::message::variant<std::string>>> interfaces;
+    m.read(objPath, interfaces);
+    std::string path(std::move(objPath));
 
-    auto mapperResponseMsg = busItem.call(mapper);
-    if (mapperResponseMsg.is_method_error())
+    for (const auto& intf : interfaces)
     {
-        log<level::ERR>("Error in mapper call",
-                        entry("PATH=%s", SOFTWARE_OBJPATH),
-                        entry("INTERFACE=%s", VERSION_IFACE));
-        return;
-    }
-
-    std::vector<std::string> mapperResponse;
-    mapperResponseMsg.read(mapperResponse);
-    if (mapperResponse.empty())
-    {
-        log<level::ERR>("Error reading mapper response",
-                        entry("PATH=%s", SOFTWARE_OBJPATH),
-                        entry("INTERFACE=%s", VERSION_IFACE));
-        return;
+        if (intf.first == VERSION_IFACE)
+        {
+            for (const auto& property : intf.second)
+            {
+                if (property.first == "Purpose")
+                {
+                    // Only process the Host and System images
+                    std::string value = sdbusplus::message::variant_ns::get<
+                            std::string>(property.second);
+                    if ((value != convertForMessage(
+                            server::Version::VersionPurpose::Host)) &&
+                        (value != convertForMessage(
+                            server::Version::VersionPurpose::System)))
+                    {
+                        return;
+                    }
+                }
+            }
+        }
     }
 
     auto extendedVersion = ItemUpdater::getExtendedVersion(MANIFEST_FILE);
-    for (const auto& resp : mapperResponse)
+    // Version id is the last item in the path
+    auto pos = path.rfind("/");
+    if (pos == std::string::npos)
     {
-        // Version id is the last item in the path
-        auto pos = resp.rfind("/");
-        if (pos == std::string::npos)
+        log<level::ERR>("No version id found in object path",
+                        entry("OBJPATH=%s", path));
+        return;
+    }
+
+    auto versionId = path.substr(pos + 1);
+
+    if (activations.find(versionId) == activations.end())
+    {
+        // Determine the Activation state by processing the given image dir.
+        auto activationState = server::Activation::Activations::Invalid;
+        if (ItemUpdater::validateSquashFSImage(versionId) == 0)
         {
-            log<level::ERR>("No version id found in object path",
-                    entry("OBJPATH=%s", resp));
-            return;
+            activationState = server::Activation::Activations::Ready;
+
+            // Load the squashfs image to pnor so that it is available to be
+            // activated when requested.
+            // This is done since the image on the BMC can be removed.
+            constexpr auto squashfsMountService =
+                                "obmc-flash-bios-squashfsmount@";
+            auto squashfsMountServiceFile =
+                                std::string(squashfsMountService) +
+                                versionId +
+                                ".service";
+            auto method = bus.new_method_call(
+                                SYSTEMD_BUSNAME,
+                                SYSTEMD_PATH,
+                                SYSTEMD_INTERFACE,
+                                "StartUnit");
+            method.append(squashfsMountServiceFile, "replace");
+            bus.call_noreply(method);
         }
 
-        auto versionId = resp.substr(pos + 1);
-
-        if (activations.find(versionId) == activations.end())
-        {
-            // Determine the Activation state by processing the given image dir.
-            auto activationState = server::Activation::Activations::Invalid;
-            if (ItemUpdater::validateSquashFSImage(versionId) == 0)
-            {
-                activationState = server::Activation::Activations::Ready;
-
-                // Load the squashfs image to pnor so that it is available to be
-                // activated when requested.
-                // This is done since the image on the BMC can be removed.
-                constexpr auto squashfsMountService =
-                        "obmc-flash-bios-squashfsmount@";
-                auto squashfsMountServiceFile =
-                        std::string(squashfsMountService) +
-                        versionId + ".service";
-                auto method = busItem.new_method_call(SYSTEMD_BUSNAME,
-                                                      SYSTEMD_PATH,
-                                                      SYSTEMD_INTERFACE,
-                                                      "StartUnit");
-                method.append(squashfsMountServiceFile, "replace");
-                busItem.call_noreply(method);
-            }
-
-            activations.insert(std::make_pair(
-                    versionId,
-                    std::make_unique<Activation>(
-                            busItem,
-                            resp,
-                            versionId,
-                            extendedVersion,
-                            activationState)));
-        }
+        activations.insert(std::make_pair(
+                versionId,
+                std::make_unique<Activation>(
+                        bus,
+                        path,
+                        versionId,
+                        extendedVersion,
+                        activationState)));
     }
     return;
 }
@@ -160,23 +166,23 @@ void ItemUpdater::reset()
                 ".service";
 
         // Remove the read-write partitions.
-        auto method = busItem.new_method_call(
+        auto method = bus.new_method_call(
                 SYSTEMD_BUSNAME,
                 SYSTEMD_PATH,
                 SYSTEMD_INTERFACE,
                 "StartUnit");
         method.append(serviceFile, "replace");
-        busItem.call_noreply(method);
+        bus.call_noreply(method);
     }
 
     // Remove the preserved partition.
-    auto method = busItem.new_method_call(
+    auto method = bus.new_method_call(
             SYSTEMD_BUSNAME,
             SYSTEMD_PATH,
             SYSTEMD_INTERFACE,
             "StartUnit");
     method.append("obmc-flash-bios-ubiumount-prsv.service", "replace");
-    busItem.call_noreply(method);
+    bus.call_noreply(method);
 
     return;
 }

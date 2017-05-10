@@ -28,7 +28,7 @@ class ItemUpdater : public ItemUpdaterInherit
          */
         ItemUpdater(sdbusplus::bus::bus& bus, const std::string& path) :
                     ItemUpdaterInherit(bus, path.c_str()),
-                    busItem(bus),
+                    bus(bus),
                     versionMatch(
                             bus,
                             MatchRules::interfacesAdded() +
@@ -67,7 +67,7 @@ class ItemUpdater : public ItemUpdaterInherit
         static int validateSquashFSImage(const std::string& versionId);
 
         /** @brief Persistent sdbusplus DBus bus connection. */
-        sdbusplus::bus::bus& busItem;
+        sdbusplus::bus::bus& bus;
 
         /** @brief Persistent map of Activation dbus objects and their
           * version id */
