@@ -19,7 +19,8 @@ generic_ldflags = \
 	$(SYSTEMD_LIBS) \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	$(SDBUSPLUS_LIBS) \
-	$(PHOSPHOR_LOGGING_LIBS)
+	$(PHOSPHOR_LOGGING_LIBS) \
+	-lstdc++fs
 
 openpower_update_manager_CXXFLAGS = $(generic_cxxflags)
 openpower_update_manager_LDFLAGS = $(generic_ldflags)
