@@ -17,6 +17,8 @@ auto Activation::activation(Activations value) ->
 {
     if (value == softwareServer::Activation::Activations::Activating)
     {
+        softwareServer::Activation::activation(value);
+
         if (!activationBlocksTransition)
         {
             activationBlocksTransition =
@@ -25,42 +27,15 @@ auto Activation::activation(Activations value) ->
                                 path);
         }
 
-        // Creating a mount point to access squashfs image.
-        constexpr auto squashfsMountService = "obmc-flash-bios-squashfsmount@";
-        auto squashfsMountServiceFile = std::string(squashfsMountService) +
-                                                    versionId + ".service";
-        auto method = bus.new_method_call(
-                SYSTEMD_BUSNAME,
-                SYSTEMD_PATH,
-                SYSTEMD_INTERFACE,
-                "StartUnit");
-        method.append(squashfsMountServiceFile,
-                      "replace");
-        bus.call(method);
-    }
-    else
-    {
-        activationBlocksTransition.reset(nullptr);
-    }
-    return softwareServer::Activation::activation(value);
-}
-
-auto Activation::requestedActivation(RequestedActivations value) ->
-        RequestedActivations
-{
-    if ((value == softwareServer::Activation::RequestedActivations::Active) &&
-        (softwareServer::Activation::requestedActivation() !=
-                  softwareServer::Activation::RequestedActivations::Active))
-    {
         constexpr auto ubimountService = "obmc-flash-bios-ubimount@";
         auto ubimountServiceFile = std::string(ubimountService) +
                                    versionId +
                                    ".service";
         auto method = bus.new_method_call(
-                SYSTEMD_BUSNAME,
-                SYSTEMD_PATH,
-                SYSTEMD_INTERFACE,
-                "StartUnit");
+                            SYSTEMD_BUSNAME,
+                            SYSTEMD_PATH,
+                            SYSTEMD_INTERFACE,
+                            "StartUnit");
         method.append(ubimountServiceFile,
                       "replace");
         bus.call_noreply(method);
@@ -95,14 +70,37 @@ auto Activation::requestedActivation(RequestedActivations value) ->
             {
                 fs::create_directory_symlink(PNOR_PRSV, PNOR_PRSV_ACTIVE_PATH);
             }
-            
-            Activation::activation(
+            return softwareServer::Activation::activation(
                     softwareServer::Activation::Activations::Active);
         }
         else
         {
-            Activation::activation(
+            return softwareServer::Activation::activation(
                     softwareServer::Activation::Activations::Failed);
+        }
+    }
+    else
+    {
+        activationBlocksTransition.reset(nullptr);
+        return softwareServer::Activation::activation(value);
+    }
+}
+
+auto Activation::requestedActivation(RequestedActivations value) ->
+        RequestedActivations
+{
+    if ((value == softwareServer::Activation::RequestedActivations::Active) &&
+        (softwareServer::Activation::requestedActivation() !=
+                  softwareServer::Activation::RequestedActivations::Active))
+    {
+        if ((softwareServer::Activation::activation() ==
+                    softwareServer::Activation::Activations::Ready) ||
+            (softwareServer::Activation::activation() ==
+                    softwareServer::Activation::Activations::Failed))
+        {
+            Activation::activation(
+                    softwareServer::Activation::Activations::Activating);
+
         }
     }
     return softwareServer::Activation::requestedActivation(value);
