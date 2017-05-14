@@ -80,6 +80,23 @@ AC_DEFINE(SYSTEMD_PATH, "/org/freedesktop/systemd1",
 AC_DEFINE(SYSTEMD_INTERFACE, "org.freedesktop.systemd1.Manager",
     [systemd interface.])
 
+AC_DEFINE(PNOR_TOC_FILE, "pnor.toc",
+    [The name of the PNOR table of contents file])
+AC_DEFINE(PNOR_RO_PREFIX, "/media/pnor-ro-",
+    [The prefix path for the versioned read-only pnor partitions])
+AC_DEFINE(PNOR_RW_PREFIX, "/media/pnor-rw-",
+    [The prefix path for the versioned read-write pnor partitions])
+AC_DEFINE(PNOR_PRSV, "/media/pnor-prsv",
+    [The path for the preserved pnor partitions])
+AC_DEFINE(PNOR_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/",
+    [Path to the active pnor partitions])
+AC_DEFINE(PNOR_RO_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/ro",
+    [Path to the active read-only pnor partitions])
+AC_DEFINE(PNOR_RW_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/rw",
+    [Path to the active read-write pnor partitions])
+AC_DEFINE(PNOR_PRSV_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/prsv",
+    [Path to the active preserved pnor partitions])
+
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
 
