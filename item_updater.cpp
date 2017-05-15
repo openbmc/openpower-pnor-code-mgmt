@@ -66,15 +66,32 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
 
         auto versionId = resp.substr(pos + 1);
 
-        // Determine the Activation state by processing the given image dir.
-        auto activationState = server::Activation::Activations::Invalid;
-        if (ItemUpdater::validateSquashFSImage(versionId) == 0)
-        {
-            activationState = server::Activation::Activations::Ready;
-        }
-
         if (updater->activations.find(versionId) == updater->activations.end())
         {
+            // Determine the Activation state by processing the given image dir.
+            auto activationState = server::Activation::Activations::Invalid;
+            if (ItemUpdater::validateSquashFSImage(versionId) == 0)
+            {
+                activationState = server::Activation::Activations::Ready;
+
+                // Load the squashfs image to pnor so that it is available to be
+                // activated when requested.
+                // This is done since the image on the BMC can be removed.
+                constexpr auto squashfsMountService =
+                                    "obmc-flash-bios-squashfsmount@";
+                auto squashfsMountServiceFile =
+                                    std::string(squashfsMountService) +
+                                    versionId +
+                                    ".service";
+                auto method = updater->busItem.new_method_call(
+                                    SYSTEMD_BUSNAME,
+                                    SYSTEMD_PATH,
+                                    SYSTEMD_INTERFACE,
+                                    "StartUnit");
+                method.append(squashfsMountServiceFile, "replace");
+                updater->busItem.call_noreply(method);
+            }
+
             updater->activations.insert(std::make_pair(
                     versionId,
                     std::make_unique<Activation>(
