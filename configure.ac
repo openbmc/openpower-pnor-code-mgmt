@@ -58,9 +58,9 @@ AC_DEFINE(VERSION_IFACE, "xyz.openbmc_project.Software.Version",
 AC_DEFINE(BUSNAME_UPDATER, "org.open_power.Software.Host.Updater",
     [The item updater DBus busname to own.])
 
-AC_ARG_VAR(MANIFEST_FILE, [The path to the MANIFEST file])
-AS_IF([test "x$MANIFEST_FILE" == "x"], [MANIFEST_FILE="/tmp/images/MANIFEST"])
-AC_DEFINE_UNQUOTED([MANIFEST_FILE], ["$MANIFEST_FILE"], [The path to the MANIFEST file])
+AC_ARG_VAR(MANIFEST_FILE_NAME, [The name of the MANIFEST file])
+AS_IF([test "x$MANIFEST_FILE_NAME" == "x"], [MANIFEST_FILE_NAME="MANIFEST"])
+AC_DEFINE_UNQUOTED([MANIFEST_FILE_NAME], ["$MANIFEST_FILE_NAME"], [The name of the MANIFEST file])
 
 AC_ARG_VAR(IMAGE_DIR, [The path to all the IMAGE files])
 AS_IF([test "x$IMAGE_DIR" == "x"], [IMAGE_DIR="/tmp/images/"])
@@ -79,6 +79,23 @@ AC_DEFINE(SYSTEMD_PATH, "/org/freedesktop/systemd1",
     [systemd path.])
 AC_DEFINE(SYSTEMD_INTERFACE, "org.freedesktop.systemd1.Manager",
     [systemd interface.])
+
+AC_DEFINE(PNOR_TOC_FILE, "pnor.toc",
+    [The name of the PNOR table of contents file])
+AC_DEFINE(PNOR_RO_PREFIX, "/media/pnor-ro-",
+    [The prefix path for the versioned read-only pnor partitions])
+AC_DEFINE(PNOR_RW_PREFIX, "/media/pnor-rw-",
+    [The prefix path for the versioned read-write pnor partitions])
+AC_DEFINE(PNOR_PRSV, "/media/pnor-prsv",
+    [The path for the preserved pnor partitions])
+AC_DEFINE(PNOR_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/",
+    [Path to the active pnor partitions])
+AC_DEFINE(PNOR_RO_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/ro",
+    [Path to the active read-only pnor partitions])
+AC_DEFINE(PNOR_RW_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/rw",
+    [Path to the active read-write pnor partitions])
+AC_DEFINE(PNOR_PRSV_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/prsv",
+    [Path to the active preserved pnor partitions])
 
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
