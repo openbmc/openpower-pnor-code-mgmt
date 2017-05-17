@@ -69,4 +69,3 @@ auto Activation::requestedActivation(RequestedActivations value) ->
 } // namespace updater
 } // namespace software
 } // namespace openpower
-

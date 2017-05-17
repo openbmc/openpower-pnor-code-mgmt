@@ -102,4 +102,3 @@ class Activation : public ActivationInherit
 } // namespace updater
 } // namespace software
 } // namespace openpower
-

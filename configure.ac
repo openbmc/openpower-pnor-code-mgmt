@@ -82,4 +82,3 @@ AC_DEFINE(SYSTEMD_INTERFACE, "org.freedesktop.systemd1.Manager",
 
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
-

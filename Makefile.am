@@ -25,4 +25,3 @@ openpower_update_manager_CXXFLAGS = $(generic_cxxflags)
 openpower_update_manager_LDFLAGS = $(generic_ldflags)
 
 SUBDIRS = test
-
