@@ -144,7 +144,24 @@ int ItemUpdater::validateSquashFSImage(const std::string& versionId)
     }
 }
 
+void ItemUpdater::reset()
+{
+    for(const auto& it : activations)
+    {
+        auto serviceFile = "obmc-flash-bios-ubiumount@" + it.first + ".service";
+
+        auto method = busItem.new_method_call(
+                SYSTEMD_BUSNAME,
+                SYSTEMD_PATH,
+                SYSTEMD_INTERFACE,
+                "StartUnit");
+        method.append(serviceFile, "replace");
+        bus.call_noreply(method);
+    }
+
+    return;
+}
+
 } // namespace updater
 } // namespace software
 } // namespace openpower
-
