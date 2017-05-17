@@ -2,6 +2,7 @@
 
 #include <sdbusplus/server.hpp>
 #include "activation.hpp"
+#include <xyz/openbmc_project/Common/FactoryReset/server.hpp>
 
 namespace openpower
 {
@@ -10,25 +11,22 @@ namespace software
 namespace updater
 {
 
+using ItemUpdaterInherit = sdbusplus::server::object::object<
+    sdbusplus::xyz::openbmc_project::Common::server::FactoryReset>;
+
 /** @class ItemUpdater
  *  @brief Manages the activation of the version items.
  */
-class ItemUpdater
+class ItemUpdater : public ItemUpdaterInherit
 {
     public:
-        ItemUpdater() = delete;
-        ~ItemUpdater() = default;
-        ItemUpdater(const ItemUpdater&) = delete;
-        ItemUpdater& operator=(const ItemUpdater&) = delete;
-        ItemUpdater(ItemUpdater&&) = delete;
-        ItemUpdater& operator=(ItemUpdater&&) = delete;
-
         /** @brief Constructs ItemUpdater
          *
          * @param[in] bus    - The Dbus bus object
          */
-        ItemUpdater(sdbusplus::bus::bus& bus) :
-                    busItem(bus),
+        ItemUpdater(sdbusplus::bus::bus& bus, const std::string& path) :
+                    ItemUpdaterInherit(bus, path.c_str()),
+                    bus(bus),
                     versionMatch(
                             bus,
                            "type='signal',"
@@ -38,6 +36,7 @@ class ItemUpdater
                             createActivation,
                             this)
         {
+fprintf(stderr, "constructor()\n");
         }
 
     private:
@@ -71,7 +70,7 @@ class ItemUpdater
         static int validateSquashFSImage(const std::string& versionId);
 
         /** @brief Persistent sdbusplus DBus bus connection. */
-        sdbusplus::bus::bus& busItem;
+        sdbusplus::bus::bus& bus;
 
         /** @brief Persistent map of Activation dbus objects and their
           * version id */
@@ -79,9 +78,10 @@ class ItemUpdater
 
         /** @brief sdbusplus signal match for Software.Version */
         sdbusplus::server::match::match versionMatch;
+
+        void reset() override;
 };
 
 } // namespace updater
 } // namespace software
 } // namespace openpower
-
