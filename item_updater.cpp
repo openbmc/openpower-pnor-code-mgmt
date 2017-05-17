@@ -144,7 +144,35 @@ int ItemUpdater::validateSquashFSImage(const std::string& versionId)
     }
 }
 
+void ItemUpdater::reset()
+{
+    for(const auto& it : activations)
+    {
+        auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + it.first +
+                ".service";
+
+        // Remove the read-write partitions.
+        auto method = busItem.new_method_call(
+                SYSTEMD_BUSNAME,
+                SYSTEMD_PATH,
+                SYSTEMD_INTERFACE,
+                "StartUnit");
+        method.append(serviceFile, "replace");
+        busItem.call_noreply(method);
+    }
+
+    // Remove the preserved partition.
+    auto method = busItem.new_method_call(
+            SYSTEMD_BUSNAME,
+            SYSTEMD_PATH,
+            SYSTEMD_INTERFACE,
+            "StartUnit");
+    method.append("obmc-flash-bios-ubiumount-prsv.service", "replace");
+    busItem.call_noreply(method);
+
+    return;
+}
+
 } // namespace updater
 } // namespace software
 } // namespace openpower
-
