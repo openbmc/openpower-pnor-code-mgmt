@@ -144,7 +144,65 @@ int ItemUpdater::validateSquashFSImage(const std::string& versionId)
     }
 }
 
+void ItemUpdater::reset()
+{
+    // constexpr auto interface = "org.open_power.Software.Host.Updater";
+    constexpr auto interface = VERSION_IFACE;
+
+    auto mapper = busItem.new_method_call(
+            MAPPER_BUSNAME,
+            MAPPER_PATH,
+            MAPPER_INTERFACE,
+            "GetSubTreePaths");
+    mapper.append(SOFTWARE_OBJPATH, 1, std::vector<std::string>({interface}));
+
+    auto mapperResponseMsg = busItem.call(mapper);
+    if (mapperResponseMsg.is_method_error())
+    {
+        log<level::ERR>("Error in mapper call",
+                        entry("PATH=%s", SOFTWARE_OBJPATH),
+                        entry("INTERFACE=%s", interface));
+        return;
+    }
+
+    std::vector<std::string> mapperResponse;
+    mapperResponseMsg.read(mapperResponse);
+    if (mapperResponse.empty())
+    {
+        log<level::ERR>("Error reading mapper response",
+                        entry("PATH=%s", SOFTWARE_OBJPATH),
+                        entry("INTERFACE=%s", interface));
+        return;
+    }
+
+    for (const auto& resp : mapperResponse)
+    {
+        auto pos = resp.rfind("/");
+        if (pos == std::string::npos)
+        {
+            log<level::ERR>("No version id found in object path",
+                    entry("OBJPATH=%s", resp));
+            return;
+        }
+
+        auto serviceFile = "obmc-flash-bios-ubiumount@" +
+                           resp.substr(pos + 1) + ".service";
+
+        log<level::INFO>(serviceFile.c_str()); //TODO: REMOVE
+
+        auto method = busItem.new_method_call(
+                SYSTEMD_BUSNAME,
+                SYSTEMD_PATH,
+                SYSTEMD_INTERFACE,
+                "StartUnit");
+        method.append(serviceFile,"replace");
+        busItem.call_noreply(method);
+
+    }
+
+    return;
+}
+
 } // namespace updater
 } // namespace software
 } // namespace openpower
-
