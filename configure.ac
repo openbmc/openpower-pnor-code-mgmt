@@ -54,17 +54,15 @@ AC_DEFINE_UNQUOTED([SOFTWARE_OBJPATH], ["$SOFTWARE_OBJPATH"], [The software mana
 
 AC_DEFINE(VERSION_IFACE, "xyz.openbmc_project.Software.Version",
     [The software version manager interface])
+AC_DEFINE(FILEPATH_IFACE, "xyz.openbmc_project.Common.FilePath",
+    [The common file path interface])
 
 AC_DEFINE(BUSNAME_UPDATER, "org.open_power.Software.Host.Updater",
     [The item updater DBus busname to own.])
 
 AC_ARG_VAR(MANIFEST_FILE, [The path to the MANIFEST file])
-AS_IF([test "x$MANIFEST_FILE" == "x"], [MANIFEST_FILE="/tmp/images/MANIFEST"])
+AS_IF([test "x$MANIFEST_FILE" == "x"], [MANIFEST_FILE="MANIFEST"])
 AC_DEFINE_UNQUOTED([MANIFEST_FILE], ["$MANIFEST_FILE"], [The path to the MANIFEST file])
-
-AC_ARG_VAR(IMAGE_DIR, [The path to all the IMAGE files])
-AS_IF([test "x$IMAGE_DIR" == "x"], [IMAGE_DIR="/tmp/images/"])
-AC_DEFINE_UNQUOTED([IMAGE_DIR], ["$IMAGE_DIR"], [The path to all the IMAGE files])
 
 AC_DEFINE(MAPPER_BUSNAME, "xyz.openbmc_project.ObjectMapper",
     [The object mapper busname.])

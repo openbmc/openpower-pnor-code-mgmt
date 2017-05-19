@@ -60,11 +60,11 @@ class ItemUpdater : public ItemUpdaterInherit
         /**
          * @brief Validates the presence of SquashFS iamge in the image dir.
          *
-         * @param[in]  versionId - The software version ID.
+         * @param[in]  filePath - The path to the SquashfFS image.
          * @param[out] result    - 0 --> if validation was successful
          *                       - -1--> Otherwise
          */
-        static int validateSquashFSImage(const std::string& versionId);
+        static int validateSquashFSImage(const std::string& filePath);
 
         /** @brief Persistent sdbusplus DBus bus connection. */
         sdbusplus::bus::bus& bus;
