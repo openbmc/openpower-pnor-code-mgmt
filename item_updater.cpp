@@ -1,4 +1,5 @@
 #include <string>
+#include <experimental/filesystem>
 #include <fstream>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Software/Version/server.hpp>
@@ -15,6 +16,7 @@ namespace updater
 
 // When you see server:: you know we're referencing our base class
 namespace server = sdbusplus::xyz::openbmc_project::Software::server;
+namespace fs = std::experimental::filesystem;
 
 using namespace phosphor::logging;
 
@@ -33,6 +35,8 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
                       sdbusplus::message::variant<std::string>>> interfaces;
     m.read(objPath, interfaces);
     std::string path(std::move(objPath));
+
+    std::string filePath;
 
     for (const auto& intf : interfaces)
     {
@@ -55,9 +59,19 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
                 }
             }
         }
+        else if (intf.first == FILEPATH_IFACE)
+        {
+            for (const auto& property : intf.second)
+            {
+                if (property.first == "Path")
+                {
+                    filePath = sdbusplus::message::variant_ns::get<
+                            std::string>(property.second);
+                }
+            }
+        }
     }
 
-    auto extendedVersion = ItemUpdater::getExtendedVersion(MANIFEST_FILE);
     // Version id is the last item in the path
     auto pos = path.rfind("/");
     if (pos == std::string::npos)
@@ -73,7 +87,7 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
     {
         // Determine the Activation state by processing the given image dir.
         auto activationState = server::Activation::Activations::Invalid;
-        if (ItemUpdater::validateSquashFSImage(versionId) == 0)
+        if (ItemUpdater::validateSquashFSImage(filePath) == 0)
         {
             activationState = server::Activation::Activations::Ready;
 
@@ -95,6 +109,9 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
             updater->bus.call_noreply(method);
         }
 
+        fs::path manifestFilePath(filePath);
+        manifestFilePath /= MANIFEST_FILE;
+        auto extendedVersion = ItemUpdater::getExtendedVersion(manifestFilePath);
         updater->activations.insert(std::make_pair(
                 versionId,
                 std::make_unique<Activation>(
@@ -146,10 +163,10 @@ std::string ItemUpdater::getExtendedVersion(const std::string& manifestFilePath)
     return extendedVersion;
 }
 
-int ItemUpdater::validateSquashFSImage(const std::string& versionId)
+int ItemUpdater::validateSquashFSImage(const std::string& filePath)
 {
-    auto file = IMAGE_DIR + versionId + "/" +
-                std::string(squashFSImage);
+    fs::path file(filePath);
+    file /= squashFSImage;
     std::ifstream efile(file.c_str());
 
     if (efile.good() == 1)
