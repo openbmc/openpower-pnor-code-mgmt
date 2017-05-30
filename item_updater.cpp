@@ -19,27 +19,20 @@ using namespace phosphor::logging;
 
 constexpr auto squashFSImage = "pnor.xz.squashfs";
 
-int ItemUpdater::createActivation(sd_bus_message* msg,
-                                  void* userData,
-                                  sd_bus_error* retErr)
+void ItemUpdater::createActivation(sdbusplus::message::message&)
 {
-    auto* updater = static_cast<ItemUpdater*>(userData);
-    auto mapper = updater->busItem.new_method_call(
-            MAPPER_BUSNAME,
-            MAPPER_PATH,
-            MAPPER_INTERFACE,
-            "GetSubTreePaths");
-    mapper.append(SOFTWARE_OBJPATH,
-                  1, // Depth
+    auto mapper = busItem.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
+                                          MAPPER_INTERFACE, "GetSubTreePaths");
+    mapper.append(SOFTWARE_OBJPATH, /* Depth */ 1,
                   std::vector<std::string>({VERSION_IFACE}));
 
-    auto mapperResponseMsg = updater->busItem.call(mapper);
+    auto mapperResponseMsg = busItem.call(mapper);
     if (mapperResponseMsg.is_method_error())
     {
         log<level::ERR>("Error in mapper call",
                         entry("PATH=%s", SOFTWARE_OBJPATH),
                         entry("INTERFACE=%s", VERSION_IFACE));
-        return -1;
+        return;
     }
 
     std::vector<std::string> mapperResponse;
@@ -49,7 +42,7 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
         log<level::ERR>("Error reading mapper response",
                         entry("PATH=%s", SOFTWARE_OBJPATH),
                         entry("INTERFACE=%s", VERSION_IFACE));
-        return -1;
+        return;
     }
 
     auto extendedVersion = ItemUpdater::getExtendedVersion(MANIFEST_FILE);
@@ -61,12 +54,12 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
         {
             log<level::ERR>("No version id found in object path",
                     entry("OBJPATH=%s", resp));
-            return -1;
+            return;
         }
 
         auto versionId = resp.substr(pos + 1);
 
-        if (updater->activations.find(versionId) == updater->activations.end())
+        if (activations.find(versionId) == activations.end())
         {
             // Determine the Activation state by processing the given image dir.
             auto activationState = server::Activation::Activations::Invalid;
@@ -78,31 +71,29 @@ int ItemUpdater::createActivation(sd_bus_message* msg,
                 // activated when requested.
                 // This is done since the image on the BMC can be removed.
                 constexpr auto squashfsMountService =
-                                    "obmc-flash-bios-squashfsmount@";
+                        "obmc-flash-bios-squashfsmount@";
                 auto squashfsMountServiceFile =
-                                    std::string(squashfsMountService) +
-                                    versionId +
-                                    ".service";
-                auto method = updater->busItem.new_method_call(
-                                    SYSTEMD_BUSNAME,
-                                    SYSTEMD_PATH,
-                                    SYSTEMD_INTERFACE,
-                                    "StartUnit");
+                        std::string(squashfsMountService) +
+                        versionId + ".service";
+                auto method = busItem.new_method_call(SYSTEMD_BUSNAME,
+                                                      SYSTEMD_PATH,
+                                                      SYSTEMD_INTERFACE,
+                                                      "StartUnit");
                 method.append(squashfsMountServiceFile, "replace");
-                updater->busItem.call_noreply(method);
+                busItem.call_noreply(method);
             }
 
-            updater->activations.insert(std::make_pair(
+            activations.insert(std::make_pair(
                     versionId,
                     std::make_unique<Activation>(
-                            updater->busItem,
+                            busItem,
                             resp,
                             versionId,
                             extendedVersion,
                             activationState)));
         }
     }
-    return 0;
+    return;
 }
 
 std::string ItemUpdater::getExtendedVersion(const std::string& manifestFilePath)

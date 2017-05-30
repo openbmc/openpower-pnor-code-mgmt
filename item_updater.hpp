@@ -13,6 +13,7 @@ namespace updater
 
 using ItemUpdaterInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Common::server::FactoryReset>;
+namespace MatchRules = sdbusplus::bus::match::rules;
 
 /** @class ItemUpdater
  *  @brief Manages the activation of the version items.
@@ -30,12 +31,12 @@ class ItemUpdater : public ItemUpdaterInherit
                     busItem(bus),
                     versionMatch(
                             bus,
-                           "type='signal',"
-                           "member='InterfacesAdded',"
-                           "path='/xyz/openbmc_project/software',"
-                           "interface='org.freedesktop.DBus.ObjectManager'",
-                            createActivation,
-                            this)
+                            MatchRules::interfacesAdded() +
+                            MatchRules::path("/xyz/openbmc_project/software"),
+                            std::bind(
+                                    std::mem_fn(&ItemUpdater::createActivation),
+                                    this,
+                                    std::placeholders::_1))
         {
         }
 
@@ -44,12 +45,8 @@ class ItemUpdater : public ItemUpdaterInherit
          *  @details Creates an Activation dbus object.
          *
          * @param[in]  msg       - Data associated with subscribed signal
-         * @param[in]  userData  - Pointer to this object instance
-         * @param[out] retError  - Required param
          */
-        static int createActivation(sd_bus_message* msg,
-                                    void* userData,
-                                    sd_bus_error* retError);
+        void createActivation(sdbusplus::message::message& msg);
 
         /**
          * @brief Get the extended version from the specified file.
@@ -77,7 +74,7 @@ class ItemUpdater : public ItemUpdaterInherit
         std::map<std::string, std::unique_ptr<Activation>> activations;
 
         /** @brief sdbusplus signal match for Software.Version */
-        sdbusplus::server::match::match versionMatch;
+        sdbusplus::bus::match_t versionMatch;
 
         /** @brief Host factory reset - clears PNOR partitions for each
           * Activation dbus object */
