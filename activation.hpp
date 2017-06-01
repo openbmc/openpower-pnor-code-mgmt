@@ -4,6 +4,7 @@
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
 #include <xyz/openbmc_project/Software/ActivationBlocksTransition/server.hpp>
 #include "xyz/openbmc_project/Software/ExtendedVersion/server.hpp"
+#include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
 
 namespace openpower
 {
@@ -17,6 +18,17 @@ using ActivationInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Software::server::Activation>;
 using ActivationBlocksTransitionInherit = sdbusplus::server::object::object<
  sdbusplus::xyz::openbmc_project::Software::server::ActivationBlocksTransition>;
+using RedundancyPriorityInherit = sdbusplus::server::object::object<
+    sdbusplus::xyz::openbmc_project::Software::server::RedundancyPriority>;
+
+
+class RedundancyPriority : public RedundancyPriorityInherit
+{
+    public:
+        RedundancyPriority(sdbusplus::bus::bus& bus,
+                                   const std::string& path) :
+                   RedundancyPriorityInherit(bus, path.c_str()) {}
+};
 
 /** @class ActivationBlocksTransition
  *  @brief OpenBMC ActivationBlocksTransition implementation.
@@ -97,6 +109,9 @@ class Activation : public ActivationInherit
 
         /** @brief Persistent ActivationBlocksTransition dbus object */
         std::unique_ptr<ActivationBlocksTransition> activationBlocksTransition;
+        
+        /** @brief Persistent RedundancyPriority dbus object */
+        std::unique_ptr<RedundancyPriority> redundancyPriority;
 };
 
 } // namespace updater

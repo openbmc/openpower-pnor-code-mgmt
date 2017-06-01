@@ -15,6 +15,12 @@ namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
 auto Activation::activation(Activations value) ->
         Activations
 {
+
+    if (value != softwareServer::Activation::Activations::Active)
+    {
+        redundancyPriority.reset(nullptr);        
+    }
+
     if (value == softwareServer::Activation::Activations::Activating)
     {
         softwareServer::Activation::activation(value);
@@ -75,6 +81,15 @@ auto Activation::activation(Activations value) ->
             if (!fs::exists(PNOR_PRSV_ACTIVE_PATH))
             {
                 fs::create_directory_symlink(PNOR_PRSV, PNOR_PRSV_ACTIVE_PATH);
+            }
+
+            // Set Redundancy Priority before setting to Active
+            if (!redundancyPriority)
+            {
+                redundancyPriority =
+                          std::make_unique<RedundancyPriority>(
+                                    bus,
+                                    path);
             }
 
             return softwareServer::Activation::activation(
