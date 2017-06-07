@@ -128,6 +128,11 @@ auto Activation::requestedActivation(RequestedActivations value) ->
     return softwareServer::Activation::requestedActivation(value);
 }
 
+uint8_t RedundancyPriority::priority(uint8_t value)
+{
+    return softwareServer::RedundancyPriority::priority(value);
+}
+
 } // namespace updater
 } // namespace software
 } // namespace openpower
