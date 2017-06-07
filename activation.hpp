@@ -44,6 +44,14 @@ class RedundancyPriority : public RedundancyPriorityInherit
             // Emit deferred signal.
             emit_object_added();
         }
+
+        /** @brief Overloaded Priority property set function
+         *
+         *  @param[in] value - uint8_t
+         *
+         *  @return Success or exception thrown
+         */
+        uint8_t priority(uint8_t value) override;
 };
 
 /** @class ActivationBlocksTransition
