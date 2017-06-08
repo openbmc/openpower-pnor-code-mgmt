@@ -3,8 +3,8 @@
 #include <sdbusplus/server.hpp>
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
 #include <xyz/openbmc_project/Software/ActivationBlocksTransition/server.hpp>
-#include "xyz/openbmc_project/Software/ExtendedVersion/server.hpp"
-#include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
+#include <xyz/openbmc_project/Software/ExtendedVersion/server.hpp>
+#include <xyz/openbmc_project/Software/RedundancyPriority/server.hpp>
 
 namespace openpower
 {
@@ -37,7 +37,8 @@ class RedundancyPriority : public RedundancyPriorityInherit
         RedundancyPriority(sdbusplus::bus::bus& bus,
                                    const std::string& path) :
                                    RedundancyPriorityInherit(bus,
-                                   path.c_str(), true)
+                                   path.c_str(), true),
+                                   bus(bus)
         {
             // Set Property
             priority(0);
@@ -52,6 +53,18 @@ class RedundancyPriority : public RedundancyPriorityInherit
          *  @return Success or exception thrown
          */
         uint8_t priority(uint8_t value) override;
+
+        /** @brief Persistent sdbusplus DBus bus connection */
+        sdbusplus::bus::bus& bus;
+
+        /** @brief Sets the given priority free by incrementing
+         *   any existing priorities by 1
+         *
+         *   @param[in] value - One of RedundancyPriority::Priority
+         *
+         *   @return None
+         */
+        void freePriority(uint8_t basePriority);
 };
 
 /** @class ActivationBlocksTransition

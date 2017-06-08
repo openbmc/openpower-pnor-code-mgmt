@@ -1,6 +1,8 @@
 #include <experimental/filesystem>
 #include "activation.hpp"
 #include "config.h"
+#include <string>
+#include <fstream>
 
 namespace openpower
 {
@@ -128,8 +130,67 @@ auto Activation::requestedActivation(RequestedActivations value) ->
     return softwareServer::Activation::requestedActivation(value);
 }
 
+void RedundancyPriority::freePriority(uint8_t basePriority)
+{
+    std::string HOST_BUSNAME("xyz.openbmc_project.Software.Host.Updater");
+    std::string HOST_PATH("/xyz/openbmc_project/software");
+    std::string OBJECT_MANAGER("org.freedesktop.DBus.ObjectManager");
+    std::string OBJECT_PROPERTIES("org.freedesktop.DBus.Properties");
+    std::string PRIORITY("xyz.openbmc_project.Software.RedundancyPriority");
+
+    auto method = this->bus.new_method_call(HOST_BUSNAME.c_str(),
+                                            HOST_PATH.c_str(),
+                                            OBJECT_MANAGER.c_str(),
+                                            "GetManagedObjects");
+    auto reply = this->bus.call(method);
+    if (reply.is_method_error())
+    {
+        return;
+    }
+
+    std::map<sdbusplus::message::object_path, std::map<std::string,
+        std::map<std::string, sdbusplus::message::variant<uint8_t>>>>
+        m;
+    reply.read(m);
+
+    for (const auto& intf1 : m)
+    {
+        std::string path(std::move(intf1.first));
+        for (const auto& intf2 : intf1.second)
+        {
+            if (intf2.first == PRIORITY.c_str())
+            {
+                for (const auto& property : intf2.second)
+                {
+                    if (property.first == "Priority")
+                    {
+                        if(basePriority == sdbusplus::message::
+                            variant_ns::get<uint8_t>(property.second));
+                        {
+                            method = this->bus.new_method_call(
+                                            HOST_BUSNAME.c_str(),
+                                            path.c_str(),
+                                            OBJECT_PROPERTIES.c_str(),
+                                            "Set");
+                            sdbusplus::message::variant<uint8_t> value =
+                                basePriority + 1;
+                            method.append(PRIORITY.c_str(),
+                                          "Priority",
+                                          value);
+                            this->bus.call_noreply(method);
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return;
+}
+
 uint8_t RedundancyPriority::priority(uint8_t value)
 {
+    RedundancyPriority::freePriority(value);
     return softwareServer::RedundancyPriority::priority(value);
 }
 
