@@ -1,6 +1,8 @@
 #include <experimental/filesystem>
 #include "activation.hpp"
 #include "config.h"
+#include <string>
+#include <fstream>
 
 namespace openpower
 {
@@ -11,6 +13,12 @@ namespace updater
 
 namespace fs = std::experimental::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
+
+constexpr auto HOSTUPDATER_SERVICE("org.open_power.Software.Host.Updater");
+constexpr auto HOSTUPDATER_PATH("/xyz/openbmc_project/software");
+constexpr auto ObjectManager("org.freedesktop.DBus.ObjectManager");
+constexpr auto ACTIVATION_PRIORITY("xyz.openbmc_project.Software.RedundancyPriority");
+constexpr auto ACTIVATION_INTERFACE("xyz.openbmc_project.Software.Activation");
 
 auto Activation::activation(Activations value) ->
         Activations
@@ -90,6 +98,7 @@ auto Activation::activation(Activations value) ->
                           std::make_unique<RedundancyPriority>(
                                     bus,
                                     path);
+                Activation::priorityUpdate();
             }
 
             return softwareServer::Activation::activation(
@@ -97,6 +106,14 @@ auto Activation::activation(Activations value) ->
         }
         else
         {
+            if (!redundancyPriority)
+            {
+                redundancyPriority =
+                          std::make_unique<RedundancyPriority>(
+                                    bus,
+                                    path);
+                Activation::priorityUpdate();
+            }
             return softwareServer::Activation::activation(
                     softwareServer::Activation::Activations::Failed);
         }
@@ -126,6 +143,27 @@ auto Activation::requestedActivation(RequestedActivations value) ->
         }
     }
     return softwareServer::Activation::requestedActivation(value);
+}
+
+void Activation::priorityUpdate()
+{
+    std::map<sdbusplus::message::object_path, std::map<std::string, 
+        std::map<std::string, sdbusplus::message::variant<std::string>>>>
+        interfaces;
+    auto method = this->bus.new_method_call(HOSTUPDATER_SERVICE,
+                                            HOSTUPDATER_PATH,
+                                            ObjectManager,
+                                            "GetManagedObjects");
+    auto reply = this->bus.call(method);
+    if (reply.is_method_error())
+    {
+        std::ofstream file;
+        file.open("/tmp/errorlog.txt", std::ofstream::app);
+        file << "Error in GetManagedObjects\n";
+        file.close();
+        return;
+    }
+    reply.read(interfaces);
 }
 
 uint8_t RedundancyPriority::priority(uint8_t value)
