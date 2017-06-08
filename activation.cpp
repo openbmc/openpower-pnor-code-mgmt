@@ -1,6 +1,9 @@
 #include <experimental/filesystem>
 #include "activation.hpp"
 #include "config.h"
+#include <string>
+#include <fstream>
+#include <phosphor-logging/log.hpp>
 
 namespace openpower
 {
@@ -11,6 +14,9 @@ namespace updater
 
 namespace fs = std::experimental::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
+using namespace phosphor::logging;
+
+std::map<std::string, std::unique_ptr<RedundancyPriority>> redundancyPriorityList;
 
 auto Activation::activation(Activations value) ->
         Activations
@@ -18,7 +24,13 @@ auto Activation::activation(Activations value) ->
 
     if (value != softwareServer::Activation::Activations::Active)
     {
-        redundancyPriority.reset(nullptr);
+        for (auto& intf : redundancyPriorityList)
+        {
+            if (intf.first == versionId)
+            {
+                intf.second.reset(nullptr);
+            }
+        }
     }
 
     if (value == softwareServer::Activation::Activations::Activating)
@@ -56,41 +68,23 @@ auto Activation::activation(Activations value) ->
             (fs::exists(PNOR_RW_PREFIX + versionId)) &&
             (fs::exists(PNOR_RO_PREFIX + versionId)))
         {
-            if (!fs::exists(PNOR_ACTIVE_PATH))
+            // Create Redundancy Priority object if it doesn't
+            // exist for this particular version Id.
+            for (const auto& intf : redundancyPriorityList)
             {
-                fs::create_directories(PNOR_ACTIVE_PATH);
+                if (intf.first == versionId)
+                {
+                    return softwareServer::Activation::activation(
+                            softwareServer::Activation::Activations::Active);
+                }
             }
-
-            // If the RW or RO active links exist, remove them and create new
-            // ones pointing to the active version.
-            if (fs::exists(PNOR_RO_ACTIVE_PATH))
-            {
-                fs::remove(PNOR_RO_ACTIVE_PATH);
-            }
-            fs::create_directory_symlink(PNOR_RO_PREFIX + versionId,
-                    PNOR_RO_ACTIVE_PATH);
-            if (fs::exists(PNOR_RW_ACTIVE_PATH))
-            {
-                fs::remove(PNOR_RW_ACTIVE_PATH);
-            }
-            fs::create_directory_symlink(PNOR_RW_PREFIX + versionId,
-                    PNOR_RW_ACTIVE_PATH);
-
-            // There is only one preserved directory as it is not tied to a
-            // version, so just create the link if it doesn't exist already.
-            if (!fs::exists(PNOR_PRSV_ACTIVE_PATH))
-            {
-                fs::create_directory_symlink(PNOR_PRSV, PNOR_PRSV_ACTIVE_PATH);
-            }
-
-            // Set Redundancy Priority before setting to Active
-            if (!redundancyPriority)
-            {
-                redundancyPriority =
-                          std::make_unique<RedundancyPriority>(
-                                    bus,
-                                    path);
-            }
+            redundancyPriorityList.insert(std::make_pair(
+                                              versionId,
+                                              std::make_unique<RedundancyPriority>(
+                                                  bus,
+                                                  path,
+                                                  versionId,
+                                                  0)));
 
             return softwareServer::Activation::activation(
                     softwareServer::Activation::Activations::Active);
@@ -128,8 +122,53 @@ auto Activation::requestedActivation(RequestedActivations value) ->
     return softwareServer::Activation::requestedActivation(value);
 }
 
+void RedundancyPriority::freePriority(uint8_t basePriority)
+{
+    for (const auto& intf : redundancyPriorityList)
+    {
+        if (intf.second.get()->redundancyPriority == basePriority)
+        {
+            intf.second->priority(basePriority + 1);
+        }
+    }
+}
+
 uint8_t RedundancyPriority::priority(uint8_t value)
 {
+
+    RedundancyPriority::freePriority(value);
+
+    // The RW and Preserved UBI volumes are already created during
+    // the activation process for this particular <versionId>.
+    if (value == 0)
+    {
+        // If the RW or RO active links exist, remove them and create new
+        // ones pointing to the active version.
+        if (!fs::exists(PNOR_ACTIVE_PATH))
+        {
+            fs::create_directories(PNOR_ACTIVE_PATH);
+        }
+        if (fs::exists(PNOR_RO_ACTIVE_PATH))
+        {
+            fs::remove(PNOR_RO_ACTIVE_PATH);
+        }
+        fs::create_directory_symlink(PNOR_RO_PREFIX + versionId,
+                PNOR_RO_ACTIVE_PATH);
+        if (fs::exists(PNOR_RW_ACTIVE_PATH))
+        {
+            fs::remove(PNOR_RW_ACTIVE_PATH);
+        }
+        fs::create_directory_symlink(PNOR_RW_PREFIX + versionId,
+                PNOR_RW_ACTIVE_PATH);
+
+        // There is only one preserved directory as it is not tied to a
+        // version, so just create the link if it doesn't exist already.
+        if (!fs::exists(PNOR_PRSV_ACTIVE_PATH))
+        {
+            fs::create_directory_symlink(PNOR_PRSV, PNOR_PRSV_ACTIVE_PATH);
+        }
+    }
+    this->redundancyPriority = value;
     return softwareServer::RedundancyPriority::priority(value);
 }
 

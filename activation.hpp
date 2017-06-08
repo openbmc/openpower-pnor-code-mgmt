@@ -3,8 +3,8 @@
 #include <sdbusplus/server.hpp>
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
 #include <xyz/openbmc_project/Software/ActivationBlocksTransition/server.hpp>
-#include "xyz/openbmc_project/Software/ExtendedVersion/server.hpp"
-#include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
+#include <xyz/openbmc_project/Software/ExtendedVersion/server.hpp>
+#include <xyz/openbmc_project/Software/RedundancyPriority/server.hpp>
 
 namespace openpower
 {
@@ -33,25 +33,54 @@ class RedundancyPriority : public RedundancyPriorityInherit
          *
          *  @param[in] bus    - The Dbus bus object
          *  @param[in] path   - The Dbus object path
+         *  @param[in] value  - The redundancyPriority value
          */
         RedundancyPriority(sdbusplus::bus::bus& bus,
-                                   const std::string& path) :
+                                   const std::string& path,
+                                   std::string& versionId,
+                                   uint8_t value) :
                                    RedundancyPriorityInherit(bus,
-                                   path.c_str(), true)
+                                   path.c_str(), true),
+                                   bus(bus),
+                                   versionId(versionId),
+                                   redundancyPriority(value)
         {
             // Set Property
-            priority(0);
+            priority(value);
             // Emit deferred signal.
             emit_object_added();
-        }
+        };
 
+    private:
         /** @brief Overloaded Priority property set function
          *
-         *  @param[in] value - uint8_t
+         *  @param[in] value - uint8_t The value of priority.
+         *      Each Active Software.Version has a priority value
+         *      between 0 (High) and 127 (Low). Only one
+         *      Software.Version, per associated device, may be at
+         *      any particular priority.
          *
          *  @return Success or exception thrown
          */
         uint8_t priority(uint8_t value) override;
+
+        /** @brief Persistent sdbusplus DBus bus connection */
+        sdbusplus::bus::bus& bus;
+
+        /** @brief Version id */
+        std::string versionId;
+
+        /** @brief Redundancy Priority */
+        uint8_t redundancyPriority;
+
+        /** @brief Sets the given priority free by incrementing
+         *   any existing priorities by 1
+         *
+         *   @param[in] basePriority - The priority that needs to be set free.
+         *
+         *   @return None
+         */
+        void freePriority(uint8_t basePriority);
 };
 
 /** @class ActivationBlocksTransition
@@ -133,9 +162,6 @@ class Activation : public ActivationInherit
 
         /** @brief Persistent ActivationBlocksTransition dbus object */
         std::unique_ptr<ActivationBlocksTransition> activationBlocksTransition;
-
-        /** @brief Persistent RedundancyPriority dbus object */
-        std::unique_ptr<RedundancyPriority> redundancyPriority;
 };
 
 } // namespace updater
