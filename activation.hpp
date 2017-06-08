@@ -136,6 +136,8 @@ class Activation : public ActivationInherit
 
         /** @brief Persistent RedundancyPriority dbus object */
         std::unique_ptr<RedundancyPriority> redundancyPriority;
+
+        void priorityUpdate();
 };
 
 } // namespace updater
