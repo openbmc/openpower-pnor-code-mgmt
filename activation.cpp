@@ -1,6 +1,8 @@
 #include <experimental/filesystem>
 #include "activation.hpp"
 #include "config.h"
+#include <string>
+#include <fstream>
 
 namespace openpower
 {
@@ -11,6 +13,12 @@ namespace updater
 
 namespace fs = std::experimental::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
+
+constexpr auto HOSTUPDATER_SERVICE("org.open_power.Software.Host.Updater");
+constexpr auto HOSTUPDATER_PATH("/xyz/openbmc_project/software");
+constexpr auto ObjectManager("org.freedesktop.DBus.ObjectManager");
+constexpr auto ACTIVATION_PRIORITY("xyz.openbmc_project.Software.RedundancyPriority");
+constexpr auto ACTIVATION_INTERFACE("xyz.openbmc_project.Software.Activation");
 
 auto Activation::activation(Activations value) ->
         Activations
@@ -90,6 +98,7 @@ auto Activation::activation(Activations value) ->
                           std::make_unique<RedundancyPriority>(
                                     bus,
                                     path);
+                Activation::priorityUpdate();
             }
 
             return softwareServer::Activation::activation(
@@ -126,6 +135,69 @@ auto Activation::requestedActivation(RequestedActivations value) ->
         }
     }
     return softwareServer::Activation::requestedActivation(value);
+}
+
+void Activation::priorityUpdate()
+{
+    std::string HOST_PATH("/xyz/openbmc_project/software");
+    std::string HOST_INTERFACE("org.freedesktop.DBus.ObjectManager");
+    auto mapperCall = this->bus.new_method_call("xyz.openbmc_project.ObjectMapper",
+                                                "/xyz/openbmc_project/object_mapper",
+                                                "xyz.openbmc_project.ObjectMapper",
+                                                "GetObject");
+    mapperCall.append(HOST_PATH);
+    mapperCall.append(std::vector<std::string>({HOST_INTERFACE}));
+    auto mapperResponseMsg = bus.call(mapperCall);
+    if (mapperResponseMsg.is_method_error())
+    {
+        printf("Error in GetObject\n");
+    }
+
+    std::map<std::string, std::vector<std::string>> mapperResponse;
+    mapperResponseMsg.read(mapperResponse);
+    if (mapperResponse.begin() == mapperResponse.end())
+    {
+        printf("ERROR in reading the mapper response\n");
+    }
+    auto busname = mapperResponse.begin()->first;
+    auto method = this->bus.new_method_call(busname.c_str(),
+                                            HOST_PATH.c_str(),
+                                            HOST_INTERFACE.c_str(),
+                                            "GetManagedObjects");
+    auto reply = this->bus.call(method);
+    if (reply.is_method_error())
+    {
+        printf("Error in GetManagedObjects\n");
+    }
+    std::map<sdbusplus::message::object_path, std::map<std::string,
+        std::map<std::string, sdbusplus::message::variant<std::string>>>>
+        m;
+    reply.read(m);
+
+    for (const auto& intf1 : m)
+    {
+        for (const auto& intf2 : intf1.second)
+        {
+            if (intf2.first == "/xyz/openbmc_project.Software.Activation")
+            {
+                for (const auto& property : intf2.second)
+                {
+                    if (property.first == "Activation")
+                    {
+                        std::string value = sdbusplus::message::variant_ns::
+                            get<std::string>(property.second);
+                        printf("Activation: " + value);
+                    }
+                    else if (property.first == "RequestedActivation")
+                    {
+                        std::string value = sdbusplus::message::variant_ns::
+                            get<std::string>(property.second);
+                        printf("RequestedActivation: " + value);
+                    }
+                }
+            }
+        }
+    }
 }
 
 uint8_t RedundancyPriority::priority(uint8_t value)
