@@ -41,6 +41,15 @@ class ItemUpdater : public ItemUpdaterInherit
         {
         }
 
+        /** @brief Sets the given priority free by incrementing
+         *  any existing priorities by 1
+         *
+         *  @param[in] value - The priority that needs to be set free.
+         *
+         *  @return None
+         */
+        void freePriority(uint8_t value);
+
     private:
         /** @brief Callback function for Software.Version match.
          *  @details Creates an Activation dbus object.

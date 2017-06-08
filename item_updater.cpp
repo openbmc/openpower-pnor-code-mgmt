@@ -107,6 +107,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                 std::make_unique<Activation>(
                         bus,
                         path,
+                        *this,
                         versionId,
                         extendedVersion,
                         activationState)));
@@ -205,6 +206,20 @@ void ItemUpdater::reset()
     bus.call_noreply(method);
 
     return;
+}
+
+void ItemUpdater::freePriority(uint8_t value)
+{
+    for (const auto& intf : activations)
+    {
+        if(intf.second->redundancyPriority)
+        {
+            if (intf.second->redundancyPriority.get()->redPriority == value)
+            {
+                intf.second->redundancyPriority.get()->priority(value+1);
+            }
+        }
+    }
 }
 
 } // namespace updater
