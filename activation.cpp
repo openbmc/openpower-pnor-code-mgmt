@@ -1,6 +1,7 @@
 #include <experimental/filesystem>
 #include "activation.hpp"
 #include "config.h"
+#include "item_updater.hpp"
 
 namespace openpower
 {
@@ -128,7 +129,9 @@ auto Activation::activation(Activations value) ->
                     redundancyPriority =
                               std::make_unique<RedundancyPriority>(
                                         bus,
-                                        path);
+                                        path,
+                                        *this,
+                                        0);
                 }
                 activationBlocksTransition.reset(nullptr);
                 return softwareServer::Activation::activation(
@@ -181,6 +184,7 @@ auto Activation::requestedActivation(RequestedActivations value) ->
 
 uint8_t RedundancyPriority::priority(uint8_t value)
 {
+    parent.parent.freePriority(value);
     return softwareServer::RedundancyPriority::priority(value);
 }
 
