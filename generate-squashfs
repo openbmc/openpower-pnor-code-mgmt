@@ -17,7 +17,7 @@ Options:
 
 let ffs_entry_size=128
 let miscflags_offset=112
-outfile=`pwd`"/pnor.squashfs.tar"
+outfile=""
 declare -a partitions=()
 tocfile="pnor.toc"
 
@@ -43,6 +43,10 @@ if [ ! -f "${pnorfile}" ]; then
   echo "Please enter a valid PNOR file."
   echo "$help"
   exit 1
+fi
+
+if [[ -z $outfile ]]; then
+    outfile=`pwd`/${pnorfile##*/}.squashfs.tar
 fi
 
 scratch_dir=`mktemp -d`
