@@ -11,13 +11,15 @@ usage: generate-squashfs [OPTION] <PNOR FILE>...
 
 Options:
    -f, --file <file>      Specify destination file. Defaults to
-                          `pwd`/pnor.squashfs.tar if unspecified.
+                          `pwd`/<PNOR FILE>.squashfs.tar if unspecified.
+                          (For example, an input /tmp/my.pnor would generate a
+                          `pwd`/my.squash.fs output.)
    -h, --help             Display this help text and exit.
 '
 
 let ffs_entry_size=128
 let miscflags_offset=112
-outfile=`pwd`"/pnor.squashfs.tar"
+outfile=""
 declare -a partitions=()
 tocfile="pnor.toc"
 
@@ -43,6 +45,14 @@ if [ ! -f "${pnorfile}" ]; then
   echo "Please enter a valid PNOR file."
   echo "$help"
   exit 1
+fi
+
+if [[ -z $outfile ]]; then
+    outfile=`pwd`/${pnorfile##*/}.squashfs.tar
+else
+    if [[ $outfile != /* ]]; then
+        outfile=`pwd`/$outfile
+    fi
 fi
 
 scratch_dir=`mktemp -d`
