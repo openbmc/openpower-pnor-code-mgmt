@@ -164,19 +164,21 @@ std::string ItemUpdater::getExtendedVersion(const std::string& manifestFilePath)
 
 int ItemUpdater::validateSquashFSImage(const std::string& filePath)
 {
-    fs::path file(filePath);
-    file /= squashFSImage;
-    std::ifstream efile(file.c_str());
-
-    if (efile.good() == 1)
+    for(const auto& iter : fs::directory_iterator(filePath))
     {
-        return 0;
+        auto file = static_cast<std::string>(
+                        iter.path().filename()).find(squashFSImage);
+        if (std::string::npos != file)
+        {
+            std::ifstream efile(iter.path().filename().c_str());
+            if (efile.good() == 1)
+            {
+                return 0;
+            }
+        }
     }
-    else
-    {
-        log<level::ERR>("Failed to find the SquashFS image.");
-        return -1;
-    }
+    log<level::ERR>("Failed to find the SquashFS image.");
+    return -1;
 }
 
 void ItemUpdater::reset()
