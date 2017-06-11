@@ -3,6 +3,7 @@
 #include <sdbusplus/server.hpp>
 #include "activation.hpp"
 #include <xyz/openbmc_project/Common/FactoryReset/server.hpp>
+#include "version.hpp"
 
 namespace openpower
 {
@@ -72,6 +73,10 @@ class ItemUpdater : public ItemUpdaterInherit
         /** @brief Persistent map of Activation dbus objects and their
           * version id */
         std::map<std::string, std::unique_ptr<Activation>> activations;
+
+        /** @brief Persistent map of Version dbus objects and their
+          * version id */
+        std::map<std::string, std::unique_ptr<Version>> versions;
 
         /** @brief sdbusplus signal match for Software.Version */
         sdbusplus::bus::match_t versionMatch;
