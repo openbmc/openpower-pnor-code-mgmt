@@ -30,8 +30,9 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                       sdbusplus::message::variant<std::string>>> interfaces;
     m.read(objPath, interfaces);
     std::string path(std::move(objPath));
-
     std::string filePath;
+    auto purpose = server::Version::VersionPurpose::Unknown;
+    std::string version;
 
     for (const auto& intf : interfaces)
     {
@@ -42,15 +43,20 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                 if (property.first == "Purpose")
                 {
                     // Only process the Host and System images
-                    std::string value = sdbusplus::message::variant_ns::get<
-                            std::string>(property.second);
-                    if ((value != convertForMessage(
-                            server::Version::VersionPurpose::Host)) &&
-                        (value != convertForMessage(
-                            server::Version::VersionPurpose::System)))
+                    std::string str = sdbusplus::message::variant_ns::get<
+                        std::string>(property.second);
+                    auto value = server::Version::
+                        convertVersionPurposeFromString(str);
+                    if (value==server::Version::VersionPurpose::Host ||
+                        value==server::Version::VersionPurpose::System)
                     {
-                        return;
+                        purpose = value;
                     }
+                }
+                else if (property.first == "Version")
+                {
+                    version = sdbusplus::message::variant_ns::
+                        get<std::string>(property.second);
                 }
             }
         }
@@ -66,7 +72,8 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
             }
         }
     }
-    if (filePath.empty())
+    if ((filePath.empty()) || (purpose == server::Version::
+            VersionPurpose::Unknown))
     {
         return;
     }
@@ -120,6 +127,14 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                         extendedVersion,
                         activationState)));
     }
+        versions.insert(std::make_pair(
+                            versionId,
+                            std::make_unique<Version>(
+                                bus,
+                                objPath,
+                                version,
+                                purpose,
+                                filePath)));
     return;
 }
 
