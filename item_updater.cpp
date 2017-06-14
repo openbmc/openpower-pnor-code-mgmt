@@ -89,23 +89,6 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
         if (ItemUpdater::validateSquashFSImage(filePath) == 0)
         {
             activationState = server::Activation::Activations::Ready;
-
-            // Load the squashfs image to pnor so that it is available to be
-            // activated when requested.
-            // This is done since the image on the BMC can be removed.
-            constexpr auto squashfsMountService =
-                                "obmc-flash-bios-squashfsmount@";
-            auto squashfsMountServiceFile =
-                                std::string(squashfsMountService) +
-                                versionId +
-                                ".service";
-            auto method = bus.new_method_call(
-                                SYSTEMD_BUSNAME,
-                                SYSTEMD_PATH,
-                                SYSTEMD_INTERFACE,
-                                "StartUnit");
-            method.append(squashfsMountServiceFile, "replace");
-            bus.call_noreply(method);
         }
 
         fs::path manifestPath(filePath);
