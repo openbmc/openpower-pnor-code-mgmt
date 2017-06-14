@@ -21,6 +21,8 @@ using ActivationBlocksTransitionInherit = sdbusplus::server::object::object<
 using RedundancyPriorityInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Software::server::RedundancyPriority>;
 
+namespace sdbusRule = sdbusplus::bus::match::rules;
+
 /** @class RedundancyPriority
  *  @brief OpenBMC RedundancyPriority implementation
  *  @details A concrete implementation for
@@ -96,8 +98,19 @@ class Activation : public ActivationInherit
                    ActivationInherit(bus, path.c_str(), true),
                    bus(bus),
                    path(path),
-                   versionId(versionId)
+                   versionId(versionId),
+                   systemdSignals(
+                           bus,
+                           sdbusRule::type::signal() +
+                           sdbusRule::member("JobRemoved") +
+                           sdbusRule::path("/org/freedesktop/systemd1") +
+                           sdbusRule::interface(
+                                   "org.freedesktop.systemd1.Manager"),
+                           std::bind(std::mem_fn(&Activation::unitStateChange),
+                                  this, std::placeholders::_1))
         {
+            // Enable systemd signals
+            subscribeToSystemdSignals();
             // Set Properties.
             extendedVersion(extVersion);
             activation(activationStatus);
@@ -122,6 +135,25 @@ class Activation : public ActivationInherit
         RequestedActivations requestedActivation(RequestedActivations value)
                 override;
 
+        /** @brief Check if systemd state change is relevant to this object
+         *
+         * Instance specific interface to handle the detected systemd state
+         * change
+         *
+         * @param[in]  msg       - Data associated with subscribed signal
+         *
+         */
+        void unitStateChange(sdbusplus::message::message& msg);
+
+        /**
+         * @brief subscribe to the systemd signals
+         *
+         * This object needs to capture when it's systemd targets complete
+         * so it can keep it's state updated
+         *
+         **/
+        void subscribeToSystemdSignals();
+
         /** @brief Persistent sdbusplus DBus bus connection */
         sdbusplus::bus::bus& bus;
 
@@ -136,9 +168,19 @@ class Activation : public ActivationInherit
 
         /** @brief Persistent RedundancyPriority dbus object */
         std::unique_ptr<RedundancyPriority> redundancyPriority;
+
+        /** @brief Used to subscribe to dbus systemd signals **/
+        sdbusplus::bus::match_t systemdSignals;
+
+        /** @brief Tracks whether the squashfs image has been loaded as part of
+         * the activation process. **/
+        bool squashfsLoaded = false;
+
+        /** @brief Tracks whether the read-write volumes have been created as
+         * part of the activation process. **/
+        bool rwVolumesCreated = false;
 };
 
 } // namespace updater
 } // namespace software
 } // namespace openpower
-
