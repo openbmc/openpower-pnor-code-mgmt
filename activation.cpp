@@ -63,13 +63,13 @@ auto Activation::activation(Activations value) ->
 
             // If the RW or RO active links exist, remove them and create new
             // ones pointing to the active version.
-            if (fs::exists(PNOR_RO_ACTIVE_PATH))
+            if (fs::is_symlink(PNOR_RO_ACTIVE_PATH))
             {
                 fs::remove(PNOR_RO_ACTIVE_PATH);
             }
             fs::create_directory_symlink(PNOR_RO_PREFIX + versionId,
                     PNOR_RO_ACTIVE_PATH);
-            if (fs::exists(PNOR_RW_ACTIVE_PATH))
+            if (fs::is_symlink(PNOR_RW_ACTIVE_PATH))
             {
                 fs::remove(PNOR_RW_ACTIVE_PATH);
             }
@@ -78,7 +78,7 @@ auto Activation::activation(Activations value) ->
 
             // There is only one preserved directory as it is not tied to a
             // version, so just create the link if it doesn't exist already.
-            if (!fs::exists(PNOR_PRSV_ACTIVE_PATH))
+            if (!fs::is_symlink(PNOR_PRSV_ACTIVE_PATH))
             {
                 fs::create_directory_symlink(PNOR_PRSV, PNOR_PRSV_ACTIVE_PATH);
             }
