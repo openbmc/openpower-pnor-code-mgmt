@@ -24,14 +24,19 @@ constexpr auto squashFSImage = "pnor.xz.squashfs";
 
 void ItemUpdater::createActivation(sdbusplus::message::message& m)
 {
+    using SVersion = server::Version;
+    using VersionPurpose = SVersion::VersionPurpose;
+    namespace msg = sdbusplus::message;
+    namespace variant_ns = msg::variant_ns;
+
     sdbusplus::message::object_path objPath;
     std::map<std::string,
-             std::map<std::string,
-                      sdbusplus::message::variant<std::string>>> interfaces;
+             std::map<std::string, msg::variant<std::string>>> interfaces;
     m.read(objPath, interfaces);
+
     std::string path(std::move(objPath));
     std::string filePath;
-    auto purpose = server::Version::VersionPurpose::Unknown;
+    auto purpose = VersionPurpose::Unknown;
     std::string version;
 
     for (const auto& intf : interfaces)
@@ -43,20 +48,18 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                 if (property.first == "Purpose")
                 {
                     // Only process the Host and System images
-                    std::string str = sdbusplus::message::variant_ns::get<
-                        std::string>(property.second);
-                    auto value = server::Version::
-                        convertVersionPurposeFromString(str);
-                    if (value == server::Version::VersionPurpose::Host ||
-                        value == server::Version::VersionPurpose::System)
+                    auto value = SVersion::convertVersionPurposeFromString(
+                            variant_ns::get<std::string>(property.second));
+
+                    if (value == VersionPurpose::Host ||
+                        value == VersionPurpose::System)
                     {
                         purpose = value;
                     }
                 }
                 else if (property.first == "Version")
                 {
-                    version = sdbusplus::message::variant_ns::
-                        get<std::string>(property.second);
+                    version = variant_ns::get<std::string>(property.second);
                 }
             }
         }
@@ -66,14 +69,12 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
             {
                 if (property.first == "Path")
                 {
-                    filePath = sdbusplus::message::variant_ns::get<
-                            std::string>(property.second);
+                    filePath = variant_ns::get<std::string>(property.second);
                 }
             }
         }
     }
-    if ((filePath.empty()) || (purpose == server::Version::
-            VersionPurpose::Unknown))
+    if ((filePath.empty()) || (purpose == VersionPurpose::Unknown))
     {
         return;
     }
