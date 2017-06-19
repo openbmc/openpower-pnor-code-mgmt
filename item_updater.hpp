@@ -39,6 +39,7 @@ class ItemUpdater : public ItemUpdaterInherit
                                     this,
                                     std::placeholders::_1))
         {
+            processPNORImage();
         }
 
         /** @brief Sets the given priority free by incrementing
@@ -50,6 +51,11 @@ class ItemUpdater : public ItemUpdaterInherit
          */
         void freePriority(uint8_t value);
 
+        /**
+         * @brief Create and populate the active PNOR Version.
+         */
+        void processPNORImage();
+
     private:
         /** @brief Callback function for Software.Version match.
          *  @details Creates an Activation dbus object.
@@ -58,15 +64,6 @@ class ItemUpdater : public ItemUpdaterInherit
          */
         void createActivation(sdbusplus::message::message& msg);
 
-        /**
-         * @brief Get the extended version from the specified file.
-         *
-         * @param[in] manifestFilePath  - File to read.
-         *
-         * @return The extended version.
-         */
-        static std::string getExtendedVersion(const std::string&
-                                               manifestFilePath);
         /**
          * @brief Validates the presence of SquashFS iamge in the image dir.
          *
