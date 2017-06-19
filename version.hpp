@@ -46,6 +46,28 @@ class Version : public VersionInherit
             // Emit deferred signal.
             emit_object_added();
         }
+
+        /**
+         * @brief Read the manifest file to get the value of the key.
+         *
+         * @param[in] filePath - The path to file which contains the value
+         *                       of keys.
+         * @param[in] keys     - A map of keys with empty values.
+         *
+         * @return The map of keys with filled values.
+         **/
+        static std::map<std::string, std::string> getValue(
+                const std::string& filePath,
+                std::map<std::string, std::string> keys);
+
+        /**
+         * @brief Get the Version id.
+         *
+         * @param[in] version     - The image version.
+         *
+         * @return The id.
+         */
+        static std::string getId(const std::string& version);
 };
 
 } // namespace updater
