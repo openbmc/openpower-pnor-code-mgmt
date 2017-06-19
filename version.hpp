@@ -46,6 +46,27 @@ class Version : public VersionInherit
             // Emit deferred signal.
             emit_object_added();
         }
+
+        /**
+         * @brief Read the manifest file to get the value of the key.
+         *
+         * @param[in] filePath - The path to file which contains the value
+         *                       of keys.
+         * @param[in] keys     - A list of keys to extracted values.
+         *
+         * @return The values of the keys.
+         **/
+        static std::vector<std::string> getValue(
+                const std::string& filePath, std::vector<std::string> keys);
+
+        /**
+         * @brief Get the Version id.
+         *
+         * @param[in] versionId      - The version identifier
+         *
+         * @return The id.
+         */
+        static std::string getId(const std::string& version);
 };
 
 } // namespace updater

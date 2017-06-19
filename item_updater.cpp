@@ -3,6 +3,7 @@
 #include <fstream>
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Software/Version/server.hpp>
+#include "version.hpp"
 #include "config.h"
 #include "item_updater.hpp"
 #include "activation.hpp"
@@ -101,7 +102,8 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
 
         fs::path manifestPath(filePath);
         manifestPath /= MANIFEST_FILE;
-        auto extendedVersion = ItemUpdater::getExtendedVersion(manifestPath);
+        auto extendedVersion = (Version::getValue(manifestPath.string(),
+                 std::vector<std::string> {"extended_version"}))[0];
         activations.insert(std::make_pair(
                 versionId,
                 std::make_unique<Activation>(
@@ -111,7 +113,6 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                         versionId,
                         extendedVersion,
                         activationState)));
-    }
         versions.insert(std::make_pair(
                             versionId,
                             std::make_unique<Version>(
@@ -120,46 +121,47 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                                 version,
                                 purpose,
                                 filePath)));
+    }
     return;
 }
 
-std::string ItemUpdater::getExtendedVersion(const std::string& manifestFilePath)
+void ItemUpdater::processPNORImage()
 {
-    constexpr auto extendedVersionKey = "extended_version=";
-    constexpr auto extendedVersionKeySize = strlen(extendedVersionKey);
 
-    if (manifestFilePath.empty())
+    fs::path pnorTOC(PNOR_RO_ACTIVE_PATH);
+    pnorTOC /= PNOR_TOC_FILE;
+    std::ifstream efile(pnorTOC.c_str());
+    if (efile.good() != 1)
     {
-        log<level::ERR>("Error MANIFESTFilePath is empty");
-        throw std::runtime_error("MANIFESTFilePath is empty");
+        log<level::INFO>("Error PNOR current version is empty");
+        return;
     }
-
-    std::string extendedVersion{};
-    std::ifstream efile;
-    std::string line;
-    efile.exceptions(std::ifstream::failbit
-                     | std::ifstream::badbit
-                     | std::ifstream::eofbit);
-
-    try
-    {
-        efile.open(manifestFilePath);
-        while (getline(efile, line))
-        {
-            if (line.compare(0, extendedVersionKeySize,
-                             extendedVersionKey) == 0)
-            {
-                extendedVersion = line.substr(extendedVersionKeySize);
-                break;
-            }
-        }
-        efile.close();
-    }
-    catch (const std::exception& e)
-    {
-        log<level::ERR>("Error in reading Host MANIFEST file");
-    }
-    return extendedVersion;
+    auto keyValues = Version::getValue(pnorTOC.string(),
+            std::vector<std::string> {"version", "extended_version"});
+    auto version = keyValues[0];
+    auto extendedVersion = keyValues[1];
+    auto id = Version::getId(version);
+    auto purpose = server::Version::VersionPurpose::Host;
+    auto path =  std::string{SOFTWARE_OBJPATH} + '/' + id;
+    auto activationState = server::Activation::Activations::Active;
+    activations.insert(std::make_pair(
+                           id,
+                           std::make_unique<Activation>(
+                               bus,
+                               path,
+                               *this,
+                               id,
+                               extendedVersion,
+                               activationState)));
+    versions.insert(std::make_pair(
+                        id,
+                        std::make_unique<Version>(
+                             bus,
+                             path,
+                             version,
+                             purpose,
+                             "")));
+    return;
 }
 
 int ItemUpdater::validateSquashFSImage(const std::string& filePath)
