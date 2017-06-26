@@ -91,12 +91,13 @@ auto Activation::activation(Activations value) ->
                                     bus,
                                     path);
             }
-
+            activationBlocksTransition.reset(nullptr);
             return softwareServer::Activation::activation(
                     softwareServer::Activation::Activations::Active);
         }
         else
         {
+            activationBlocksTransition.reset(nullptr);
             return softwareServer::Activation::activation(
                     softwareServer::Activation::Activations::Failed);
         }
