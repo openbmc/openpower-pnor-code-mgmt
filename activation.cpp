@@ -130,12 +130,13 @@ auto Activation::activation(Activations value) ->
                                         bus,
                                         path);
                 }
-
+                activationBlocksTransition.reset(nullptr);
                 return softwareServer::Activation::activation(
                         softwareServer::Activation::Activations::Active);
             }
             else
             {
+                activationBlocksTransition.reset(nullptr);
                 return softwareServer::Activation::activation(
                         softwareServer::Activation::Activations::Failed);
             }
@@ -145,6 +146,7 @@ auto Activation::activation(Activations value) ->
             // If either the squashfs image has not yet been loaded or the RW
             // volumes have not yet been created, the activation process is
             // ongoing, so we return "Activating" status.
+            activationBlocksTransition.reset(nullptr);
             return softwareServer::Activation::activation(value);
         }
     }
