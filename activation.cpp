@@ -77,6 +77,8 @@ auto Activation::activation(Activations value) ->
             method.append(ubimountServiceFile, "replace");
             bus.call_noreply(method);
 
+            softwareServer::ActivationProgress::progress(10);
+
             return softwareServer::Activation::activation(value);
         }
         else if (squashfsLoaded == true && rwVolumesCreated == true)
@@ -131,6 +133,8 @@ auto Activation::activation(Activations value) ->
                                         path);
                 }
 
+                softwareServer::ActivationProgress::progress(100);
+
                 return softwareServer::Activation::activation(
                         softwareServer::Activation::Activations::Active);
             }
@@ -160,6 +164,8 @@ auto Activation::requestedActivation(RequestedActivations value) ->
 {
     squashfsLoaded = false;
     rwVolumesCreated = false;
+
+    softwareServer::ActivationProgress::progress(0);
 
     if ((value == softwareServer::Activation::RequestedActivations::Active) &&
         (softwareServer::Activation::requestedActivation() !=
@@ -207,6 +213,13 @@ void Activation::unitStateChange(sdbusplus::message::message& msg)
     if(newStateUnit == ubimountServiceFile && newStateResult == "done")
     {
         rwVolumesCreated = true;
+    }
+
+    if(softwareServer::Activation::activation() ==
+            softwareServer::Activation::Activations::Activating)
+    {
+        softwareServer::ActivationProgress::progress(10 +
+                (squashfsLoaded ? 30 : 0) + (rwVolumesCreated ? 50 : 0));
     }
 
     if(squashfsLoaded && rwVolumesCreated)
