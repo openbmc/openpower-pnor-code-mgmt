@@ -45,6 +45,12 @@ auto Activation::activation(Activations value) ->
             // RW volumes have not yet been created, we need to start the
             // service files for each of those actions.
 
+            if (!activationProgress)
+            {
+                activationProgress = std::make_unique<ActivationProgress>(bus,
+                        path);
+            }
+
             if (!activationBlocksTransition)
             {
                 activationBlocksTransition =
@@ -77,6 +83,8 @@ auto Activation::activation(Activations value) ->
             method.append(ubimountServiceFile, "replace");
             bus.call_noreply(method);
 
+            activationProgress->progress(10);
+
             return softwareServer::Activation::activation(value);
         }
         else if (squashfsLoaded == true && rwVolumesCreated == true)
@@ -94,6 +102,8 @@ auto Activation::activation(Activations value) ->
                 (fs::is_directory(PNOR_RW_PREFIX + versionId)) &&
                 (fs::is_directory(PNOR_RO_PREFIX + versionId)))
             {
+                activationProgress->progress(90);
+
                 if (!fs::is_directory(PNOR_ACTIVE_PATH))
                 {
                     fs::create_directories(PNOR_ACTIVE_PATH);
@@ -130,13 +140,19 @@ auto Activation::activation(Activations value) ->
                                         bus,
                                         path);
                 }
+
+                activationProgress->progress(100);
+
                 activationBlocksTransition.reset(nullptr);
+                activationProgress.reset(nullptr);
+
                 return softwareServer::Activation::activation(
                         softwareServer::Activation::Activations::Active);
             }
             else
             {
                 activationBlocksTransition.reset(nullptr);
+                activationProgress.reset(nullptr);
                 return softwareServer::Activation::activation(
                         softwareServer::Activation::Activations::Failed);
             }
@@ -152,6 +168,7 @@ auto Activation::activation(Activations value) ->
     else
     {
         activationBlocksTransition.reset(nullptr);
+        activationProgress.reset(nullptr);
         return softwareServer::Activation::activation(value);
     }
 }
@@ -202,12 +219,14 @@ void Activation::unitStateChange(sdbusplus::message::message& msg)
 
     if(newStateUnit == squashfsMountServiceFile && newStateResult == "done")
     {
-       squashfsLoaded = true;
+        squashfsLoaded = true;
+        activationProgress->progress(activationProgress->progress() + 20);
     }
 
     if(newStateUnit == ubimountServiceFile && newStateResult == "done")
     {
         rwVolumesCreated = true;
+        activationProgress->progress(activationProgress->progress() + 50);
     }
 
     if(squashfsLoaded && rwVolumesCreated)
