@@ -16,9 +16,12 @@ Options:
                           generate `pwd`/my.pnor.squashfs.tar output.)
    -h, --help             Display this help text and exit.
 '
-
+# Reference the ffs structures at:
+# https://github.com/open-power/hostboot/blob/master/src/usr/pnor/common/ffs_hb.H
+# https://github.com/open-power/hostboot/blob/master/src/usr/pnor/ffs.h
 let ffs_entry_size=128
-let miscflags_offset=112
+let vercheck_offset=112
+let miscflags_offset=113
 outfile=""
 declare -a partitions=()
 tocfile="pnor.toc"
@@ -86,6 +89,8 @@ pflash --partition=VERSION --read=${scratch_dir}/VERSION -F ${pnorfile}
         done
 
         id=${fields[0]##*=}
+        offset=$((${ffs_entry_size} * 10#${id} + ${vercheck_offset}))
+        vercheck=$(xxd -p -l  0x1 -seek ${offset} ${scratch_dir}/part)
         offset=$((${ffs_entry_size} * 10#${id} + ${miscflags_offset}))
         miscflags=0x$(xxd -p -l  0x1 -seek ${offset} ${scratch_dir}/part)
         if ((miscflags & 0x80)); then
@@ -97,13 +102,13 @@ pflash --partition=VERSION --read=${scratch_dir}/VERSION -F ${pnorfile}
         fi
 
         # Need the partition ID, name, start location, end location, and flags
-        echo  "partition${id}=${fields[1]},${fields[2]/../,}${flags}"
+        echo  "partition${id}=${fields[1]},${fields[2]/../,},${vercheck}${flags}"
 
         # Save the partition name
         partitions+=(${fields[1]})
     fi
-  # Don't need part, version, or backup_part partitions
-  done < <(pflash --info -F ${pnorfile} | grep -v -i "part\|version")
+  # Don't need the BACKUP_PART partition
+  done < <(pflash --info -F ${pnorfile} | grep -v "BACKUP")
 } > ${scratch_dir}/${tocfile}
 
 for partition in "${partitions[@]}"; do
