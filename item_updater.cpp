@@ -111,7 +111,6 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                         versionId,
                         extendedVersion,
                         activationState)));
-    }
         versions.insert(std::make_pair(
                             versionId,
                             std::make_unique<Version>(
@@ -120,6 +119,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                                 version,
                                 purpose,
                                 filePath)));
+    }
     return;
 }
 
