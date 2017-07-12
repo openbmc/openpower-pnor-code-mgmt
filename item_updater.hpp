@@ -56,6 +56,14 @@ class ItemUpdater : public ItemUpdaterInherit
          */
         void processPNORImage();
 
+        /** @brief Deletes version
+         *
+         *  @param[in] entryId - Id of the version to delete
+         *
+         *  @return None
+         */
+        void erase(std::string entryId);
+
     private:
         /** @brief Callback function for Software.Version match.
          *  @details Creates an Activation dbus object.
@@ -86,6 +94,17 @@ class ItemUpdater : public ItemUpdaterInherit
 
         /** @brief sdbusplus signal match for Software.Version */
         sdbusplus::bus::match_t versionMatch;
+
+        /** @brief Clears read only PNOR partition for
+          * given Activation dbus object */
+        void removeReadOnlyPartition(std::string versionId);
+
+        /** @brief Clears read write PNOR partition for
+          * given Activation dbus object */
+        void removeReadWritePartition(std::string versionId);
+
+        /** @brief Clears preserved PNOR partition */
+        void removePreservedPartition();
 
         /** @brief Host factory reset - clears PNOR partitions for each
           * Activation dbus object */
