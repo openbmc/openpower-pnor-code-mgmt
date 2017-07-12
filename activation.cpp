@@ -266,6 +266,11 @@ void Activation::unitStateChange(sdbusplus::message::message& msg)
     return;
 }
 
+void Activation::delete_()
+{
+    parent.erase(versionId);
+}
+
 } // namespace updater
 } // namespace software
 } // namespace openpower

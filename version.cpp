@@ -7,6 +7,7 @@
 #include "version.hpp"
 #include <phosphor-logging/elog-errors.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
+#include "item_updater.hpp"
 
 namespace openpower
 {
@@ -80,6 +81,11 @@ std::map<std::string, std::string> Version::getValue(
     }
 
     return keys;
+}
+
+void Version::delete_()
+{
+    parent.erase(getId(version()));
 }
 
 } // namespace updater
