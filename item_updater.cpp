@@ -118,7 +118,8 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                                 path,
                                 version,
                                 purpose,
-                                filePath)));
+                                filePath,
+                                this)));
     }
     return;
 }
@@ -179,11 +180,24 @@ int ItemUpdater::validateSquashFSImage(const std::string& filePath)
     }
 }
 
-void ItemUpdater::reset()
+void ItemUpdater::removeReadOnlyPartition(std::string versionId)
 {
-    for(const auto& it : activations)
-    {
-        auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + it.first +
+        auto serviceFile = "obmc-flash-bios-ubiumount-ro@" + versionId +
+                ".service";
+
+        // Remove the read-only partitions.
+        auto method = bus.new_method_call(
+                SYSTEMD_BUSNAME,
+                SYSTEMD_PATH,
+                SYSTEMD_INTERFACE,
+                "StartUnit");
+        method.append(serviceFile, "replace");
+        bus.call_noreply(method);
+}
+
+void ItemUpdater::removeReadWritePartition(std::string versionId)
+{
+        auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + versionId +
                 ".service";
 
         // Remove the read-write partitions.
@@ -194,8 +208,10 @@ void ItemUpdater::reset()
                 "StartUnit");
         method.append(serviceFile, "replace");
         bus.call_noreply(method);
-    }
+}
 
+void ItemUpdater::removePreservedPartition()
+{
     // Remove the preserved partition.
     auto method = bus.new_method_call(
             SYSTEMD_BUSNAME,
@@ -205,6 +221,16 @@ void ItemUpdater::reset()
     method.append("obmc-flash-bios-ubiumount-prsv.service", "replace");
     bus.call_noreply(method);
 
+    return;
+}
+
+void ItemUpdater::reset()
+{
+    for(const auto& it : activations)
+    {
+        removeReadWritePartition(it.first);
+    }
+    removePreservedPartition();
     return;
 }
 
@@ -219,6 +245,35 @@ void ItemUpdater::freePriority(uint8_t value)
             {
                 intf.second->redundancyPriority.get()->priority(value+1);
             }
+        }
+    }
+}
+
+void ItemUpdater::erase(std::string entryId)
+{
+    for (const auto& intf : versions)
+    {
+        std::string key = intf.first;
+        std::string version = (*intf.second).version();
+        // Found match
+        if (version.compare(entryId) == 0)
+        {
+            versions.erase(key);
+            removeReadWritePartition(key);
+            removeReadOnlyPartition(key);
+            removePreservedPartition();
+            break;
+        }
+    }
+    for (const auto& it : activations)
+    {
+        std::string key = it.first;
+        std::string version = (*it.second).versionId;
+        // Found match
+        if (version.compare(entryId) == 0)
+        {
+            activations.erase(key);
+            break;
         }
     }
 }

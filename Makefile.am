@@ -8,7 +8,8 @@ sbin_PROGRAMS = \
 openpower_update_manager_SOURCES = \
 	activation.cpp \
 	item_updater.cpp \
-	item_updater_main.cpp
+	item_updater_main.cpp \
+	version.cpp
 
 generic_cxxflags = \
 	$(SYSTEMD_CFLAGS) \
