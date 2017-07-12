@@ -113,12 +113,13 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                         activationState)));
         versions.insert(std::make_pair(
                             versionId,
-                            std::make_unique<Version>(
+                            std::make_unique<Version<ItemUpdater>>(
                                 bus,
                                 path,
                                 version,
                                 purpose,
-                                filePath)));
+                                filePath,
+                                this)));
     }
     return;
 }
@@ -179,11 +180,9 @@ int ItemUpdater::validateSquashFSImage(const std::string& filePath)
     }
 }
 
-void ItemUpdater::reset()
+void ItemUpdater::removeReadWritePartition(std::string versionId)
 {
-    for(const auto& it : activations)
-    {
-        auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + it.first +
+        auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + versionId +
                 ".service";
 
         // Remove the read-write partitions.
@@ -194,6 +193,13 @@ void ItemUpdater::reset()
                 "StartUnit");
         method.append(serviceFile, "replace");
         bus.call_noreply(method);
+}
+
+void ItemUpdater::reset()
+{
+    for(const auto& it : activations)
+    {
+        removeReadWritePartition(it.first);
     }
 
     // Remove the preserved partition.
@@ -220,6 +226,54 @@ void ItemUpdater::freePriority(uint8_t value)
                 intf.second->redundancyPriority.get()->priority(value+1);
             }
         }
+    }
+}
+
+void ItemUpdater::erase(std::string entryId)
+{
+    std::string found_key = "";
+    fs::path path = "";
+    for (const auto& intf : versions)
+    {
+        std::string key = intf.first;
+        std::string version = (*intf.second).version();
+        // Found match
+        if (version.compare(entryId) == 0)
+        {
+            found_key = key;
+            path = (*intf.second).path();
+            break;
+        }
+    }
+    if (found_key.empty())
+    {
+        std::string err_msg = "Error Failed to find version for " + \
+                               entryId + " in pnor updater. Unable to delete.";
+        log<level::ERR>(err_msg.c_str());
+        return;
+    }
+    auto it = activations.find(found_key);
+    // Activation not found
+    if (it == activations.end())
+    {
+        std::string err_msg = "Error Failed to find activation for " + \
+                               entryId + " in pnor updater. Unable to delete.";
+        log<level::ERR>(err_msg.c_str());
+        return;
+    }
+    const Activation& current_activation = *(it->second);
+    // Remove read write partitiont if it's not active
+    if (current_activation.activation() == server::Activation::Activations::Active)
+    {
+        std::string err_msg = "Error Version for " + \
+                               entryId + " in pnor updater is Active. Unable to delete.";
+        log<level::ERR>(err_msg.c_str());
+    }
+    else
+    {
+        removeReadWritePartition(found_key);
+        versions.erase(found_key);
+        activations.erase(found_key);
     }
 }
 
