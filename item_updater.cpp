@@ -113,12 +113,13 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                         activationState)));
         versions.insert(std::make_pair(
                             versionId,
-                            std::make_unique<Version>(
+                            std::make_unique<Version<ItemUpdater>>(
                                 bus,
                                 path,
                                 version,
                                 purpose,
-                                filePath)));
+                                filePath,
+                                this)));
     }
     return;
 }
@@ -219,6 +220,26 @@ void ItemUpdater::freePriority(uint8_t value)
             {
                 intf.second->redundancyPriority.get()->priority(value+1);
             }
+        }
+    }
+}
+
+void ItemUpdater::erase(std::string entryId)
+{
+    for (const auto& intf : versions)
+    {
+        std::string key = intf.first;
+        std::string version = (*intf.second).version();
+        // Found match
+        if (version.compare(entryId) == 0)
+        {
+            fs::path path = (*intf.second).path();
+            if (fs::exists(path))
+            {
+                fs::remove_all(path);
+            }
+            versions.erase(key);
+            break;
         }
     }
 }
