@@ -121,7 +121,8 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                                 path,
                                 version,
                                 purpose,
-                                filePath)));
+                                filePath,
+                                this)));
     }
     return;
 }
@@ -162,7 +163,8 @@ void ItemUpdater::processPNORImage()
                              path,
                              version,
                              purpose,
-                             "")));
+                             "",
+                             this)));
     return;
 }
 
@@ -183,11 +185,24 @@ int ItemUpdater::validateSquashFSImage(const std::string& filePath)
     }
 }
 
-void ItemUpdater::reset()
+void ItemUpdater::removeReadOnlyPartition(std::string versionId)
 {
-    for(const auto& it : activations)
-    {
-        auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + it.first +
+        auto serviceFile = "obmc-flash-bios-ubiumount-ro@" + versionId +
+                ".service";
+
+        // Remove the read-only partitions.
+        auto method = bus.new_method_call(
+                SYSTEMD_BUSNAME,
+                SYSTEMD_PATH,
+                SYSTEMD_INTERFACE,
+                "StartUnit");
+        method.append(serviceFile, "replace");
+        bus.call_noreply(method);
+}
+
+void ItemUpdater::removeReadWritePartition(std::string versionId)
+{
+        auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + versionId +
                 ".service";
 
         // Remove the read-write partitions.
@@ -198,8 +213,10 @@ void ItemUpdater::reset()
                 "StartUnit");
         method.append(serviceFile, "replace");
         bus.call_noreply(method);
-    }
+}
 
+void ItemUpdater::removePreservedPartition()
+{
     // Remove the preserved partition.
     auto method = bus.new_method_call(
             SYSTEMD_BUSNAME,
@@ -209,6 +226,16 @@ void ItemUpdater::reset()
     method.append("obmc-flash-bios-ubiumount-prsv.service", "replace");
     bus.call_noreply(method);
 
+    return;
+}
+
+void ItemUpdater::reset()
+{
+    for(const auto& it : activations)
+    {
+        removeReadWritePartition(it.first);
+    }
+    removePreservedPartition();
     return;
 }
 
@@ -240,6 +267,31 @@ bool ItemUpdater::isLowestPriority(uint8_t value)
         }
     }
     return true;
+}
+
+void ItemUpdater::erase(std::string entryId)
+{
+    removePreservedPartition();
+    auto it = std::find_if(versions.begin(),
+                           versions.end(),
+                           [&](std::pair<const std::string,
+                                         std::unique_ptr<Version>>& t)
+                           {
+                               return (*(t.second)).version() == entryId;
+                           });
+    if (it == versions.end())
+    {
+        return;
+    }
+    versions.erase(it->first);
+    removeReadWritePartition(it->first);
+    removeReadOnlyPartition(it->first);
+
+    auto ita = activations.find(it->first);
+    if (ita != activations.end())
+    {
+        activations.erase(it->first);
+    }
 }
 
 } // namespace updater
