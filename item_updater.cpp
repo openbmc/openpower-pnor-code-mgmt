@@ -113,12 +113,13 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                         activationState)));
         versions.insert(std::make_pair(
                             versionId,
-                            std::make_unique<Version>(
+                            std::make_unique<Version<ItemUpdater>>(
                                 bus,
                                 path,
                                 version,
                                 purpose,
-                                filePath)));
+                                filePath,
+                                this)));
     }
     return;
 }
@@ -219,6 +220,44 @@ void ItemUpdater::freePriority(uint8_t value)
             {
                 intf.second->redundancyPriority.get()->priority(value+1);
             }
+        }
+    }
+}
+
+void ItemUpdater::erase(std::string entryId)
+{
+    std::string found_key = "";
+    fs::path path = "";
+    for (const auto& intf : versions)
+    {
+        std::string key = intf.first;
+        std::string version = (*intf.second).version();
+        // Found match
+        if (version.compare(entryId) == 0)
+        {
+            found_key = key;
+            path = (*intf.second).path();
+            break;
+        }
+    }
+    if (!found_key.empty())
+    {
+        auto it = activations.find(found_key);
+        // Activation not found
+        if (it == activations.end())
+        {
+            return;
+        }
+        const Activation& current_activation = *(it->second);
+        // Delete image if it's not active
+        if (current_activation.activation() != server::Activation::Activations::Active)
+        {
+            if (fs::exists(path))
+            {
+                fs::remove_all(path);
+            }
+            versions.erase(found_key);
+            activations.erase(found_key);
         }
     }
 }

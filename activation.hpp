@@ -226,6 +226,13 @@ class Activation : public ActivationInherit
         /** @brief Tracks whether the read-write volumes have been created as
          * part of the activation process. **/
         bool rwVolumesCreated = false;
+
+        /** @brief activation status property get function
+         *
+         * @returns Activations - The activation value
+         */
+        using ActivationInherit::activation;
+
 };
 
 } // namespace updater
