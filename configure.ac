@@ -77,6 +77,8 @@ AC_DEFINE(SYSTEMD_PATH, "/org/freedesktop/systemd1",
     [systemd path.])
 AC_DEFINE(SYSTEMD_INTERFACE, "org.freedesktop.systemd1.Manager",
     [systemd interface.])
+AC_DEFINE(SYSTEMD_PROPERTY_INTERFACE, "org.freedesktop.DBus.Properties",
+    [systemd property interface.])
 
 AC_DEFINE(PNOR_TOC_FILE, "pnor.toc",
     [The name of the PNOR table of contents file])

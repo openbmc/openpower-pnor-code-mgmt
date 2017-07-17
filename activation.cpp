@@ -2,6 +2,9 @@
 #include "activation.hpp"
 #include "config.h"
 #include "item_updater.hpp"
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include "xyz/openbmc_project/Common/error.hpp"
 
 namespace openpower
 {
@@ -10,11 +13,17 @@ namespace software
 namespace updater
 {
 
+using namespace sdbusplus::xyz::openbmc_project::Common::Error;
+using namespace phosphor::logging;
+
 namespace fs = std::experimental::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
 
 constexpr auto SYSTEMD_SERVICE   = "org.freedesktop.systemd1";
 constexpr auto SYSTEMD_OBJ_PATH  = "/org/freedesktop/systemd1";
+
+constexpr auto CHASSIS_STATE_OBJ = "xyz.openbmc_project.State.Chassis";
+constexpr auto CHASSIS_STATE_ON = "xyz.openbmc_project.State.Chassis.PowerState.On";
 
 void Activation::subscribeToSystemdSignals()
 {
@@ -56,6 +65,61 @@ void Activation::createSymlinks()
         fs::create_directory_symlink(PNOR_PRSV,
                 PNOR_PRSV_ACTIVE_PATH);
     }
+}
+
+bool Activation::isChassisOn()
+{
+    auto mapperCall = bus.new_method_call(
+            MAPPER_BUSNAME,
+            MAPPER_PATH,
+            MAPPER_INTERFACE,
+            "GetSubTree");
+    mapperCall.append("/", 0, std::vector<std::string>({CHASSIS_STATE_OBJ}));
+    auto mapperResponseMsg = bus.call(mapperCall);
+    if (mapperResponseMsg.is_method_error())
+    {
+        log<level::ERR>("Error in Mapper call");
+        elog<InvalidArgument>(xyz::openbmc_project::Common::InvalidArgument::
+                              ARGUMENT_NAME("GetSubTree"),
+                              xyz::openbmc_project::Common::InvalidArgument::
+                              ARGUMENT_VALUE(CHASSIS_STATE_OBJ));
+    }
+    using MapperResponseType = std::map<std::string,
+                               std::map<std::string, std::vector<std::string>>>;
+    MapperResponseType mapperResponse;
+    mapperResponseMsg.read(mapperResponse);
+    if (mapperResponse.empty())
+    {
+        log<level::ERR>("Invalid Response from mapper");
+        elog<InvalidArgument>(xyz::openbmc_project::Common::InvalidArgument::
+                              ARGUMENT_NAME("MapperResponseMsg"),
+                              xyz::openbmc_project::Common::InvalidArgument::
+                              ARGUMENT_VALUE(CHASSIS_STATE_OBJ));
+    }
+
+    auto method = bus.new_method_call(CHASSIS_STATE_OBJ,
+                                      (mapperResponse.begin()->first).c_str(),
+                                      SYSTEMD_PROPERTY_INTERFACE,
+                                      "Get");
+    method.append(CHASSIS_STATE_OBJ, "CurrentPowerState");
+    auto response = bus.call(method);
+    if (response.is_method_error())
+    {
+        log<level::ERR>("Error in fetching current Chassis State");
+        elog<InvalidArgument>(xyz::openbmc_project::Common::InvalidArgument::
+                              ARGUMENT_NAME("Response"),
+                              xyz::openbmc_project::Common::InvalidArgument::
+                              ARGUMENT_VALUE(""));
+    }
+    sdbusplus::message::variant<std::string> currentChassisState;
+    response.read(currentChassisState);
+    auto strParam = sdbusplus::message::variant_ns::
+                                    get<std::string>(currentChassisState);
+    if (strParam == CHASSIS_STATE_ON)
+    {
+        return true;
+    }
+    return false;
 }
 
 auto Activation::activation(Activations value) ->
@@ -135,7 +199,12 @@ auto Activation::activation(Activations value) ->
                 (fs::is_directory(PNOR_RO_PREFIX + versionId)))
             {
                 activationProgress->progress(90);
-                createSymlinks();
+
+                // Update the symlinks only if Chassis is Off.
+                if (!Activation::isChassisOn())
+                {
+                    createSymlinks();
+                }
 
                 // Set Redundancy Priority before setting to Active
                 if (!redundancyPriority)

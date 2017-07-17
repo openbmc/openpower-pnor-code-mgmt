@@ -250,6 +250,14 @@ class Activation : public ActivationInherit
          **/
         void subscribeToSystemdSignals();
 
+        /**
+         * @brief Determine if Chassis is on.
+         *
+         * @return bool True if Chassis is On
+         *              False if Chassis is Off
+         */
+        bool isChassisOn();
+
         /** @brief Persistent sdbusplus DBus bus connection */
         sdbusplus::bus::bus& bus;
 
