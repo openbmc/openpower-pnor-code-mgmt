@@ -2,6 +2,9 @@
 #include "activation.hpp"
 #include "config.h"
 #include "item_updater.hpp"
+#include "xyz/openbmc_project/State/Host/server.hpp"
+#include <string>
+#include <fstream>
 
 namespace openpower
 {
@@ -12,9 +15,16 @@ namespace updater
 
 namespace fs = std::experimental::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
+namespace stateServer = sdbusplus::xyz::openbmc_project::State::server;
 
 constexpr auto SYSTEMD_SERVICE   = "org.freedesktop.systemd1";
 constexpr auto SYSTEMD_OBJ_PATH  = "/org/freedesktop/systemd1";
+
+constexpr auto HOST_SERVICE = "xyz.openbmc_project.State.Host";
+constexpr auto HOST_OBJPATH = "/xyz/openbmc_project/state/host0";
+constexpr auto HOST_INTERFACE = "xyz.openbmc_project.State.Host";
+constexpr auto HOST_RUNNING = "xyz.openbmc_project.State.Host.HostState.Off";
+constexpr auto SYSTEMD_PROPERTY_IFACE = "org.freedesktop.DBus.Properties";
 
 void Activation::subscribeToSystemdSignals()
 {
@@ -25,6 +35,19 @@ void Activation::subscribeToSystemdSignals()
     this->bus.call_noreply(method);
 
     return;
+}
+
+auto Activation::getHostState()
+{
+    sdbusplus::message::variant<std::string> currentState;
+    auto method = bus.new_method_call(
+            HOST_SERVICE,
+            HOST_OBJPATH,
+            SYSTEMD_PROPERTY_IFACE,
+            "Get");
+    method.append(HOST_INTERFACE, "CurrentHostState");
+    bus.call(method).read(currentState);
+    return currentState;
 }
 
 auto Activation::activation(Activations value) ->
@@ -38,6 +61,23 @@ auto Activation::activation(Activations value) ->
 
     if (value == softwareServer::Activation::Activations::Activating)
     {
+        // Code Update can only be performed when the Host is down.
+        if (Activation::getHostState() == HOST_RUNNING)
+        {
+            if(!redundancyPriority)
+            {
+                redundancyPriority =
+                              std::make_unique<RedundancyPriority>(
+                                        bus,
+                                        path,
+                                        *this,
+                                        0);
+            }
+            return softwareServer::Activation::activation(
+                        softwareServer::Activation::Activations::Active);
+        }
+
+
         softwareServer::Activation::activation(value);
 
         if (squashfsLoaded == false && rwVolumesCreated == false)

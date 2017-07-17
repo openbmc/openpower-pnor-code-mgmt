@@ -195,6 +195,13 @@ class Activation : public ActivationInherit
          **/
         void subscribeToSystemdSignals();
 
+        /**
+         * @brief Determine the current HOST state.
+         *
+         * @return Returns the HOST state.
+         */
+        auto getHostState();
+
         /** @brief Persistent sdbusplus DBus bus connection */
         sdbusplus::bus::bus& bus;
 
