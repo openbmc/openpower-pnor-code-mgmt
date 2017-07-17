@@ -51,12 +51,18 @@ class RedundancyPriority : public RedundancyPriorityInherit
                                    uint8_t value) :
                                    RedundancyPriorityInherit(bus,
                                    path.c_str(), true),
-                                   parent(parent)
+                                   parent(parent),
+                                   bus(bus),
+                                   path(path)
         {
             // Set Property
             priority(value);
-            // Emit deferred signal.
-            emit_object_added();
+            bus.emit_interfaces_added(path.c_str(), interface);
+        }
+
+        ~RedundancyPriority()
+        {
+            bus.emit_interfaces_removed(path.c_str(), interface);
         }
 
         /** @brief Overloaded Priority property set function
@@ -75,6 +81,13 @@ class RedundancyPriority : public RedundancyPriorityInherit
 
         /** @brief Parent Object. */
         Activation& parent;
+
+    private:
+        // TODO Remove once openbmc/openbmc#1975 is resolved
+        std::vector<std::string> interface =
+                {"xyz.openbmc_project.Software.RedundancyPriority"};
+        sdbusplus::bus::bus& bus;
+        std::string path;
 };
 
 /** @class ActivationBlocksTransition
@@ -92,7 +105,24 @@ class ActivationBlocksTransition : public ActivationBlocksTransitionInherit
          */
         ActivationBlocksTransition(sdbusplus::bus::bus& bus,
                                    const std::string& path) :
-                   ActivationBlocksTransitionInherit(bus, path.c_str()) {}
+                   ActivationBlocksTransitionInherit(bus, path.c_str(), true),
+                   bus(bus),
+                   path(path)
+        {
+            bus.emit_interfaces_added(path.c_str(), interface);
+        }
+
+        ~ActivationBlocksTransition()
+        {
+            bus.emit_interfaces_removed(path.c_str(), interface);
+        }
+
+    private:
+        // TODO Remove once openbmc/openbmc#1975 is resolved
+        std::vector<std::string> interface =
+                {"xyz.openbmc_project.Software.ActivationBlocksTransition"};
+        sdbusplus::bus::bus& bus;
+        std::string path;
 };
 
 class ActivationProgress : public ActivationProgressInherit
@@ -105,11 +135,25 @@ class ActivationProgress : public ActivationProgressInherit
          */
         ActivationProgress(sdbusplus::bus::bus& bus,
                            const std::string& path) :
-                   ActivationProgressInherit(bus, path.c_str(), true)
+                   ActivationProgressInherit(bus, path.c_str(), true),
+                   bus(bus),
+                   path(path)
        {
            progress(0);
-           emit_object_added();
+           bus.emit_interfaces_added(path.c_str(), interface);
        }
+
+        ~ActivationProgress()
+        {
+            bus.emit_interfaces_removed(path.c_str(), interface);
+        }
+
+    private:
+        // TODO Remove once openbmc/openbmc#1975 is resolved
+        std::vector<std::string> interface =
+                {"xyz.openbmc_project.Software.ActivationProgress"};
+        sdbusplus::bus::bus& bus;
+        std::string path;
 };
 
 /** @class Activation
