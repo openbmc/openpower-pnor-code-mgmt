@@ -16,6 +16,12 @@ namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
 constexpr auto SYSTEMD_SERVICE   = "org.freedesktop.systemd1";
 constexpr auto SYSTEMD_OBJ_PATH  = "/org/freedesktop/systemd1";
 
+constexpr auto HOST_SERVICE = "xyz.openbmc_project.State.Host";
+constexpr auto HOST_OBJPATH = "/xyz/openbmc_project/state/host0";
+constexpr auto HOST_INTERFACE = "xyz.openbmc_project.State.Host";
+constexpr auto HOST_RUNNING = "xyz.openbmc_project.State.Host.HostState.Running";
+constexpr auto SYSTEMD_PROPERTY_IFACE = "org.freedesktop.DBus.Properties";
+
 void Activation::subscribeToSystemdSignals()
 {
     auto method = this->bus.new_method_call(SYSTEMD_SERVICE,
@@ -25,6 +31,19 @@ void Activation::subscribeToSystemdSignals()
     this->bus.call_noreply(method);
 
     return;
+}
+
+auto Activation::getHostState()
+{
+    sdbusplus::message::variant<std::string> currentState;
+    auto method = bus.new_method_call(
+            HOST_SERVICE,
+            HOST_OBJPATH,
+            SYSTEMD_PROPERTY_IFACE,
+            "Get");
+    method.append(HOST_INTERFACE, "CurrentHostState");
+    bus.call(method).read(currentState);
+    return currentState;
 }
 
 auto Activation::activation(Activations value) ->
@@ -105,32 +124,36 @@ auto Activation::activation(Activations value) ->
             {
                 activationProgress->progress(90);
 
-                if (!fs::is_directory(PNOR_ACTIVE_PATH))
+                // Update the symlinks for current link on if Host is not running.
+                if (Activation::getHostState() == HOST_RUNNING)
                 {
-                    fs::create_directories(PNOR_ACTIVE_PATH);
-                }
+                    if (!fs::is_directory(PNOR_ACTIVE_PATH))
+                    {
+                        fs::create_directories(PNOR_ACTIVE_PATH);
+                    }
 
-                // If the RW or RO active links exist, remove them and create new
-                // ones pointing to the active version.
-                if (fs::is_symlink(PNOR_RO_ACTIVE_PATH))
-                {
-                    fs::remove(PNOR_RO_ACTIVE_PATH);
-                }
-                fs::create_directory_symlink(PNOR_RO_PREFIX + versionId,
-                        PNOR_RO_ACTIVE_PATH);
-                if (fs::is_symlink(PNOR_RW_ACTIVE_PATH))
-                {
-                    fs::remove(PNOR_RW_ACTIVE_PATH);
-                }
-                fs::create_directory_symlink(PNOR_RW_PREFIX + versionId,
-                        PNOR_RW_ACTIVE_PATH);
+                    // If the RW or RO active links exist, remove them and create
+                    // new ones pointing to the active version.
+                    if (fs::is_symlink(PNOR_RO_ACTIVE_PATH))
+                    {
+                        fs::remove(PNOR_RO_ACTIVE_PATH);
+                    }
+                    fs::create_directory_symlink(PNOR_RO_PREFIX + versionId,
+                            PNOR_RO_ACTIVE_PATH);
+                    if (fs::is_symlink(PNOR_RW_ACTIVE_PATH))
+                    {
+                        fs::remove(PNOR_RW_ACTIVE_PATH);
+                    }
+                    fs::create_directory_symlink(PNOR_RW_PREFIX + versionId,
+                            PNOR_RW_ACTIVE_PATH);
 
-                // There is only one preserved directory as it is not tied to a
-                // version, so just create the link if it doesn't exist already.
-                if (!fs::is_symlink(PNOR_PRSV_ACTIVE_PATH))
-                {
-                    fs::create_directory_symlink(PNOR_PRSV,
-                            PNOR_PRSV_ACTIVE_PATH);
+                    // There is only one preserved directory as it is not tied to a
+                    // version, so just create the link if it doesn't exist already.
+                    if (!fs::is_symlink(PNOR_PRSV_ACTIVE_PATH))
+                    {
+                        fs::create_directory_symlink(PNOR_PRSV,
+                                PNOR_PRSV_ACTIVE_PATH);
+                    }
                 }
 
                 // Set Redundancy Priority before setting to Active
