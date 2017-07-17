@@ -27,6 +27,37 @@ void Activation::subscribeToSystemdSignals()
     return;
 }
 
+void Activation::createSymlinks()
+{
+    if (!fs::is_directory(PNOR_ACTIVE_PATH))
+    {
+        fs::create_directories(PNOR_ACTIVE_PATH);
+    }
+
+    // If the RW or RO active links exist, remove them and create new
+    // ones pointing to the active version.
+    if (fs::is_symlink(PNOR_RO_ACTIVE_PATH))
+    {
+        fs::remove(PNOR_RO_ACTIVE_PATH);
+    }
+    fs::create_directory_symlink(PNOR_RO_PREFIX + versionId,
+            PNOR_RO_ACTIVE_PATH);
+    if (fs::is_symlink(PNOR_RW_ACTIVE_PATH))
+    {
+        fs::remove(PNOR_RW_ACTIVE_PATH);
+    }
+    fs::create_directory_symlink(PNOR_RW_PREFIX + versionId,
+            PNOR_RW_ACTIVE_PATH);
+
+    // There is only one preserved directory as it is not tied to a
+    // version, so just create the link if it doesn't exist already
+    if (!fs::is_symlink(PNOR_PRSV_ACTIVE_PATH))
+    {
+        fs::create_directory_symlink(PNOR_PRSV,
+                PNOR_PRSV_ACTIVE_PATH);
+    }
+}
+
 auto Activation::activation(Activations value) ->
         Activations
 {
@@ -104,34 +135,7 @@ auto Activation::activation(Activations value) ->
                 (fs::is_directory(PNOR_RO_PREFIX + versionId)))
             {
                 activationProgress->progress(90);
-
-                if (!fs::is_directory(PNOR_ACTIVE_PATH))
-                {
-                    fs::create_directories(PNOR_ACTIVE_PATH);
-                }
-
-                // If the RW or RO active links exist, remove them and create new
-                // ones pointing to the active version.
-                if (fs::is_symlink(PNOR_RO_ACTIVE_PATH))
-                {
-                    fs::remove(PNOR_RO_ACTIVE_PATH);
-                }
-                fs::create_directory_symlink(PNOR_RO_PREFIX + versionId,
-                        PNOR_RO_ACTIVE_PATH);
-                if (fs::is_symlink(PNOR_RW_ACTIVE_PATH))
-                {
-                    fs::remove(PNOR_RW_ACTIVE_PATH);
-                }
-                fs::create_directory_symlink(PNOR_RW_PREFIX + versionId,
-                        PNOR_RW_ACTIVE_PATH);
-
-                // There is only one preserved directory as it is not tied to a
-                // version, so just create the link if it doesn't exist already.
-                if (!fs::is_symlink(PNOR_PRSV_ACTIVE_PATH))
-                {
-                    fs::create_directory_symlink(PNOR_PRSV,
-                            PNOR_PRSV_ACTIVE_PATH);
-                }
+                createSymlinks();
 
                 // Set Redundancy Priority before setting to Active
                 if (!redundancyPriority)
@@ -202,6 +206,14 @@ auto Activation::requestedActivation(RequestedActivations value) ->
 uint8_t RedundancyPriority::priority(uint8_t value)
 {
     parent.parent.freePriority(value);
+
+    if(parent.parent.isLowestPriority(value))
+    {
+        // Need to update the symlinks to point to Software Version
+        // with lowest priority.
+        parent.createSymlinks();
+    }
+
     return softwareServer::RedundancyPriority::priority(value);
 }
 

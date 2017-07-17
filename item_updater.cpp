@@ -227,6 +227,21 @@ void ItemUpdater::freePriority(uint8_t value)
     }
 }
 
+bool ItemUpdater::isLowestPriority(uint8_t value)
+{
+    for (const auto& intf : activations)
+    {
+        if(intf.second->redundancyPriority)
+        {
+            if (intf.second->redundancyPriority.get()->priority() < value)
+            {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 } // namespace updater
 } // namespace software
 } // namespace openpower
