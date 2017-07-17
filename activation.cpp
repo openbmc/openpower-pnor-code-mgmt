@@ -202,6 +202,15 @@ auto Activation::requestedActivation(RequestedActivations value) ->
 uint8_t RedundancyPriority::priority(uint8_t value)
 {
     parent.parent.freePriority(value);
+
+    if(parent.parent.isLowestPriority(value))
+    {
+        // Need to update the symlinks to point to Software Version
+        // with lowest priority.
+        parent.Activation::activation(
+                softwareServer::Activation::Activations::Activating);
+    }
+
     return softwareServer::RedundancyPriority::priority(value);
 }
 
