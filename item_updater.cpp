@@ -128,7 +128,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
 
 void ItemUpdater::processPNORImage()
 {
-
+    // Get the current PNOR version
     fs::path pnorTOC(PNOR_RO_ACTIVE_PATH);
     pnorTOC /= PNOR_TOC_FILE;
     std::ifstream efile(pnorTOC.c_str());
@@ -137,32 +137,76 @@ void ItemUpdater::processPNORImage()
         log<level::INFO>("Error PNOR current version is empty");
         return;
     }
-    auto keyValues = Version::getValue(pnorTOC.string(),
-        std::map<std::string, std::string> {{"version", ""},
-        {"extended_version", ""}});
-    std::string version = keyValues.at("version");
-    std::string extendedVersion = keyValues.at("extended_version");
-    auto id = Version::getId(version);
-    auto purpose = server::Version::VersionPurpose::Host;
-    auto path =  std::string{SOFTWARE_OBJPATH} + '/' + id;
-    auto activationState = server::Activation::Activations::Active;
-    activations.insert(std::make_pair(
-                           id,
-                           std::make_unique<Activation>(
-                               bus,
-                               path,
-                               *this,
-                               id,
-                               extendedVersion,
-                               activationState)));
-    versions.insert(std::make_pair(
-                        id,
-                        std::make_unique<Version>(
+    std::string currentVersion = (Version::getValue(pnorTOC.string(),
+                 std::map<std::string, std::string>
+                 {{"version", ""}})).begin()->second;
+
+    // Read pnor.toc from folders under /media/
+    // to get Active Software Versions.
+    for(const auto& iter : fs::directory_iterator(MEDIA_DIR))
+    {
+        auto activationState = server::Activation::Activations::Active;
+        auto file = (MEDIA_DIR + static_cast<std::string>(
+            iter.path().filename())).find(PNOR_TOC_FILE);
+        if (std::string::npos == file)
+        {
+            auto keyValues = Version::getValue(pnorTOC.string(),
+                std::map<std::string, std::string> {{"version", ""},
+                {"extended_version", ""}});
+            std::string version = keyValues.at("version");
+            if (version.empty())
+            {
+                log<level::ERR>("Failed to read version from pnorTOC\n",
+                                entry("FileName=%s", pnorTOC.string()));
+                activationState = server::Activation::Activations::Invalid;
+            }
+
+            std::string extendedVersion = keyValues.at("extended_version");
+            if (extendedVersion.empty())
+            {
+                log<level::ERR>("Failed to read extendedVersion from pnorTOC\n",
+                                entry("FileName=%s", pnorTOC.string()));
+                activationState = server::Activation::Activations::Invalid;
+            }
+
+            auto id = Version::getId(version);
+            auto purpose = server::Version::VersionPurpose::Host;
+            auto path =  std::string{SOFTWARE_OBJPATH} + '/' + id;
+
+            activations.insert(std::make_pair(
+                                   id,
+                                   std::make_unique<Activation>(
+                                       bus,
+                                       path,
+                                       *this,
+                                       id,
+                                       extendedVersion,
+                                       activationState)));
+            if (activationState == server::Activation::Activations::Active)
+            {
+                // Current PNOR needs the lowest Priority, so setting to 0.
+                auto priority = 1;
+                if (currentVersion == version)
+                {
+                    priority = 0;
+                }
+                activations.find(id)->second->redundancyPriority =
+                         std::make_unique<RedundancyPriority>(
                              bus,
                              path,
-                             version,
-                             purpose,
-                             "")));
+                             *(activations.find(id)->second),
+                             priority);
+            }
+            versions.insert(std::make_pair(
+                                id,
+                                std::make_unique<Version>(
+                                     bus,
+                                     path,
+                                     version,
+                                     purpose,
+                                     "")));
+        }
+    }
     return;
 }
 
