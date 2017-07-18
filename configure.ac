@@ -80,6 +80,8 @@ AC_DEFINE(SYSTEMD_INTERFACE, "org.freedesktop.systemd1.Manager",
 
 AC_DEFINE(PNOR_TOC_FILE, "pnor.toc",
     [The name of the PNOR table of contents file])
+AC_DEFINE(MEDIA_DIR, "/media/",
+    [The base dir where all PNOR RO AND RW partitions are mounted])
 AC_DEFINE(PNOR_RO_PREFIX, "/media/pnor-ro-",
     [The prefix path for the versioned read-only pnor partitions])
 AC_DEFINE(PNOR_RW_PREFIX, "/media/pnor-rw-",
