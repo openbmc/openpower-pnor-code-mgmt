@@ -245,6 +245,11 @@ class Activation : public ActivationInherit
          **/
         void subscribeToSystemdSignals();
 
+        /** @brief Creates systemd mount files that will be required to
+         *         mount the RO and RW ubi volumes
+         */
+        void createMountFiles();
+
         /** @brief Persistent sdbusplus DBus bus connection */
         sdbusplus::bus::bus& bus;
 

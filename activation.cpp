@@ -2,6 +2,8 @@
 #include "activation.hpp"
 #include "config.h"
 #include "item_updater.hpp"
+#include <string>
+#include <fstream>
 
 namespace openpower
 {
@@ -25,6 +27,84 @@ void Activation::subscribeToSystemdSignals()
     this->bus.call_noreply(method);
 
     return;
+}
+
+void Activation::createMountFiles()
+{
+    const auto mountDir("/lib/systemd/system/");
+    auto requiredService = "Requires=obmc-flash-bios-ubiattach.service\n";
+    auto wantedService = "After=obmc-flash-bios-ubiattach.service\n";
+    auto wantedBy = "[Install]\nWantedBy=multi-user.target\n";
+
+    // Create systemd mount file for RO parition
+    auto mountROFile = std::string(mountDir) + "media-pnor\\x2dro\\x2d" +
+         versionId + ".mount";
+    if (!fs::exists(mountROFile))
+    {
+        std::ofstream mountRO;
+        mountRO.open(mountROFile, std::ofstream::app);
+        mountRO << "[Unit]\nDescription=Systemd Mount RO Partition\n";
+        mountRO << (std::string(requiredService) + std::string(wantedService));
+        mountRO << "[Mount]\nType=squashfs\nOptions=ro\n";
+        mountRO << "What=/dev/ubiblock7_1\n";
+        mountRO << "Where=/media/pnor-ro-" + versionId + "\n";
+        mountRO << wantedBy;
+        mountRO.close();
+
+        auto method = bus.new_method_call(
+                SYSTEMD_BUSNAME,
+                SYSTEMD_PATH,
+                SYSTEMD_INTERFACE,
+                "EnableUnitFiles");
+        method.append(std::vector<std::string> {mountROFile}, false, true);
+        bus.call_noreply(method);
+    }
+
+    // Create systemd mount file for RW partition
+    auto mountRWFile = std::string(mountDir) + "media-pnor\\x2drw\\x2d" +
+         versionId + ".mount";
+    if (!fs::exists(mountRWFile))
+    {
+        std::ofstream mountRW;
+        mountRW.open(mountRWFile, std::ofstream::app);
+        mountRW << "[Unit]\nDescription=Systemd Mount RW Partition\n";
+        mountRW << (std::string(requiredService) + std::string(wantedService));
+        mountRW << "[Mount]\nType=ubifs\n";
+        mountRW << "What=ubi7:pnor-rw-" + versionId + "\n";
+        mountRW << "Where=/media/pnor-rw-" + versionId + "\n";
+        mountRW << wantedBy;
+        mountRW.close();
+
+        auto method = bus.new_method_call(
+                SYSTEMD_BUSNAME,
+                SYSTEMD_PATH,
+                SYSTEMD_INTERFACE,
+                "EnableUnitFiles");
+        method.append(std::vector<std::string> {mountRWFile}, false, true);
+        bus.call_noreply(method);
+    }
+
+    auto mountPRSVFile = std::string(mountDir) + "media-pnor\\x2dprsv.mount";
+    if (!fs::exists(mountPRSVFile))
+    {
+        std::ofstream mountPRSV;
+        mountPRSV.open(mountPRSVFile, std::ofstream::app);
+        mountPRSV << "[Unit]\nDescription=Systemd Mount PRSV Partition\n";
+        mountPRSV << std::string(requiredService)+std::string(wantedService);
+        mountPRSV << "[Mount]\nType=ubifs\n";
+        mountPRSV << "What=ubi7:pnor-prsv\n";
+        mountPRSV << "Where=/media/pnor-prsv\n";
+        mountPRSV << wantedBy;
+        mountPRSV.close();
+
+        auto method = bus.new_method_call(
+                SYSTEMD_BUSNAME,
+                SYSTEMD_PATH,
+                SYSTEMD_INTERFACE,
+                "EnableUnitFiles");
+        method.append(std::vector<std::string> {mountPRSVFile}, false, true);
+        bus.call_noreply(method);
+    }
 }
 
 auto Activation::activation(Activations value) ->
@@ -132,6 +212,9 @@ auto Activation::activation(Activations value) ->
                     fs::create_directory_symlink(PNOR_PRSV,
                             PNOR_PRSV_ACTIVE_PATH);
                 }
+
+                // Create a UBI Mount file
+                Activation::createMountFiles();
 
                 // Set Redundancy Priority before setting to Active
                 if (!redundancyPriority)
