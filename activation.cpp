@@ -149,6 +149,11 @@ auto Activation::activation(Activations value) ->
                 activationBlocksTransition.reset(nullptr);
                 activationProgress.reset(nullptr);
 
+                squashfsLoaded = false;
+                rwVolumesCreated = false;
+
+                //TODO: openbmc/openbmc#1843: Unsubscribe from systemd signals.
+
                 return softwareServer::Activation::activation(
                         softwareServer::Activation::Activations::Active);
             }
