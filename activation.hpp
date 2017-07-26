@@ -250,6 +250,15 @@ class Activation : public ActivationInherit
          **/
         void subscribeToSystemdSignals();
 
+        /**
+         * @brief unsubscribe from the systemd signals
+         *
+         * Once the activation process has completed successfully, we can
+         * safely unsubscribe from systemd signals.
+         *
+         **/
+        void unsubscribeFromSystemdSignals();
+
         /** @brief Persistent sdbusplus DBus bus connection */
         sdbusplus::bus::bus& bus;
 
@@ -282,6 +291,7 @@ class Activation : public ActivationInherit
          * part of the activation process. **/
         bool rwVolumesCreated = false;
 
+<<<<<<< HEAD
         /** @brief activation status property get function
          *
          * @returns Activations - The activation value
@@ -294,6 +304,12 @@ class Activation : public ActivationInherit
          * */
         void delete_() override;
 
+    private:
+        /** @brief Create symlinks for the current Software Version */
+        void startActivation();
+
+        /** @brief Create symlinks for the current Software Version */
+        void finishActivation();
 };
 
 } // namespace updater
