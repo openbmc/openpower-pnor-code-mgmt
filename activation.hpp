@@ -250,6 +250,15 @@ class Activation : public ActivationInherit
          **/
         void subscribeToSystemdSignals();
 
+        /**
+         * @brief unsubscribe from the systemd signals
+         *
+         * Once the activation process has completed successfully, we can
+         * safely unsubscribe from systemd signals.
+         *
+         **/
+        void unsubscribeFromSystemdSignals();
+
         /** @brief Persistent sdbusplus DBus bus connection */
         sdbusplus::bus::bus& bus;
 
@@ -294,6 +303,12 @@ class Activation : public ActivationInherit
          * */
         void delete_() override;
 
+    private:
+        /** @brief Member function for clarity & brevity at activation start */
+        void startActivation();
+
+        /** @brief Member function for clarity & brevity at activation end */
+        void finishActivation();
 };
 
 } // namespace updater

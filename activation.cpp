@@ -28,6 +28,17 @@ void Activation::subscribeToSystemdSignals()
     return;
 }
 
+void Activation::unsubscribeFromSystemdSignals()
+{
+    auto method = this->bus.new_method_call(SYSTEMD_SERVICE,
+                                            SYSTEMD_OBJ_PATH,
+                                            SYSTEMD_INTERFACE,
+                                            "Unsubscribe");
+    this->bus.call_noreply(method);
+
+    return;
+}
+
 void Activation::createSymlinks()
 {
     if (!fs::is_directory(PNOR_ACTIVE_PATH))
@@ -59,6 +70,72 @@ void Activation::createSymlinks()
     }
 }
 
+void Activation::startActivation()
+{
+    // Since the squashfs image has not yet been loaded to pnor and the
+    // RW volumes have not yet been created, we need to start the
+    // service files for each of those actions.
+
+    if (!activationProgress)
+    {
+        activationProgress = std::make_unique<ActivationProgress>(
+                bus, path);
+    }
+
+    if (!activationBlocksTransition)
+    {
+        activationBlocksTransition =
+                std::make_unique<ActivationBlocksTransition>(bus, path);
+    }
+
+    constexpr auto squashfsMountService =
+            "obmc-flash-bios-squashfsmount@";
+    auto squashfsMountServiceFile = std::string(squashfsMountService) +
+            versionId + ".service";
+    auto method = bus.new_method_call(
+            SYSTEMD_BUSNAME,
+            SYSTEMD_PATH,
+            SYSTEMD_INTERFACE,
+            "StartUnit");
+    method.append(squashfsMountServiceFile, "replace");
+    bus.call_noreply(method);
+
+    constexpr auto ubimountService = "obmc-flash-bios-ubimount@";
+    auto ubimountServiceFile = std::string(ubimountService) +
+           versionId + ".service";
+    method = bus.new_method_call(
+            SYSTEMD_BUSNAME,
+            SYSTEMD_PATH,
+            SYSTEMD_INTERFACE,
+            "StartUnit");
+    method.append(ubimountServiceFile, "replace");
+    bus.call_noreply(method);
+
+    activationProgress->progress(10);
+}
+
+void Activation::finishActivation()
+{
+    activationProgress->progress(90);
+    createSymlinks();
+
+    // Set Redundancy Priority before setting to Active
+    if (!redundancyPriority)
+    {
+        redundancyPriority = std::make_unique<RedundancyPriority>(
+                bus, path, *this, 0);
+    }
+
+    activationProgress->progress(100);
+
+    activationBlocksTransition.reset(nullptr);
+    activationProgress.reset(nullptr);
+
+    squashfsLoaded = false;
+    rwVolumesCreated = false;
+    Activation::unsubscribeFromSystemdSignals();
+}
+
 auto Activation::activation(Activations value) ->
         Activations
 {
@@ -74,91 +151,21 @@ auto Activation::activation(Activations value) ->
 
         if (squashfsLoaded == false && rwVolumesCreated == false)
         {
-            // If the squashfs image has not yet been loaded to pnor and the
-            // RW volumes have not yet been created, we need to start the
-            // service files for each of those actions.
-
-            if (!activationProgress)
-            {
-                activationProgress = std::make_unique<ActivationProgress>(bus,
-                        path);
-            }
-
-            if (!activationBlocksTransition)
-            {
-                activationBlocksTransition =
-                          std::make_unique<ActivationBlocksTransition>(
-                                    bus,
-                                    path);
-            }
-
-            constexpr auto squashfsMountService =
-                    "obmc-flash-bios-squashfsmount@";
-            auto squashfsMountServiceFile = std::string(squashfsMountService) +
-                    versionId + ".service";
-            auto method = bus.new_method_call(
-                    SYSTEMD_BUSNAME,
-                    SYSTEMD_PATH,
-                    SYSTEMD_INTERFACE,
-                    "StartUnit");
-            method.append(squashfsMountServiceFile, "replace");
-            bus.call_noreply(method);
-
-            constexpr auto ubimountService = "obmc-flash-bios-ubimount@";
-            auto ubimountServiceFile = std::string(ubimountService) +
-                   versionId +
-                   ".service";
-            method = bus.new_method_call(
-                    SYSTEMD_BUSNAME,
-                    SYSTEMD_PATH,
-                    SYSTEMD_INTERFACE,
-                    "StartUnit");
-            method.append(ubimountServiceFile, "replace");
-            bus.call_noreply(method);
-
-            activationProgress->progress(10);
-
+            Activation::startActivation();
             return softwareServer::Activation::activation(value);
         }
         else if (squashfsLoaded == true && rwVolumesCreated == true)
         {
             // Only when the squashfs image is finished loading AND the RW
-            // volumes have been created do we proceed with activation.
+            // volumes have been created do we proceed with activation. To
+            // verify that this happened, we check for the mount dirs PNOR_PRSV
+            // and PNOR_RW_PREFIX_<versionid>, as well as the image dir R0.
 
-            // The ubimount service files attemps to create the RW and Preserved
-            // UBI volumes. If the service fails, the mount dirs PNOR_PRSV
-            // and PNOR_RW_PREFIX_<versionid> won't be present. Check for the
-            // existence of those directories to validate the service file was
-            // successful, also for the existence of the RO directory where the
-            // image is supposed to reside.
             if ((fs::is_directory(PNOR_PRSV)) &&
                 (fs::is_directory(PNOR_RW_PREFIX + versionId)) &&
                 (fs::is_directory(PNOR_RO_PREFIX + versionId)))
             {
-                activationProgress->progress(90);
-                createSymlinks();
-
-                // Set Redundancy Priority before setting to Active
-                if (!redundancyPriority)
-                {
-                    redundancyPriority =
-                              std::make_unique<RedundancyPriority>(
-                                        bus,
-                                        path,
-                                        *this,
-                                        0);
-                }
-
-                activationProgress->progress(100);
-
-                activationBlocksTransition.reset(nullptr);
-                activationProgress.reset(nullptr);
-
-                squashfsLoaded = false;
-                rwVolumesCreated = false;
-
-                //TODO: openbmc/openbmc#1843: Unsubscribe from systemd signals.
-
+                Activation::finishActivation();
                 return softwareServer::Activation::activation(
                         softwareServer::Activation::Activations::Active);
             }
@@ -170,20 +177,14 @@ auto Activation::activation(Activations value) ->
                         softwareServer::Activation::Activations::Failed);
             }
         }
-        else
-        {
-            // If either the squashfs image has not yet been loaded or the RW
-            // volumes have not yet been created, the activation process is
-            // ongoing, so we return "Activating" status.
-            return softwareServer::Activation::activation(value);
-        }
     }
     else
     {
         activationBlocksTransition.reset(nullptr);
         activationProgress.reset(nullptr);
-        return softwareServer::Activation::activation(value);
     }
+
+    return softwareServer::Activation::activation(value);
 }
 
 auto Activation::requestedActivation(RequestedActivations value) ->
