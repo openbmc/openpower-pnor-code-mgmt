@@ -7,6 +7,7 @@
 #include "config.h"
 #include "item_updater.hpp"
 #include "activation.hpp"
+#include "serialize.hpp"
 
 namespace openpower
 {
@@ -198,21 +199,23 @@ void ItemUpdater::processPNORImage()
             // If Active, create RedundancyPriority instance for this version.
             if (activationState == server::Activation::Activations::Active)
             {
-                // Current PNOR needs the lowest Priority, so setting to 0.
-                // TODO openbmc/openbmc#2040 Need to store Priority in the
-                // RW partition to be able to restore the priorities that
-                // were set before the BMC reboot.
-                auto priority = 1;
-                if (currentVersion == version)
+                if(fs::is_regular_file(PERSIST_DIR + id))
                 {
-                    priority = 0;
+                    uint8_t priority;
+                    restoreFromFile(id, &priority);
+                    activations.find(id)->second->redundancyPriority =
+                             std::make_unique<RedundancyPriority>(
+                                 bus,
+                                 path,
+                                 *(activations.find(id)->second),
+                                 priority);
                 }
-                activations.find(id)->second->redundancyPriority =
-                         std::make_unique<RedundancyPriority>(
-                             bus,
-                             path,
-                             *(activations.find(id)->second),
-                             priority);
+                else
+                {
+                    activations.find(id)->second->activation(
+                            server::Activation::Activations::Invalid);
+                }
+
             }
 
             // Create Version instance for this version.
@@ -293,6 +296,7 @@ void ItemUpdater::reset()
     for(const auto& it : activations)
     {
         removeReadWritePartition(it.first);
+        removeFile(it.first);
     }
     removePreservedPartition();
     return;
@@ -355,6 +359,7 @@ void ItemUpdater::erase(std::string entryId)
         return;
     }
     activations.erase(entryId);
+    removeFile(entryId);
 }
 
 } // namespace updater
