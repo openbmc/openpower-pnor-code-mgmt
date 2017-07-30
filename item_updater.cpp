@@ -7,6 +7,7 @@
 #include "config.h"
 #include "item_updater.hpp"
 #include "activation.hpp"
+#include "serialize.hpp"
 
 namespace openpower
 {
@@ -129,16 +130,6 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
 
 void ItemUpdater::processPNORImage()
 {
-    // Get the current PNOR version
-    auto pnorTOC = fs::path(PNOR_RO_ACTIVE_PATH) / PNOR_TOC_FILE;
-    if (!fs::is_regular_file(pnorTOC))
-    {
-        log<level::INFO>("Error PNOR current version is empty");
-        return;
-    }
-    std::string currentVersion =
-            Version::getValue(pnorTOC, {{ "version", "" }}).begin()->second;
-
     // Read pnor.toc from folders under /media/
     // to get Active Software Versions.
     for(const auto& iter : fs::directory_iterator(MEDIA_DIR))
@@ -198,21 +189,23 @@ void ItemUpdater::processPNORImage()
             // If Active, create RedundancyPriority instance for this version.
             if (activationState == server::Activation::Activations::Active)
             {
-                // Current PNOR needs the lowest Priority, so setting to 0.
-                // TODO openbmc/openbmc#2040 Need to store Priority in the
-                // RW partition to be able to restore the priorities that
-                // were set before the BMC reboot.
-                auto priority = 1;
-                if (currentVersion == version)
+                if(fs::is_regular_file(PERSIST_DIR + id))
                 {
-                    priority = 0;
+                    uint8_t priority;
+                    restoreFromFile(id, &priority);
+                    activations.find(id)->second->redundancyPriority =
+                             std::make_unique<RedundancyPriority>(
+                                 bus,
+                                 path,
+                                 *(activations.find(id)->second),
+                                 priority);
                 }
-                activations.find(id)->second->redundancyPriority =
-                         std::make_unique<RedundancyPriority>(
-                             bus,
-                             path,
-                             *(activations.find(id)->second),
-                             priority);
+                else
+                {
+                    activations.find(id)->second->activation(
+                            server::Activation::Activations::Invalid);
+                }
+
             }
 
             // Create Version instance for this version.
@@ -293,6 +286,7 @@ void ItemUpdater::reset()
     for(const auto& it : activations)
     {
         removeReadWritePartition(it.first);
+        removeFile(it.first);
     }
     removePreservedPartition();
     return;
@@ -355,6 +349,7 @@ void ItemUpdater::erase(std::string entryId)
         return;
     }
     activations.erase(entryId);
+    removeFile(entryId);
 }
 
 } // namespace updater
