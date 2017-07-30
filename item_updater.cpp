@@ -293,13 +293,22 @@ void ItemUpdater::removePreservedPartition()
 
 void ItemUpdater::reset()
 {
+    std::vector<std::string> entryIdCache;
+
     for(const auto& it : activations)
     {
-        removeReadWritePartition(it.first);
-        removeFile(it.first);
+        entryIdCache.push_back(it.first);
     }
+    for(const auto& entryId : entryIdCache)
+    {
+        removeReadWritePartition(entryId);
+        removeReadOnlyPartition(entryId);
+        versions.erase(entryId);
+        activations.erase(entryId);
+        removeFile(entryId);
+    }
+
     removePreservedPartition();
-    return;
 }
 
 void ItemUpdater::freePriority(uint8_t value)
