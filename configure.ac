@@ -82,6 +82,8 @@ AC_DEFINE(PNOR_TOC_FILE, "pnor.toc",
     [The name of the PNOR table of contents file])
 AC_DEFINE(MEDIA_DIR, "/media/",
     [The base dir where all PNOR RO AND RW partitions are mounted])
+AC_DEFINE(PERSIST_DIR, "/var/lib/obmc/openpower-pnor-code-mgmt/",
+    [The dir where activation data is stored in files])
 AC_DEFINE(PNOR_RO_PREFIX, "/media/pnor-ro-",
     [The prefix path for the versioned read-only pnor partitions])
 AC_DEFINE(PNOR_RW_PREFIX, "/media/pnor-rw-",
@@ -99,4 +101,3 @@ AC_DEFINE(PNOR_PRSV_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/prsv",
 
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
-
