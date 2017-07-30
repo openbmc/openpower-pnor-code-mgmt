@@ -7,6 +7,7 @@
 #include "config.h"
 #include "item_updater.hpp"
 #include "activation.hpp"
+#include "serialize.hpp"
 
 namespace openpower
 {
@@ -198,15 +199,16 @@ void ItemUpdater::processPNORImage()
             // If Active, create RedundancyPriority instance for this version.
             if (activationState == server::Activation::Activations::Active)
             {
-                // Current PNOR needs the lowest Priority, so setting to 0.
-                // TODO openbmc/openbmc#2040 Need to store Priority in the
-                // RW partition to be able to restore the priorities that
-                // were set before the BMC reboot.
-                auto priority = 1;
+                uint8_t priority = 1;
+                if(fs::is_regular_file(SERIAL_DIR + id))
+                {
+                    restoreFromFile(id, &priority);
+                }
                 if (currentVersion == version)
                 {
                     priority = 0;
                 }
+
                 activations.find(id)->second->redundancyPriority =
                          std::make_unique<RedundancyPriority>(
                              bus,
@@ -293,6 +295,7 @@ void ItemUpdater::reset()
     for(const auto& it : activations)
     {
         removeReadWritePartition(it.first);
+        removeFile(it.first);
     }
     removePreservedPartition();
     return;
@@ -308,6 +311,7 @@ void ItemUpdater::freePriority(uint8_t value)
             if (intf.second->redundancyPriority.get()->priority() == value)
             {
                 intf.second->redundancyPriority.get()->priority(value+1);
+                storeToFile(intf.first, value+1);
             }
         }
     }
@@ -355,6 +359,7 @@ void ItemUpdater::erase(std::string entryId)
         return;
     }
     activations.erase(entryId);
+    removeFile(entryId);
 }
 
 } // namespace updater

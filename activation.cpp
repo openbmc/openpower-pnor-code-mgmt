@@ -2,6 +2,7 @@
 #include "activation.hpp"
 #include "config.h"
 #include "item_updater.hpp"
+#include "serialize.hpp"
 
 namespace openpower
 {
@@ -65,6 +66,7 @@ auto Activation::activation(Activations value) ->
     if (value != softwareServer::Activation::Activations::Active)
     {
         redundancyPriority.reset(nullptr);
+        removeFile(versionId);
     }
 
     if (value == softwareServer::Activation::Activations::Activating)
@@ -146,6 +148,7 @@ auto Activation::activation(Activations value) ->
                                         path,
                                         *this,
                                         0);
+                    storeToFile(versionId, 0);
                 }
 
                 activationProgress->progress(100);
