@@ -2,6 +2,7 @@
 #include "activation.hpp"
 #include "config.h"
 #include "item_updater.hpp"
+#include "serialize.hpp"
 
 namespace openpower
 {
@@ -65,6 +66,7 @@ auto Activation::activation(Activations value) ->
     if (value != softwareServer::Activation::Activations::Active)
     {
         redundancyPriority.reset(nullptr);
+        removeFile(versionId);
     }
 
     if (value == softwareServer::Activation::Activations::Activating)
@@ -219,6 +221,7 @@ uint8_t RedundancyPriority::priority(uint8_t value)
         parent.createSymlinks();
     }
 
+    storeToFile(parent.versionId, value);
     return softwareServer::RedundancyPriority::priority(value);
 }
 

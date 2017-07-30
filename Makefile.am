@@ -8,6 +8,7 @@ sbin_PROGRAMS = \
 openpower_update_manager_SOURCES = \
 	activation.cpp \
 	version.cpp \
+	serialize.cpp \
 	item_updater.cpp \
 	item_updater_main.cpp
 
@@ -27,4 +28,3 @@ openpower_update_manager_CXXFLAGS = $(generic_cxxflags)
 openpower_update_manager_LDFLAGS = $(generic_ldflags)
 
 SUBDIRS = test
-
