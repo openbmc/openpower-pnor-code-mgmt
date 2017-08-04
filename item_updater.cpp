@@ -189,23 +189,18 @@ void ItemUpdater::processPNORImage()
             // If Active, create RedundancyPriority instance for this version.
             if (activationState == server::Activation::Activations::Active)
             {
-                if(fs::is_regular_file(PERSIST_DIR + id))
+                uint8_t priority = 255;
+                if (!restoreFromFile(id, priority))
                 {
-                    uint8_t priority;
-                    restoreFromFile(id, &priority);
-                    activations.find(id)->second->redundancyPriority =
-                             std::make_unique<RedundancyPriority>(
-                                 bus,
-                                 path,
-                                 *(activations.find(id)->second),
-                                 priority);
+                    log<level::ERR>("Unable to restore priority from file.",
+                            entry("VERSIONID=%s", id));
                 }
-                else
-                {
-                    activations.find(id)->second->activation(
-                            server::Activation::Activations::Invalid);
-                }
-
+                activations.find(id)->second->redundancyPriority =
+                         std::make_unique<RedundancyPriority>(
+                             bus,
+                             path,
+                             *(activations.find(id)->second),
+                             priority);
             }
 
             // Create Version instance for this version.
