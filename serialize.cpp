@@ -26,15 +26,25 @@ void storeToFile(std::string versionId, uint8_t priority)
     oarchive(cereal::make_nvp("priority", priority));
 }
 
-void restoreFromFile(std::string versionId, uint8_t *priority)
+int restoreFromFile(std::string versionId, uint8_t *priority)
 {
     std::string path = PERSIST_DIR + versionId;
     if (fs::exists(path))
     {
         std::ifstream is(path.c_str(), std::ios::in);
-        cereal::JSONInputArchive iarchive(is);
-        iarchive(cereal::make_nvp("priority", *priority));
+        try
+        {
+            cereal::JSONInputArchive iarchive(is);
+            iarchive(cereal::make_nvp("priority", *priority));
+        }
+        catch(cereal::RapidJSONException& e)
+        {
+            fs::remove(path);
+            return 1;
+        }
+        return 0;
     }
+    return 1;
 }
 
 void removeFile(std::string versionId)

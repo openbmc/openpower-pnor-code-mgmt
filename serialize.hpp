@@ -22,7 +22,7 @@ void storeToFile(std::string versionId, uint8_t priority);
  *  @param[in] versionId - The version for which to retrieve information.
  *  @param[in] priority - RedundancyPriority pointer for that version.
  */
-void restoreFromFile(std::string versionId, uint8_t *priority);
+int restoreFromFile(std::string versionId, uint8_t *priority);
 
 /** @brief Removes the serial file for a given version.
  *  @param[in] versionId - The version for which to remove a file, if it exists.
