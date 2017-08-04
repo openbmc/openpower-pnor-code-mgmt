@@ -32,8 +32,14 @@ void restoreFromFile(std::string versionId, uint8_t *priority)
     if (fs::exists(path))
     {
         std::ifstream is(path.c_str(), std::ios::in);
-        cereal::JSONInputArchive iarchive(is);
-        iarchive(cereal::make_nvp("priority", *priority));
+        try{
+            cereal::JSONInputArchive iarchive(is);
+            iarchive(cereal::make_nvp("priority", *priority));
+        }
+        catch(cereal::RapidJSONException& e)
+        {
+            fs::remove(path);
+        }
     }
 }
 
