@@ -191,14 +191,23 @@ void ItemUpdater::processPNORImage()
             {
                 if(fs::is_regular_file(PERSIST_DIR + id))
                 {
-                    uint8_t priority;
+                    uint8_t priority = 255;
                     restoreFromFile(id, &priority);
-                    activations.find(id)->second->redundancyPriority =
-                             std::make_unique<RedundancyPriority>(
-                                 bus,
-                                 path,
-                                 *(activations.find(id)->second),
-                                 priority);
+
+                    if (priority != 255)
+                    {
+                        activations.find(id)->second->redundancyPriority =
+                                 std::make_unique<RedundancyPriority>(
+                                     bus,
+                                     path,
+                                     *(activations.find(id)->second),
+                                     priority);
+                    }
+                    else
+                    {
+                        activations.find(id)->second->activation(
+                                server::Activation::Activations::Invalid);
+                    }
                 }
                 else
                 {
