@@ -212,7 +212,7 @@ auto Activation::requestedActivation(RequestedActivations value) ->
 
 uint8_t RedundancyPriority::priority(uint8_t value)
 {
-    parent.parent.freePriority(value);
+    parent.parent.freePriority(value, parent.versionId);
 
     if(parent.parent.isLowestPriority(value))
     {
