@@ -297,14 +297,15 @@ void ItemUpdater::reset()
     return;
 }
 
-void ItemUpdater::freePriority(uint8_t value)
+void ItemUpdater::freePriority(uint8_t value, const std::string& versionId)
 {
     //TODO openbmc/openbmc#1896 Improve the performance of this function
     for (const auto& intf : activations)
     {
         if(intf.second->redundancyPriority)
         {
-            if (intf.second->redundancyPriority.get()->priority() == value)
+            if (intf.second->redundancyPriority.get()->priority() == value &&
+                intf.second->versionId != versionId)
             {
                 intf.second->redundancyPriority.get()->priority(value+1);
             }

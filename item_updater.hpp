@@ -46,10 +46,11 @@ class ItemUpdater : public ItemUpdaterInherit
          *  any existing priority with the same value by 1
          *
          *  @param[in] value - The priority that needs to be set free.
-         *
+         *  @param[in] versionId - The Id of the version for which we
+         *                         are trying to free up the priority.
          *  @return None
          */
-        void freePriority(uint8_t value);
+        void freePriority(uint8_t value, const std::string& versionId);
 
         /** @brief Determine is the given priority is the lowest
          *
