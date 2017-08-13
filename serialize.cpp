@@ -19,28 +19,54 @@ void storeToFile(std::string versionId, uint8_t priority)
     {
         fs::create_directory(PERSIST_DIR);
     }
-    std::string path = PERSIST_DIR + versionId;
 
-    std::ofstream os(path.c_str());
-    cereal::JSONOutputArchive oarchive(os);
-    oarchive(cereal::make_nvp("priority", priority));
+    // store one copy in /var/lib/obmc/openpower-pnor-code-mgmt/[versionId]
+    auto varPath = PERSIST_DIR + versionId;
+    std::ofstream varOutput(varPath.c_str());
+    cereal::JSONOutputArchive varArchive(varOutput);
+    varArchive(cereal::make_nvp("priority", priority));
+
+    if(fs::is_directory(PNOR_RW_PREFIX + versionId))
+    {
+        // store another copy in /media/pnor-rw-[versionId]/[versionId]
+        auto rwPath = PNOR_RW_PREFIX + versionId + "/" + versionId;
+        std::ofstream rwOutput(rwPath.c_str());
+        cereal::JSONOutputArchive rwArchive(rwOutput);
+        rwArchive(cereal::make_nvp("priority", priority));
+    }
 }
 
 bool restoreFromFile(std::string versionId, uint8_t& priority)
 {
-    std::string path = PERSIST_DIR + versionId;
-    if (fs::exists(path))
+    auto varPath = PERSIST_DIR + versionId;
+    if (fs::exists(varPath))
     {
-        std::ifstream is(path.c_str(), std::ios::in);
+        std::ifstream varInput(varPath.c_str(), std::ios::in);
         try
         {
-            cereal::JSONInputArchive iarchive(is);
-            iarchive(cereal::make_nvp("priority", priority));
+            cereal::JSONInputArchive varArchive(varInput);
+            varArchive(cereal::make_nvp("priority", priority));
+            return 0;
+        }
+        catch(cereal::RapidJSONException& e)
+        {
+            fs::remove(varPath);
+        }
+    }
+
+    auto rwPath = PNOR_RW_PREFIX + versionId + "/" + versionId;
+    if (fs::exists(rwPath))
+    {
+        std::ifstream rwInput(rwPath.c_str(), std::ios::in);
+        try
+        {
+            cereal::JSONInputArchive rwArchive(rwInput);
+            rwArchive(cereal::make_nvp("priority", priority));
             return true;
         }
         catch(cereal::RapidJSONException& e)
         {
-            fs::remove(path);
+            fs::remove(rwPath);
         }
     }
     return false;
