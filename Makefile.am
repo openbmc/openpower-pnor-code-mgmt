@@ -10,7 +10,8 @@ openpower_update_manager_SOURCES = \
 	version.cpp \
 	serialize.cpp \
 	item_updater.cpp \
-	item_updater_main.cpp
+	item_updater_main.cpp \
+	org.openbmc.Associations.cpp
 
 generic_cxxflags = \
 	$(SYSTEMD_CFLAGS) \
