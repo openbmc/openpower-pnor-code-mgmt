@@ -189,32 +189,25 @@ void ItemUpdater::processPNORImage()
             // If Active, create RedundancyPriority instance for this version.
             if (activationState == server::Activation::Activations::Active)
             {
-                if(fs::is_regular_file(PERSIST_DIR + id))
+                uint8_t priority;
+                if (restoreFromFile(id, &priority) == 0)
                 {
-                    uint8_t priority;
-                    if (restoreFromFile(id, &priority) == 0)
-                    {
-                        activations.find(id)->second->redundancyPriority =
-                                 std::make_unique<RedundancyPriority>(
-                                     bus,
-                                     path,
-                                     *(activations.find(id)->second),
-                                     priority);
-                    }
-                    else
-                    {
-                        log<level::ERR>("Unable to restore priority from file.",
-                                entry("VERSIONID=%s", id));
-                        activations.find(id)->second->activation(
-                                server::Activation::Activations::Invalid);
-                    }
+                    activations.find(id)->second->redundancyPriority =
+                             std::make_unique<RedundancyPriority>(
+                                 bus,
+                                 path,
+                                 *(activations.find(id)->second),
+                                 priority);
+                    // ensure both priority file locations are in sync
+                    storeToFile(id, priority);
                 }
                 else
                 {
+                    log<level::ERR>("Unable to restore priority from file.",
+                            entry("VERSIONID=%s", id));
                     activations.find(id)->second->activation(
                             server::Activation::Activations::Invalid);
                 }
-
             }
 
             // Create Version instance for this version.

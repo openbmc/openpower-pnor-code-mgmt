@@ -1,16 +1,11 @@
 #pragma once
 
-#include <experimental/filesystem>
-#include "config.h"
-
 namespace openpower
 {
 namespace software
 {
 namespace updater
 {
-
-namespace fs = std::experimental::filesystem;
 
 /** @brief Serialization function - stores activation information to file
  *  @param[in] versionId - The version for which to store information.
