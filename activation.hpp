@@ -7,6 +7,7 @@
 #include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
 #include "xyz/openbmc_project/Software/ActivationProgress/server.hpp"
 #include "xyz/openbmc_project/Object/Delete/server.hpp"
+#include "org/openbmc/Associations/server.hpp"
 
 namespace openpower
 {
@@ -18,7 +19,8 @@ namespace updater
 using ActivationInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Object::server::Delete,
     sdbusplus::xyz::openbmc_project::Software::server::ExtendedVersion,
-    sdbusplus::xyz::openbmc_project::Software::server::Activation>;
+    sdbusplus::xyz::openbmc_project::Software::server::Activation,
+    sdbusplus::org::openbmc::server::Associations>;
 using ActivationBlocksTransitionInherit = sdbusplus::server::object::object<
  sdbusplus::xyz::openbmc_project::Software::server::ActivationBlocksTransition>;
 using RedundancyPriorityInherit = sdbusplus::server::object::object<
