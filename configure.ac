@@ -20,6 +20,8 @@ PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus],,
 PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging],,
     [AC_MSG_ERROR([The openbmc/phosphor-logging package is required])])
 
+AC_PATH_PROG([SDBUSPLUSPLUS], [sdbus++])
+
 # Checks for library functions
 LT_INIT # Required for systemd linking
 
