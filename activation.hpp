@@ -228,9 +228,6 @@ class Activation : public ActivationInherit
         RequestedActivations requestedActivation(RequestedActivations value)
                 override;
 
-        /** @brief Create symlinks for the current Software Version */
-        void createSymlinks();
-
         /** @brief Check if systemd state change is relevant to this object
          *
          * Instance specific interface to handle the detected systemd state
