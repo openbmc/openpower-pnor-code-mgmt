@@ -325,6 +325,9 @@ bool ItemUpdater::isLowestPriority(uint8_t value)
 
 void ItemUpdater::erase(std::string entryId)
 {
+    // Remove priority persistence file
+    removeFile(entryId);
+
     // Removing partitions
     removeReadWritePartition(entryId);
     removeReadOnlyPartition(entryId);
@@ -350,7 +353,6 @@ void ItemUpdater::erase(std::string entryId)
         return;
     }
     activations.erase(entryId);
-    removeFile(entryId);
 }
 
 } // namespace updater
