@@ -147,6 +147,7 @@ auto Activation::activation(Activations value) ->
 
     if (value == softwareServer::Activation::Activations::Activating)
     {
+        parent.freeSpace();
         softwareServer::Activation::activation(value);
 
         if (squashfsLoaded == false && rwVolumesCreated == false)

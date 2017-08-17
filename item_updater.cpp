@@ -358,6 +358,32 @@ void ItemUpdater::erase(std::string entryId)
     removeFile(entryId);
 }
 
+// TODO: openbmc/openbmc#1402 Monitor flash usage
+void ItemUpdater::freeSpace()
+{
+    int count=0;
+    uint8_t highestPriority=0;
+    std::string highestPriorityVersion;
+    for (const auto& iter : activations)
+    {
+        if (iter.second.get()->activation() == server::Activation::Activations::Active)
+        {
+            count+=1;
+            if (iter.second->redundancyPriority.get()->priority() > highestPriority)
+            {
+                highestPriority = iter.second->redundancyPriority.get()->priority();
+                highestPriorityVersion = iter.first;
+            }
+        }
+    }
+    // Remove the pnor version with highest priority since the PNOR image
+    // can't hold more than 2 versions.
+    if (count >= 2)
+    {
+        erase(highestPriorityVersion);
+    }
+}
+
 } // namespace updater
 } // namespace software
 } // namespace openpower

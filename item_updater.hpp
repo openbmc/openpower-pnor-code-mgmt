@@ -74,6 +74,11 @@ class ItemUpdater : public ItemUpdaterInherit
          */
         void erase(std::string entryId);
 
+        /** @brief Deletes the active pnor version with highest priority
+                   if the total number of volume exceeds the threshold.
+         */
+        void freeSpace();
+
     private:
         /** @brief Callback function for Software.Version match.
          *  @details Creates an Activation dbus object.
