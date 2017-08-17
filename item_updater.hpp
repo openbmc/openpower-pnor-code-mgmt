@@ -74,6 +74,8 @@ class ItemUpdater : public ItemUpdaterInherit
          */
         void erase(std::string entryId);
 
+        void freeSpace();
+
     private:
         /** @brief Callback function for Software.Version match.
          *  @details Creates an Activation dbus object.
