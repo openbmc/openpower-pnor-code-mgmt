@@ -99,5 +99,9 @@ AC_DEFINE(PNOR_RW_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/rw",
 AC_DEFINE(PNOR_PRSV_ACTIVE_PATH, "/var/lib/phosphor-software-manager/pnor/prsv",
     [Path to the active preserved pnor partitions])
 
+AC_ARG_VAR(ACTIVE_PNOR_MAX_ALLOWED, [The maximum allowed active pnor versions])
+AS_IF([test "x$ACTIVE_PNOR_MAX_ALLOWED" == "x"], [ACTIVE_PNOR_MAX_ALLOWED=2])
+AC_DEFINE_UNQUOTED([ACTIVE_PNOR_MAX_ALLOWED], [$ACTIVE_PNOR_MAX_ALLOWED], [The maximum allowed active pnor versions])
+
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT

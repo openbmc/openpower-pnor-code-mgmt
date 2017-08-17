@@ -211,6 +211,12 @@ class Activation : public ActivationInherit
             emit_object_added();
         }
 
+        /** @brief Activation property get function
+         *
+         *  @returns One of Activation::Activations
+         */
+        using ActivationInherit::activation;
+
         /** @brief Overloaded Activation property setter function
          *
          *  @param[in] value - One of Activation::Activations
