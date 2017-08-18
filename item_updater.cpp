@@ -106,6 +106,15 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
         std::string extendedVersion = (Version::getValue(manifestPath.string(),
                  std::map<std::string, std::string>
                  {{"extended_version", ""}})).begin()->second;
+
+        /** @brief This activation's associations */
+        AssociationList associations = {};
+
+        // Create an association to the host inventory item
+        associations.emplace_back(std::make_tuple(ACTIVATION_FWD_ASSOCIATION,
+                                            ACTIVATION_REV_ASSOCIATION,
+                                            HOST_INVENTORY_PATH));
+
         activations.insert(std::make_pair(
                 versionId,
                 std::make_unique<Activation>(
@@ -114,7 +123,8 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                         *this,
                         versionId,
                         extendedVersion,
-                        activationState)));
+                        activationState,
+                        associations)));
         versions.insert(std::make_pair(
                             versionId,
                             std::make_unique<Version>(
@@ -180,6 +190,14 @@ void ItemUpdater::processPNORImage()
             auto purpose = server::Version::VersionPurpose::Host;
             auto path = fs::path(SOFTWARE_OBJPATH) / id;
 
+            /** @brief This activation's associations */
+            AssociationList associations = {};
+
+            // Create an association to the host inventory item
+            associations.emplace_back(std::make_tuple(ACTIVATION_FWD_ASSOCIATION,
+                                                ACTIVATION_REV_ASSOCIATION,
+                                                HOST_INVENTORY_PATH));
+
             // Create Activation instance for this version.
             activations.insert(std::make_pair(
                                    id,
@@ -189,7 +207,8 @@ void ItemUpdater::processPNORImage()
                                        *this,
                                        id,
                                        extendedVersion,
-                                       activationState)));
+                                       activationState,
+                                       associations)));
 
             // If Active, create RedundancyPriority instance for this version.
             if (activationState == server::Activation::Activations::Active)
