@@ -33,7 +33,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
 
     sdbusplus::message::object_path objPath;
     std::map<std::string,
-             std::map<std::string, msg::variant<std::string>>> interfaces;
+        std::map<std::string, msg::variant<std::string>>> interfaces;
     m.read(objPath, interfaces);
 
     std::string path(std::move(objPath));
@@ -51,7 +51,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                 {
                     // Only process the Host and System images
                     auto value = SVersion::convertVersionPurposeFromString(
-                            variant_ns::get<std::string>(property.second));
+                                     variant_ns::get<std::string>(property.second));
 
                     if (value == VersionPurpose::Host ||
                         value == VersionPurpose::System)
@@ -104,17 +104,17 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
         fs::path manifestPath(filePath);
         manifestPath /= MANIFEST_FILE;
         std::string extendedVersion = (Version::getValue(manifestPath.string(),
-                 std::map<std::string, std::string>
-                 {{"extended_version", ""}})).begin()->second;
+                                       std::map<std::string, std::string>
+        {{"extended_version", ""}})).begin()->second;
         activations.insert(std::make_pair(
-                versionId,
-                std::make_unique<Activation>(
-                        bus,
-                        path,
-                        *this,
-                        versionId,
-                        extendedVersion,
-                        activationState)));
+                               versionId,
+                               std::make_unique<Activation>(
+                                   bus,
+                                   path,
+                                   *this,
+                                   versionId,
+                                   extendedVersion,
+                                   activationState)));
         versions.insert(std::make_pair(
                             versionId,
                             std::make_unique<Version>(
@@ -128,7 +128,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
     else
     {
         log<level::INFO>("Software Object with the same version already exists",
-                        entry("VERSION_ID=%s", versionId));
+                         entry("VERSION_ID=%s", versionId));
     }
     return;
 }
@@ -137,7 +137,7 @@ void ItemUpdater::processPNORImage()
 {
     // Read pnor.toc from folders under /media/
     // to get Active Software Versions.
-    for(const auto& iter : fs::directory_iterator(MEDIA_DIR))
+    for (const auto& iter : fs::directory_iterator(MEDIA_DIR))
     {
         auto activationState = server::Activation::Activations::Active;
 
@@ -155,9 +155,11 @@ void ItemUpdater::processPNORImage()
                 activationState = server::Activation::Activations::Invalid;
             }
             auto keyValues =
-                    Version::getValue(pnorTOC,
-                                      {{ "version", "" },
-                                       { "extended_version", "" } });
+                Version::getValue(pnorTOC,
+            {
+                { "version", "" },
+                { "extended_version", "" }
+            });
             auto& version = keyValues.at("version");
             if (version.empty())
             {
@@ -198,26 +200,26 @@ void ItemUpdater::processPNORImage()
                 if (!restoreFromFile(id, priority))
                 {
                     log<level::ERR>("Unable to restore priority from file.",
-                            entry("VERSIONID=%s", id));
+                                    entry("VERSIONID=%s", id));
                 }
                 activations.find(id)->second->redundancyPriority =
-                         std::make_unique<RedundancyPriority>(
-                             bus,
-                             path,
-                             *(activations.find(id)->second),
-                             priority);
+                    std::make_unique<RedundancyPriority>(
+                        bus,
+                        path,
+                        *(activations.find(id)->second),
+                        priority);
             }
 
             // Create Version instance for this version.
             versions.insert(std::make_pair(
                                 id,
                                 std::make_unique<Version>(
-                                     bus,
-                                     path,
-                                     version,
-                                     purpose,
-                                     "",
-                                     *this)));
+                                    bus,
+                                    path,
+                                    version,
+                                    purpose,
+                                    "",
+                                    *this)));
         }
     }
     return;
@@ -239,42 +241,42 @@ int ItemUpdater::validateSquashFSImage(const std::string& filePath)
 
 void ItemUpdater::removeReadOnlyPartition(std::string versionId)
 {
-        auto serviceFile = "obmc-flash-bios-ubiumount-ro@" + versionId +
-                ".service";
+    auto serviceFile = "obmc-flash-bios-ubiumount-ro@" + versionId +
+                       ".service";
 
-        // Remove the read-only partitions.
-        auto method = bus.new_method_call(
-                SYSTEMD_BUSNAME,
-                SYSTEMD_PATH,
-                SYSTEMD_INTERFACE,
-                "StartUnit");
-        method.append(serviceFile, "replace");
-        bus.call_noreply(method);
+    // Remove the read-only partitions.
+    auto method = bus.new_method_call(
+                      SYSTEMD_BUSNAME,
+                      SYSTEMD_PATH,
+                      SYSTEMD_INTERFACE,
+                      "StartUnit");
+    method.append(serviceFile, "replace");
+    bus.call_noreply(method);
 }
 
 void ItemUpdater::removeReadWritePartition(std::string versionId)
 {
-        auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + versionId +
-                ".service";
+    auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + versionId +
+                       ".service";
 
-        // Remove the read-write partitions.
-        auto method = bus.new_method_call(
-                SYSTEMD_BUSNAME,
-                SYSTEMD_PATH,
-                SYSTEMD_INTERFACE,
-                "StartUnit");
-        method.append(serviceFile, "replace");
-        bus.call_noreply(method);
+    // Remove the read-write partitions.
+    auto method = bus.new_method_call(
+                      SYSTEMD_BUSNAME,
+                      SYSTEMD_PATH,
+                      SYSTEMD_INTERFACE,
+                      "StartUnit");
+    method.append(serviceFile, "replace");
+    bus.call_noreply(method);
 }
 
 void ItemUpdater::removePreservedPartition()
 {
     // Remove the preserved partition.
     auto method = bus.new_method_call(
-            SYSTEMD_BUSNAME,
-            SYSTEMD_PATH,
-            SYSTEMD_INTERFACE,
-            "StartUnit");
+                      SYSTEMD_BUSNAME,
+                      SYSTEMD_PATH,
+                      SYSTEMD_INTERFACE,
+                      "StartUnit");
     method.append("obmc-flash-bios-ubiumount-prsv.service", "replace");
     bus.call_noreply(method);
 
@@ -283,7 +285,7 @@ void ItemUpdater::removePreservedPartition()
 
 void ItemUpdater::reset()
 {
-    for(const auto& it : activations)
+    for (const auto& it : activations)
     {
         removeReadWritePartition(it.first);
         removeFile(it.first);
@@ -297,12 +299,12 @@ void ItemUpdater::freePriority(uint8_t value, const std::string& versionId)
     //TODO openbmc/openbmc#1896 Improve the performance of this function
     for (const auto& intf : activations)
     {
-        if(intf.second->redundancyPriority)
+        if (intf.second->redundancyPriority)
         {
             if (intf.second->redundancyPriority.get()->priority() == value &&
                 intf.second->versionId != versionId)
             {
-                intf.second->redundancyPriority.get()->priority(value+1);
+                intf.second->redundancyPriority.get()->priority(value + 1);
             }
         }
     }
@@ -312,7 +314,7 @@ bool ItemUpdater::isLowestPriority(uint8_t value)
 {
     for (const auto& intf : activations)
     {
-        if(intf.second->redundancyPriority)
+        if (intf.second->redundancyPriority)
         {
             if (intf.second->redundancyPriority.get()->priority() < value)
             {
@@ -334,8 +336,8 @@ void ItemUpdater::erase(std::string entryId)
     if (it == versions.end())
     {
         log<level::ERR>(("Error: Failed to find version " + entryId + \
-                        " in item updater versions map." \
-                        " Unable to remove.").c_str());
+                         " in item updater versions map." \
+                         " Unable to remove.").c_str());
         return;
     }
     versions.erase(entryId);
@@ -345,8 +347,8 @@ void ItemUpdater::erase(std::string entryId)
     if (ita == activations.end())
     {
         log<level::ERR>(("Error: Failed to find version " + entryId + \
-                        " in item updater activations map." \
-                        " Unable to remove.").c_str());
+                         " in item updater activations map." \
+                         " Unable to remove.").c_str());
         return;
     }
     activations.erase(entryId);
