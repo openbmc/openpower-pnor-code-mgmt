@@ -16,6 +16,8 @@ namespace software
 namespace updater
 {
 
+using AssociationList =
+     std::vector<std::tuple<std::string, std::string, std::string>>;
 using ActivationInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Object::server::Delete,
     sdbusplus::xyz::openbmc_project::Software::server::ExtendedVersion,
@@ -188,7 +190,8 @@ class Activation : public ActivationInherit
                    std::string& versionId,
                    std::string& extVersion,
                    sdbusplus::xyz::openbmc_project::Software::
-                   server::Activation::Activations activationStatus) :
+                   server::Activation::Activations activationStatus,
+                   AssociationList& assocs) :
                    ActivationInherit(bus, path.c_str(), true),
                    bus(bus),
                    path(path),
@@ -209,6 +212,8 @@ class Activation : public ActivationInherit
             // Set Properties.
             extendedVersion(extVersion);
             activation(activationStatus);
+            associations(std::move(assocs));
+
             // Emit deferred signal.
             emit_object_added();
         }
