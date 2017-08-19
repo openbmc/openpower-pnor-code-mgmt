@@ -77,7 +77,11 @@ std::map<std::string, std::string> Version::getValue(
     }
     catch (const std::exception& e)
     {
-        log<level::ERR>("Error in reading file");
+        if (!efile.eof())
+        {
+            log<level::ERR>("Error in reading file");
+        }
+        efile.close();
     }
 
     return keys;
