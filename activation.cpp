@@ -102,6 +102,8 @@ void Activation::finishActivation()
     squashfsLoaded = false;
     rwVolumesCreated = false;
     Activation::unsubscribeFromSystemdSignals();
+    // Create active association
+    parent.createActiveAssociation(path);
 }
 
 auto Activation::activation(Activations value) ->
@@ -232,6 +234,9 @@ void Activation::unitStateChange(sdbusplus::message::message& msg)
 
 void Activation::delete_()
 {
+    // Remove active association
+    parent.removeActiveAssociation(path);
+
     parent.erase(versionId);
 }
 
