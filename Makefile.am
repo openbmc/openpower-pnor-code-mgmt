@@ -2,9 +2,6 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 
 ACLOCAL_AMFLAGS = -Im4
 
-nodist_noinst_HEADERS = \
-	org/openbmc/Associations/server.hpp
-
 sbin_PROGRAMS = \
 	openpower-update-manager
 
@@ -19,12 +16,10 @@ nodist_openpower_update_manager_SOURCES = \
 	org/openbmc/Associations/server.cpp
 
 CLEANFILES = \
-	org/openbmc/Associations/server.cpp \
-	org/openbmc/Associations/server.hpp
+	org/openbmc/Associations/server.cpp
 
 BUILT_SOURCES = \
-	org/openbmc/Associations/server.cpp \
-	org/openbmc/Associations/server.hpp
+	org/openbmc/Associations/server.cpp
 
 generic_cxxflags = \
 	$(SYSTEMD_CFLAGS) \
@@ -41,10 +36,6 @@ generic_ldflags = \
 org/openbmc/Associations/server.cpp: org/openbmc/Associations.interface.yaml
 	@mkdir -p `dirname $@`
 	$(SDBUSPLUSPLUS) -r $(srcdir) interface server-cpp org.openbmc.Associations > $@
-
-org/openbmc/Associations/server.hpp: org/openbmc/Associations.interface.yaml
-	@mkdir -p `dirname $@`
-	$(SDBUSPLUSPLUS) -r $(srcdir) interface server-header org.openbmc.Associations > $@
 
 openpower_update_manager_CXXFLAGS = $(generic_cxxflags)
 openpower_update_manager_LDFLAGS = $(generic_ldflags)
