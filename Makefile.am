@@ -2,7 +2,7 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 
 ACLOCAL_AMFLAGS = -Im4
 
-nobase_nodist_include_HEADERS = \
+nodist_noinst_HEADERS = \
 	org/openbmc/Associations/server.hpp
 
 sbin_PROGRAMS = \
