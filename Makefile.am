@@ -2,7 +2,7 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 
 ACLOCAL_AMFLAGS = -Im4
 
-nobase_nodist_include_HEADERS = \
+nodist_noinst_HEADERS = \
 	org/openbmc/Associations/server.hpp
 
 sbin_PROGRAMS = \
@@ -13,7 +13,9 @@ openpower_update_manager_SOURCES = \
 	version.cpp \
 	serialize.cpp \
 	item_updater.cpp \
-	item_updater_main.cpp \
+	item_updater_main.cpp
+
+nodist_openpower_update_manager_SOURCES = \
 	org/openbmc/Associations/server.cpp
 
 CLEANFILES = \
