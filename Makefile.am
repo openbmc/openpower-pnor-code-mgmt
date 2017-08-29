@@ -4,6 +4,10 @@ ACLOCAL_AMFLAGS = -Im4
 
 noinst_HEADERS = \
 	org/openbmc/Associations/server.hpp
+	activation.hpp \
+	item_updater.hpp \
+	serialize.hpp \
+	version.hpp
 
 sbin_PROGRAMS = \
 	openpower-update-manager
