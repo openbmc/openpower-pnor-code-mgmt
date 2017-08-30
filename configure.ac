@@ -54,8 +54,8 @@ AC_ARG_VAR(SOFTWARE_OBJPATH, [The software manager Dbus root])
 AS_IF([test "x$SOFTWARE_OBJPATH" == "x"], [SOFTWARE_OBJPATH="/xyz/openbmc_project/software"])
 AC_DEFINE_UNQUOTED([SOFTWARE_OBJPATH], ["$SOFTWARE_OBJPATH"], [The software manager Dbus root])
 
-AC_DEFINE(ACTIVATION_FWD_ASSOCIATION, "activation", [The name of the activation's forward association.])
-AC_DEFINE(ACTIVATION_REV_ASSOCIATION, "inventory", [The name of the activation's reverse association.])
+AC_DEFINE(ACTIVATION_FWD_ASSOCIATION, "inventory", [The name of the activation's forward association.])
+AC_DEFINE(ACTIVATION_REV_ASSOCIATION, "activation", [The name of the activation's reverse association.])
 AC_DEFINE(HOST_INVENTORY_PATH, "/xyz/openbmc_project/inventory/system/chassis", [The host inventory path.])
 
 AC_DEFINE(ACTIVE_FWD_ASSOCIATION, "active", [The name of the active's forward association.])
