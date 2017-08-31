@@ -1,7 +1,9 @@
 #include <string>
 #include <experimental/filesystem>
 #include <fstream>
+#include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include "xyz/openbmc_project/Common/error.hpp"
 #include <xyz/openbmc_project/Software/Version/server.hpp>
 #include "version.hpp"
 #include "config.h"
@@ -20,9 +22,15 @@ namespace updater
 namespace server = sdbusplus::xyz::openbmc_project::Software::server;
 namespace fs = std::experimental::filesystem;
 
+using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace phosphor::logging;
 
 constexpr auto squashFSImage = "pnor.xz.squashfs";
+constexpr auto CHASSIS_STATE_PATH = "/xyz/openbmc_project/state/chassis0";
+constexpr auto CHASSIS_STATE_OBJ = "xyz.openbmc_project.State.Chassis";
+constexpr auto CHASSIS_STATE_OFF =
+                        "xyz.openbmc_project.State.Chassis.PowerState.Off";
+constexpr auto SYSTEMD_PROPERTY_INTERFACE = "org.freedesktop.DBus.Properties";
 
 void ItemUpdater::createActivation(sdbusplus::message::message& m)
 {
@@ -308,6 +316,81 @@ void ItemUpdater::reset()
     return;
 }
 
+bool ItemUpdater::isVersionFunctional(std::string versionId)
+{
+    if (!fs::exists(PNOR_RO_ACTIVE_PATH))
+    {
+        return false;
+    }
+
+    fs::path activeRO = fs::read_symlink(PNOR_RO_ACTIVE_PATH);
+
+    if (!fs::is_directory(activeRO))
+    {
+        return false;
+    }
+
+    if (activeRO.string().find(versionId) == std::string::npos)
+    {
+        return false;
+    }
+
+    // active PNOR is the version we're checking
+    return true;
+}
+
+bool ItemUpdater::isChassisOn()
+{
+    auto mapperCall = bus.new_method_call(
+            MAPPER_BUSNAME,
+            MAPPER_PATH,
+            MAPPER_INTERFACE,
+            "GetObject");
+
+    mapperCall.append(CHASSIS_STATE_PATH,
+        std::vector<std::string>({CHASSIS_STATE_OBJ}));
+    auto mapperResponseMsg = bus.call(mapperCall);
+    if (mapperResponseMsg.is_method_error())
+    {
+        log<level::ERR>("Error in Mapper call");
+        elog<InvalidArgument>(xyz::openbmc_project::Common::InvalidArgument::
+                              ARGUMENT_NAME("GetObject"),
+                              xyz::openbmc_project::Common::InvalidArgument::
+                              ARGUMENT_VALUE(CHASSIS_STATE_OBJ));
+    }
+    using MapperResponseType = std::map<std::string, std::vector<std::string>>;
+    MapperResponseType mapperResponse;
+    mapperResponseMsg.read(mapperResponse);
+    if (mapperResponse.empty())
+    {
+        log<level::ERR>("Invalid Response from mapper");
+        elog<InvalidArgument>(xyz::openbmc_project::Common::InvalidArgument::
+                              ARGUMENT_NAME("MapperResponseMsg"),
+                              xyz::openbmc_project::Common::InvalidArgument::
+                              ARGUMENT_VALUE(CHASSIS_STATE_OBJ));
+    }
+
+    auto method = bus.new_method_call((mapperResponse.begin()->first).c_str(),
+                                      CHASSIS_STATE_PATH,
+                                      SYSTEMD_PROPERTY_INTERFACE,
+                                      "Get");
+    method.append(CHASSIS_STATE_OBJ, "CurrentPowerState");
+    auto response = bus.call(method);
+    if (response.is_method_error())
+    {
+        log<level::ERR>("Error in fetching current Chassis State");
+        elog<InvalidArgument>(xyz::openbmc_project::Common::InvalidArgument::
+                              ARGUMENT_NAME("Response"),
+                              xyz::openbmc_project::Common::InvalidArgument::
+                              ARGUMENT_VALUE(""));
+    }
+    sdbusplus::message::variant<std::string> currentChassisState;
+    response.read(currentChassisState);
+    auto strParam = sdbusplus::message::variant_ns::
+                                    get<std::string>(currentChassisState);
+    return (strParam != CHASSIS_STATE_OFF);
+}
+
 void ItemUpdater::freePriority(uint8_t value, const std::string& versionId)
 {
     //TODO openbmc/openbmc#1896 Improve the performance of this function
@@ -341,6 +424,12 @@ bool ItemUpdater::isLowestPriority(uint8_t value)
 
 void ItemUpdater::erase(std::string entryId)
 {
+    if (isVersionFunctional(entryId) && isChassisOn()) {
+        log<level::ERR>(("Error: Version " + entryId + \
+                         " is currently active and running on the host." \
+                         " Unable to remove.").c_str());
+        return;
+    }
     // Remove priority persistence file
     removeFile(entryId);
 
