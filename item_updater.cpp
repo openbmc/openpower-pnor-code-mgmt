@@ -253,27 +253,12 @@ int ItemUpdater::validateSquashFSImage(const std::string& filePath)
     }
 }
 
-void ItemUpdater::removeReadOnlyPartition(std::string versionId)
+void ItemUpdater::removePartition(std::string versionId)
 {
-        auto serviceFile = "obmc-flash-bios-ubiumount-ro@" + versionId +
+        auto serviceFile = "obmc-flash-bios-ubiumount@" + versionId +
                 ".service";
 
         // Remove the read-only partitions.
-        auto method = bus.new_method_call(
-                SYSTEMD_BUSNAME,
-                SYSTEMD_PATH,
-                SYSTEMD_INTERFACE,
-                "StartUnit");
-        method.append(serviceFile, "replace");
-        bus.call_noreply(method);
-}
-
-void ItemUpdater::removeReadWritePartition(std::string versionId)
-{
-        auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + versionId +
-                ".service";
-
-        // Remove the read-write partitions.
         auto method = bus.new_method_call(
                 SYSTEMD_BUSNAME,
                 SYSTEMD_PATH,
@@ -345,8 +330,7 @@ void ItemUpdater::erase(std::string entryId)
     removeFile(entryId);
 
     // Removing partitions
-    removeReadWritePartition(entryId);
-    removeReadOnlyPartition(entryId);
+    removePartition(entryId);
 
     // Removing entry in versions map
     auto it = versions.find(entryId);
