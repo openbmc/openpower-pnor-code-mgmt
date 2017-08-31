@@ -294,13 +294,9 @@ class Activation : public ActivationInherit
         /** @brief Used to subscribe to dbus systemd signals **/
         sdbusplus::bus::match_t systemdSignals;
 
-        /** @brief Tracks whether the squashfs image has been loaded as part of
-         * the activation process. **/
-        bool squashfsLoaded = false;
-
-        /** @brief Tracks whether the read-write volumes have been created as
-         * part of the activation process. **/
-        bool rwVolumesCreated = false;
+        /** @brief Tracks whether the read-only & read-write volumes have been
+         *created as part of the activation process. **/
+        bool ubiVolumesCreated = false;
 
         /** @brief activation status property get function
          *

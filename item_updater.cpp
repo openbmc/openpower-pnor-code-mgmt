@@ -344,7 +344,7 @@ void ItemUpdater::erase(std::string entryId)
     // Remove priority persistence file
     removeFile(entryId);
 
-    // Removing partitions
+    // Removing read-only and read-write partitions
     removeReadWritePartition(entryId);
     removeReadOnlyPartition(entryId);
 

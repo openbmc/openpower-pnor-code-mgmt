@@ -57,22 +57,10 @@ void Activation::startActivation()
                 std::make_unique<ActivationBlocksTransition>(bus, path);
     }
 
-    constexpr auto squashfsMountService =
-            "obmc-flash-bios-squashfsmount@";
-    auto squashfsMountServiceFile = std::string(squashfsMountService) +
-            versionId + ".service";
-    auto method = bus.new_method_call(
-            SYSTEMD_BUSNAME,
-            SYSTEMD_PATH,
-            SYSTEMD_INTERFACE,
-            "StartUnit");
-    method.append(squashfsMountServiceFile, "replace");
-    bus.call_noreply(method);
-
     constexpr auto ubimountService = "obmc-flash-bios-ubimount@";
     auto ubimountServiceFile = std::string(ubimountService) +
            versionId + ".service";
-    method = bus.new_method_call(
+    auto method = bus.new_method_call(
             SYSTEMD_BUSNAME,
             SYSTEMD_PATH,
             SYSTEMD_INTERFACE,
@@ -99,8 +87,7 @@ void Activation::finishActivation()
     activationBlocksTransition.reset(nullptr);
     activationProgress.reset(nullptr);
 
-    squashfsLoaded = false;
-    rwVolumesCreated = false;
+    ubiVolumesCreated = false;
     Activation::unsubscribeFromSystemdSignals();
     // Create active association
     parent.createActiveAssociation(path);
@@ -120,12 +107,12 @@ auto Activation::activation(Activations value) ->
         parent.freeSpace();
         softwareServer::Activation::activation(value);
 
-        if (squashfsLoaded == false && rwVolumesCreated == false)
+        if (ubiVolumesCreated == false)
         {
             Activation::startActivation();
             return softwareServer::Activation::activation(value);
         }
-        else if (squashfsLoaded == true && rwVolumesCreated == true)
+        else if (ubiVolumesCreated == true)
         {
             // Only when the squashfs image is finished loading AND the RW
             // volumes have been created do we proceed with activation. To
@@ -161,8 +148,7 @@ auto Activation::activation(Activations value) ->
 auto Activation::requestedActivation(RequestedActivations value) ->
         RequestedActivations
 {
-    squashfsLoaded = false;
-    rwVolumesCreated = false;
+    ubiVolumesCreated = false;
 
     if ((value == softwareServer::Activation::RequestedActivations::Active) &&
         (softwareServer::Activation::requestedActivation() !=
@@ -198,32 +184,22 @@ void Activation::unitStateChange(sdbusplus::message::message& msg)
     //Read the msg and populate each variable
     msg.read(newStateID, newStateObjPath, newStateUnit, newStateResult);
 
-    auto squashfsMountServiceFile =
-            "obmc-flash-bios-squashfsmount@" + versionId + ".service";
-
     auto ubimountServiceFile =
             "obmc-flash-bios-ubimount@" + versionId + ".service";
 
-    if(newStateUnit == squashfsMountServiceFile && newStateResult == "done")
-    {
-        squashfsLoaded = true;
-        activationProgress->progress(activationProgress->progress() + 20);
-    }
-
     if(newStateUnit == ubimountServiceFile && newStateResult == "done")
     {
-        rwVolumesCreated = true;
+        ubiVolumesCreated = true;
         activationProgress->progress(activationProgress->progress() + 50);
     }
 
-    if(squashfsLoaded && rwVolumesCreated)
+    if(ubiVolumesCreated)
     {
         Activation::activation(
                 softwareServer::Activation::Activations::Activating);
     }
 
-    if((newStateUnit == squashfsMountServiceFile ||
-        newStateUnit == ubimountServiceFile) &&
+    if((newStateUnit == ubimountServiceFile) &&
         (newStateResult == "failed" || newStateResult == "dependency"))
     {
         Activation::activation(softwareServer::Activation::Activations::Failed);
