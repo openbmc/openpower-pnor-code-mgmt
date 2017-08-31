@@ -141,7 +141,7 @@ class ItemUpdater : public ItemUpdaterInherit
         /** @brief Clears read write PNOR partition for
          *  given Activation dbus object
          *
-         * @param[in]  versionId - The id of the rw partition to remove.
+         *  @param[in]  versionId - The id of the rw partition to remove.
          */
         void removeReadWritePartition(std::string versionId);
 
