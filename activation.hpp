@@ -298,9 +298,9 @@ class Activation : public ActivationInherit
          * the activation process. **/
         bool squashfsLoaded = false;
 
-        /** @brief Tracks whether the read-write volumes have been created as
-         * part of the activation process. **/
-        bool rwVolumesCreated = false;
+        /** @brief Tracks whether the read-only & read-write volumes have been
+         *created as part of the activation process. **/
+        bool ubiVolumesCreated = false;
 
         /** @brief activation status property get function
          *
