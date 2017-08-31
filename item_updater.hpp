@@ -130,6 +130,20 @@ class ItemUpdater : public ItemUpdaterInherit
         /** @brief Host factory reset - clears PNOR partitions for each
           * Activation dbus object */
         void reset() override;
+
+        /** @brief Check whether the provided image id is the active one
+         *
+         * @param[in] - versionId - The id of the image to check.
+         *
+         * @return - Returns true if this version is currently active.
+         */
+        static bool isVersionActive(std::string versionId);
+
+        /** @brief Check whether the host is running
+         *
+         * @return - Returns true if the Chassis is powered on.
+         */
+        bool isChassisOn();
 };
 
 } // namespace updater
