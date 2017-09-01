@@ -138,8 +138,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                                 path,
                                 version,
                                 purpose,
-                                filePath,
-                                *this)));
+                                filePath)));
     }
     else
     {
@@ -248,8 +247,7 @@ void ItemUpdater::processPNORImage()
                                      path,
                                      version,
                                      purpose,
-                                     "",
-                                     *this)));
+                                     "")));
         }
         else if (0 == iter.path().native().compare(0, PNOR_RW_PREFIX_LEN,
                                                       PNOR_RW_PREFIX))
