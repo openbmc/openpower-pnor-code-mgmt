@@ -137,8 +137,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                                 path,
                                 version,
                                 purpose,
-                                filePath,
-                                *this)));
+                                filePath)));
     }
     else
     {
@@ -239,8 +238,7 @@ void ItemUpdater::processPNORImage()
                                      path,
                                      version,
                                      purpose,
-                                     "",
-                                     *this)));
+                                     "")));
         }
     }
     return;
