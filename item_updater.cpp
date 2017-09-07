@@ -195,6 +195,9 @@ void ItemUpdater::processPNORImage()
                                               ACTIVATION_REV_ASSOCIATION,
                                               HOST_INVENTORY_PATH))};
 
+            // Create an active association since this image is active
+            createActiveAssociation(path);
+
             // Create Activation instance for this version.
             activations.insert(std::make_pair(
                                    id,
