@@ -107,11 +107,16 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                  std::map<std::string, std::string>
                  {{"extended_version", ""}})).begin()->second;
 
-        // Create an association to the host inventory item
-        AssociationList associations{(std::make_tuple(
-                                          ACTIVATION_FWD_ASSOCIATION,
-                                          ACTIVATION_REV_ASSOCIATION,
-                                          HOST_INVENTORY_PATH))};
+        AssociationList associations = {};
+
+        if (activationState != server::Activation::Activations::Invalid)
+        {
+            // Create an association to the host inventory item
+            associations.emplace_back(std::make_tuple(
+                                              ACTIVATION_FWD_ASSOCIATION,
+                                              ACTIVATION_REV_ASSOCIATION,
+                                              HOST_INVENTORY_PATH));
+        }
 
         activations.insert(std::make_pair(
                 versionId,
@@ -187,13 +192,19 @@ void ItemUpdater::processPNORImage()
             auto id = iter.path().native().substr(PNOR_RO_PREFIX_LEN);
             auto purpose = server::Version::VersionPurpose::Host;
             auto path = fs::path(SOFTWARE_OBJPATH) / id;
+            AssociationList associations = {};
 
+            if (activationState == server::Activation::Activations::Active)
+            {
+                // Create an association to the host inventory item
+                associations.emplace_back(std::make_tuple(
+                                                  ACTIVATION_FWD_ASSOCIATION,
+                                                  ACTIVATION_REV_ASSOCIATION,
+                                                  HOST_INVENTORY_PATH));
 
-            // Create an association to the host inventory item
-            AssociationList associations{(std::make_tuple(
-                                              ACTIVATION_FWD_ASSOCIATION,
-                                              ACTIVATION_REV_ASSOCIATION,
-                                              HOST_INVENTORY_PATH))};
+                // Create an active association since this image is active
+                createActiveAssociation(path);
+            }
 
             // Create Activation instance for this version.
             activations.insert(std::make_pair(
