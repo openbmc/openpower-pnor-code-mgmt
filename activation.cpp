@@ -211,7 +211,7 @@ void Activation::unitStateChange(sdbusplus::message::message& msg)
 void Activation::delete_()
 {
     // Remove active association
-    parent.removeActiveAssociation(path);
+    parent.removeAssociation(FUNCTIONAL_FWD_ASSOCIATION, path);
 
     parent.erase(versionId);
 }

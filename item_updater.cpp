@@ -412,11 +412,20 @@ void ItemUpdater::createActiveAssociation(std::string path)
     associations(assocs);
 }
 
-void ItemUpdater::removeActiveAssociation(std::string path)
+void ItemUpdater::createFunctionalAssociation(std::string path)
+{
+    assocs.emplace_back(std::make_tuple(FUNCTIONAL_FWD_ASSOCIATION,
+                                        FUNCTIONAL_REV_ASSOCIATION,
+                                        path));
+    associations(assocs);
+}
+
+void ItemUpdater::removeAssociation(std::string fwdAssoc, std::string path)
 {
     for (auto iter = assocs.begin(); iter != assocs.end();)
     {
-        if ((std::get<2>(*iter)).compare(path) == 0)
+        if ((std::get<0>(*iter)).compare(fwdAssoc) == 0 &&
+            (std::get<2>(*iter)).compare(path) == 0)
         {
             iter = assocs.erase(iter);
             associations(assocs);
