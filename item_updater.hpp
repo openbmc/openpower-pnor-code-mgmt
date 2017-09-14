@@ -91,11 +91,13 @@ class ItemUpdater : public ItemUpdaterInherit
          */
         void createActiveAssociation(std::string path);
 
-        /** @brief Removes an active association to the software image
+        /** @brief Removes an association to a software image
          *
-         * @param[in]  path - The path to remove the association from.
+         * @param[in]  fwdAssoc - The name of the forward association to remove.
+         * @param[in]  path - The path to the image object to
+         *                    remove the association from.
          */
-        void removeActiveAssociation(std::string path);
+        void removeAssociation(std::string fwdAssoc, std::string path);
 
     private:
         /** @brief Callback function for Software.Version match.
@@ -113,6 +115,13 @@ class ItemUpdater : public ItemUpdaterInherit
          *                       - -1--> Otherwise
          */
         static int validateSquashFSImage(const std::string& filePath);
+
+        /** @brief Creates a functional association to the
+         *  "running" PNOR software image
+         *
+         * @param[in]  path - The path to create the association to.
+         */
+        void createFunctionalAssociation(std::string path);
 
         /** @brief Persistent sdbusplus DBus bus connection. */
         sdbusplus::bus::bus& bus;
