@@ -91,6 +91,13 @@ class ItemUpdater : public ItemUpdaterInherit
          */
         void createActiveAssociation(std::string path);
 
+        /** @brief Updates the functional association to the
+         *  new "running" PNOR image
+         *
+         * @param[in]  path - The path to update the association to.
+         */
+        void updateFunctionalAssociation(std::string path);
+
         /** @brief Removes an active association to the software image
          *
          * @param[in]  path - The path to remove the association from.
