@@ -17,7 +17,7 @@ void storeToFile(std::string versionId, uint8_t priority)
 {
     if(!fs::is_directory(PERSIST_DIR))
     {
-        fs::create_directory(PERSIST_DIR);
+        fs::create_directories(PERSIST_DIR);
     }
 
     // store one copy in /var/lib/obmc/openpower-pnor-code-mgmt/[versionId]
