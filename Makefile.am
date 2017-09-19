@@ -34,7 +34,9 @@ generic_ldflags = \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	$(SDBUSPLUS_LIBS) \
 	$(PHOSPHOR_LOGGING_LIBS) \
-	-lstdc++fs
+	-lstdc++fs \
+	-lssl \
+	-lcrypto
 
 org/openbmc/Associations/server.cpp: org/openbmc/Associations.interface.yaml
 	@mkdir -p `dirname $@`
