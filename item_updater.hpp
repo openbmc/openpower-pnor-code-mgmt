@@ -84,6 +84,14 @@ class ItemUpdater : public ItemUpdaterInherit
          */
         void freeSpace();
 
+        /** @brief Determine the software version id
+         *         from the symlink target (e.g. /media/ro-2a1022fe).
+         *
+         * @param[in] symlinkPath - The path of the symlink.
+         * @param[out] id - The version id as a string.
+         */
+        static std::string determineId(const std::string& symlinkPath);
+
         /** @brief Creates an active association to the
          *  newly active software image
          *
