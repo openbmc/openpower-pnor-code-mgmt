@@ -8,6 +8,7 @@
 #include <phosphor-logging/log.hpp>
 #include "config.h"
 #include "watch.hpp"
+#include "item_updater.hpp"
 
 namespace openpower
 {
@@ -100,19 +101,7 @@ int Watch::callback(sd_event_source* s,
         auto path = std::string{PNOR_ACTIVE_PATH} + event->name;
         if (path.compare(PNOR_RO_ACTIVE_PATH) == 0)
         {
-            // Read the symlink target
-            char buf[1024];
-            int len;
-            if ((len = readlink(path.c_str(), buf, sizeof(buf) - 1)) != -1)
-            {
-                buf[len] = '\0';
-            }
-            auto target = std::string(buf);
-
-            // Get the image <id> from the symlink target
-            // for example /media/ro-2a1022fe
-            static const auto PNOR_RO_PREFIX_LEN = strlen(PNOR_RO_PREFIX);
-            auto id = target.substr(PNOR_RO_PREFIX_LEN);
+            auto id = ItemUpdater::determineId(path);
             auto objPath = std::string{SOFTWARE_OBJPATH} + '/' + id;
 
             static_cast<Watch*>(userdata)->functionalCallback(objPath);
