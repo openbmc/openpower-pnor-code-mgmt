@@ -494,7 +494,7 @@ void ItemUpdater::freeSpace()
     }
 }
 
-void ItemUpdater::createActiveAssociation(std::string path)
+void ItemUpdater::createActiveAssociation(const std::string& path)
 {
     assocs.emplace_back(std::make_tuple(ACTIVE_FWD_ASSOCIATION,
                                         ACTIVE_REV_ASSOCIATION,
@@ -523,7 +523,7 @@ void ItemUpdater::updateFunctionalAssociation(const std::string& path)
     associations(assocs);
 }
 
-void ItemUpdater::removeActiveAssociation(std::string path)
+void ItemUpdater::removeActiveAssociation(const std::string& path)
 {
     for (auto iter = assocs.begin(); iter != assocs.end();)
     {
