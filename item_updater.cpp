@@ -555,6 +555,11 @@ std::string ItemUpdater::determineId(const std::string& symlinkPath)
         return "";
     }
 
+    // check to make sure the target really exists
+    if (!fs::is_regular_file(target + "/" + PNOR_TOC_FILE))
+    {
+        return "";
+    }
     // Get the image <id> from the symlink target
     // for example /media/ro-2a1022fe
     static const auto PNOR_RO_PREFIX_LEN = strlen(PNOR_RO_PREFIX);
