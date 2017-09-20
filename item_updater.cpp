@@ -250,6 +250,13 @@ void ItemUpdater::processPNORImage()
                                      *this)));
         }
     }
+
+    // Look at the RO symlink to determine if there is a functional image
+    auto id = determineId(PNOR_RO_ACTIVE_PATH);
+    if (!id.empty())
+    {
+        updateFunctionalAssociation(std::string{SOFTWARE_OBJPATH} + '/' + id);
+    }
     return;
 }
 
@@ -557,6 +564,26 @@ void ItemUpdater::removeActiveAssociation(std::string path)
             ++iter;
         }
     }
+}
+
+std::string ItemUpdater::determineId(const std::string& symlinkPath)
+{
+    if (!fs::exists(symlinkPath))
+    {
+        return {};
+    }
+
+    auto target = fs::canonical(symlinkPath).string();
+
+    // check to make sure the target really exists
+    if (!fs::is_regular_file(target + "/" + PNOR_TOC_FILE))
+    {
+        return {};
+    }
+    // Get the image <id> from the symlink target
+    // for example /media/ro-2a1022fe
+    static const auto PNOR_RO_PREFIX_LEN = strlen(PNOR_RO_PREFIX);
+    return target.substr(PNOR_RO_PREFIX_LEN);
 }
 
 } // namespace updater
