@@ -2,6 +2,7 @@
 #include <experimental/filesystem>
 #include <fstream>
 #include <phosphor-logging/elog-errors.hpp>
+#include <unistd.h>
 #include <phosphor-logging/log.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
 #include <xyz/openbmc_project/Software/Version/server.hpp>
@@ -249,6 +250,13 @@ void ItemUpdater::processPNORImage()
                                      "",
                                      *this)));
         }
+    }
+
+    // Look at the RO symlink to determine if there is a functional image
+    auto id = determineId(PNOR_RO_ACTIVE_PATH);
+    if (!id.empty())
+    {
+        updateFunctionalAssociation(std::string{SOFTWARE_OBJPATH} + '/' + id);
     }
     return;
 }
@@ -530,6 +538,27 @@ void ItemUpdater::removeActiveAssociation(std::string path)
             ++iter;
         }
     }
+}
+
+std::string ItemUpdater::determineId(const std::string& symlinkPath)
+{
+    // Read the symlink target
+    char buf[1024];
+    int len;
+    if ((len = readlink(symlinkPath.c_str(), buf, sizeof(buf) - 1)) != -1)
+    {
+        buf[len] = '\0';
+    }
+    auto target = std::string(buf);
+    if (target.empty())
+    {
+        return "";
+    }
+
+    // Get the image <id> from the symlink target
+    // for example /media/ro-2a1022fe
+    static const auto PNOR_RO_PREFIX_LEN = strlen(PNOR_RO_PREFIX);
+    return target.substr(PNOR_RO_PREFIX_LEN);
 }
 
 } // namespace updater
