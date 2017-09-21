@@ -459,6 +459,27 @@ void ItemUpdater::erase(std::string entryId)
     activations.erase(entryId);
 }
 
+void ItemUpdater::deleteAll()
+{
+    for (const auto& it : activations)
+    {
+        if (!isVersionFunctional(it.first))
+        {
+            ItemUpdater::erase(it.first);
+        }
+    }
+
+    // Remove any remaining pnor-ro- or pnor-rw- volumes that do not match
+    // the current version.
+    auto method = bus.new_method_call(
+            SYSTEMD_BUSNAME,
+            SYSTEMD_PATH,
+            SYSTEMD_INTERFACE,
+            "StartUnit");
+    method.append("obmc-flash-bios-cleanup.service", "replace");
+    bus.call_noreply(method);
+}
+
 // TODO: openbmc/openbmc#1402 Monitor flash usage
 void ItemUpdater::freeSpace()
 {
