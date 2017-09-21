@@ -5,6 +5,7 @@
 #include <xyz/openbmc_project/Common/FactoryReset/server.hpp>
 #include "version.hpp"
 #include "org/openbmc/Associations/server.hpp"
+#include "xyz/openbmc_project/Collection/DeleteAll/server.hpp"
 
 namespace openpower
 {
@@ -15,7 +16,8 @@ namespace updater
 
 using ItemUpdaterInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Common::server::FactoryReset,
-    sdbusplus::org::openbmc::server::Associations>;
+    sdbusplus::org::openbmc::server::Associations,
+    sdbusplus::xyz::openbmc_project::Collection::server::DeleteAll>;
 namespace MatchRules = sdbusplus::bus::match::rules;
 
 using AssociationList =
@@ -78,6 +80,11 @@ class ItemUpdater : public ItemUpdaterInherit
          *  @return None
          */
         void erase(std::string entryId);
+
+        /**
+         * @brief TODO.
+         */
+        void deleteAll();
 
         /** @brief Deletes the active pnor version with highest priority
                    if the total number of volume exceeds the threshold.
