@@ -18,6 +18,7 @@ namespace updater
 
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace phosphor::logging;
+using Argument = xyz::openbmc_project::Common::InvalidArgument;
 
 std::string Version::getId(const std::string& version)
 {
@@ -26,10 +27,8 @@ std::string Version::getId(const std::string& version)
     if (version.empty())
     {
         log<level::ERR>("Error version is empty");
-        elog<InvalidArgument>(xyz::openbmc_project::Common::InvalidArgument::
-                              ARGUMENT_NAME("Version"),
-                              xyz::openbmc_project::Common::InvalidArgument::
-                              ARGUMENT_VALUE(version.c_str()));
+        elog<InvalidArgument>(Argument::ARGUMENT_NAME("Version"),
+                              Argument::ARGUMENT_VALUE(version.c_str()));
     }
 
     // Only want 8 hex digits.
@@ -41,21 +40,18 @@ std::string Version::getId(const std::string& version)
 std::map<std::string, std::string> Version::getValue(
         const std::string& filePath, std::map<std::string, std::string> keys)
 {
-
     if (filePath.empty())
     {
         log<level::ERR>("Error filePath is empty");
-        elog<InvalidArgument>(xyz::openbmc_project::Common::InvalidArgument::
-                              ARGUMENT_NAME("FilePath"),
-                              xyz::openbmc_project::Common::InvalidArgument::
-                              ARGUMENT_VALUE(filePath.c_str()));
+        elog<InvalidArgument>(Argument::ARGUMENT_NAME("FilePath"),
+                              Argument::ARGUMENT_VALUE(filePath.c_str()));
     }
 
     std::ifstream efile;
     std::string line;
-    efile.exceptions(std::ifstream::failbit
-                     | std::ifstream::badbit
-                     | std::ifstream::eofbit);
+    efile.exceptions(std::ifstream::failbit |
+                     std::ifstream::badbit |
+                     std::ifstream::eofbit);
 
     try
     {
