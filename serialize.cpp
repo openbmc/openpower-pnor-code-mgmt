@@ -15,7 +15,7 @@ namespace fs = std::experimental::filesystem;
 
 void storeToFile(std::string versionId, uint8_t priority)
 {
-    if(!fs::is_directory(PERSIST_DIR))
+    if (!fs::is_directory(PERSIST_DIR))
     {
         fs::create_directories(PERSIST_DIR);
     }
@@ -26,7 +26,7 @@ void storeToFile(std::string versionId, uint8_t priority)
     cereal::JSONOutputArchive varArchive(varOutput);
     varArchive(cereal::make_nvp("priority", priority));
 
-    if(fs::is_directory(PNOR_RW_PREFIX + versionId))
+    if (fs::is_directory(PNOR_RW_PREFIX + versionId))
     {
         // store another copy in /media/pnor-rw-[versionId]/[versionId]
         auto rwPath = PNOR_RW_PREFIX + versionId + "/" + versionId;
@@ -48,7 +48,7 @@ bool restoreFromFile(std::string versionId, uint8_t& priority)
             varArchive(cereal::make_nvp("priority", priority));
             return true;
         }
-        catch(cereal::RapidJSONException& e)
+        catch (cereal::RapidJSONException& e)
         {
             fs::remove(varPath);
         }
@@ -64,7 +64,7 @@ bool restoreFromFile(std::string versionId, uint8_t& priority)
             rwArchive(cereal::make_nvp("priority", priority));
             return true;
         }
-        catch(cereal::RapidJSONException& e)
+        catch (cereal::RapidJSONException& e)
         {
             fs::remove(rwPath);
         }
