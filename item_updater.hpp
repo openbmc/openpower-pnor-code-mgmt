@@ -14,23 +14,23 @@ namespace updater
 {
 
 using ItemUpdaterInherit = sdbusplus::server::object::object<
-    sdbusplus::xyz::openbmc_project::Common::server::FactoryReset,
-    sdbusplus::org::openbmc::server::Associations>;
+        sdbusplus::xyz::openbmc_project::Common::server::FactoryReset,
+        sdbusplus::org::openbmc::server::Associations>;
 namespace MatchRules = sdbusplus::bus::match::rules;
 
 using AssociationList =
         std::vector<std::tuple<std::string, std::string, std::string>>;
 
 /** @class ItemUpdater
- *  @brief Manages the activation of the version items.
+ *  @brief Manages the activation of the HOST version items.
  */
 class ItemUpdater : public ItemUpdaterInherit
 {
     public:
         /** @brief Constructs ItemUpdater
          *
-         * @param[in] bus    - The Dbus bus object
-         * @param[in] path   - The Dbus path
+         * @param[in] bus    - The D-Bus bus object
+         * @param[in] path   - The D-Bus path
          */
         ItemUpdater(sdbusplus::bus::bus& bus, const std::string& path) :
                     ItemUpdaterInherit(bus, path.c_str()),
@@ -99,7 +99,7 @@ class ItemUpdater : public ItemUpdaterInherit
 
     private:
         /** @brief Callback function for Software.Version match.
-         *  @details Creates an Activation dbus object.
+         *  @details Creates an Activation D-Bus object.
          *
          * @param[in]  msg       - Data associated with subscribed signal
          */
@@ -114,14 +114,14 @@ class ItemUpdater : public ItemUpdaterInherit
          */
         static int validateSquashFSImage(const std::string& filePath);
 
-        /** @brief Persistent sdbusplus DBus bus connection. */
+        /** @brief Persistent sdbusplus D-Bus bus connection. */
         sdbusplus::bus::bus& bus;
 
-        /** @brief Persistent map of Activation dbus objects and their
+        /** @brief Persistent map of Activation D-Bus objects and their
           * version id */
         std::map<std::string, std::unique_ptr<Activation>> activations;
 
-        /** @brief Persistent map of Version dbus objects and their
+        /** @brief Persistent map of Version D-Bus objects and their
           * version id */
         std::map<std::string, std::unique_ptr<Version>> versions;
 
@@ -132,14 +132,14 @@ class ItemUpdater : public ItemUpdaterInherit
         AssociationList assocs = {};
 
         /** @brief Clears read only PNOR partition for
-         *  given Activation dbus object
+         *  given Activation D-Bus object
          *
          * @param[in]  versionId - The id of the ro partition to remove.
          */
         void removeReadOnlyPartition(std::string versionId);
 
         /** @brief Clears read write PNOR partition for
-         *  given Activation dbus object
+         *  given Activation D-Bus object
          *
          *  @param[in]  versionId - The id of the rw partition to remove.
          */
@@ -149,7 +149,7 @@ class ItemUpdater : public ItemUpdaterInherit
         void removePreservedPartition();
 
         /** @brief Host factory reset - clears PNOR partitions for each
-          * Activation dbus object */
+          * Activation D-Bus object */
         void reset() override;
 
         /** @brief Check whether the provided image id is the functional one
