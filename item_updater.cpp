@@ -297,28 +297,33 @@ void ItemUpdater::removeReadWritePartition(std::string versionId)
         bus.call_noreply(method);
 }
 
-void ItemUpdater::removePreservedPartition()
+void ItemUpdater::reset()
 {
-    // Remove the preserved partition.
+    for (const auto& it : activations)
+    {
+        auto serviceFile = "obmc-flash-bios-ubiclear@pnor-rw-" + it.first +
+                ".service";
+
+        // Clear the read-write partitions.
+        auto method = bus.new_method_call(
+                SYSTEMD_BUSNAME,
+                SYSTEMD_PATH,
+                SYSTEMD_INTERFACE,
+                "StartUnit");
+        method.append(serviceFile, "replace");
+        bus.call(method);
+
+        removeFile(it.first);
+    }
+    // Clear the preserved partition.
     auto method = bus.new_method_call(
             SYSTEMD_BUSNAME,
             SYSTEMD_PATH,
             SYSTEMD_INTERFACE,
             "StartUnit");
-    method.append("obmc-flash-bios-ubiumount-prsv.service", "replace");
-    bus.call_noreply(method);
+    method.append("obmc-flash-bios-ubiclear@pnor-prsv.service", "replace");
+    bus.call(method);
 
-    return;
-}
-
-void ItemUpdater::reset()
-{
-    for (const auto& it : activations)
-    {
-        removeReadWritePartition(it.first);
-        removeFile(it.first);
-    }
-    removePreservedPartition();
     return;
 }
 
