@@ -163,12 +163,14 @@ void ItemUpdater::processPNORImage()
         if (0 == iter.path().native().compare(0, PNOR_RO_PREFIX_LEN,
                                               PNOR_RO_PREFIX))
         {
+            auto id = iter.path().native().substr(PNOR_RO_PREFIX_LEN);
             auto pnorTOC = iter.path() / PNOR_TOC_FILE;
             if (!fs::is_regular_file(pnorTOC))
             {
-                log<level::ERR>("Failed to read pnorTOC\n",
+                log<level::ERR>("Failed to read pnorTOC.\n",
                                 entry("FileName=%s", pnorTOC.string()));
-                activationState = server::Activation::Activations::Invalid;
+                ItemUpdater::erase(id);
+                continue;
             }
             auto keyValues =
                     Version::getValue(pnorTOC,
@@ -192,7 +194,6 @@ void ItemUpdater::processPNORImage()
 
             // The versionId is extracted from the path
             // for example /media/pnor-ro-2a1022fe
-            auto id = iter.path().native().substr(PNOR_RO_PREFIX_LEN);
             auto purpose = server::Version::VersionPurpose::Host;
             auto path = fs::path(SOFTWARE_OBJPATH) / id;
             AssociationList associations = {};
