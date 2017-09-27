@@ -158,6 +158,7 @@ void ItemUpdater::processPNORImage()
         auto activationState = server::Activation::Activations::Active;
 
         static const auto PNOR_RO_PREFIX_LEN = strlen(PNOR_RO_PREFIX);
+        static const auto PNOR_RW_PREFIX_LEN = strlen(PNOR_RW_PREFIX);
 
         // Check if the PNOR_RO_PREFIX is the prefix of the iter.path
         if (0 == iter.path().native().compare(0, PNOR_RO_PREFIX_LEN,
@@ -248,6 +249,18 @@ void ItemUpdater::processPNORImage()
                                      purpose,
                                      "",
                                      *this)));
+        }
+        else if (0 == iter.path().native().compare(0, PNOR_RW_PREFIX_LEN,
+                                                      PNOR_RW_PREFIX))
+        {
+            auto id = iter.path().native().substr(PNOR_RW_PREFIX_LEN);
+            auto roDir = PNOR_RO_PREFIX + id;
+            if (!fs::is_directory(roDir))
+            {
+                log<level::ERR>("No corresponding read-only volume found.",
+                                entry("DIRNAME=%s", roDir));
+                ItemUpdater::erase(id);
+            }
         }
     }
 
