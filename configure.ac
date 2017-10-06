@@ -76,6 +76,13 @@ AC_ARG_VAR(MANIFEST_FILE, [The path to the MANIFEST file])
 AS_IF([test "x$MANIFEST_FILE" == "x"], [MANIFEST_FILE="MANIFEST"])
 AC_DEFINE_UNQUOTED([MANIFEST_FILE], ["$MANIFEST_FILE"], [The path to the MANIFEST file])
 
+AC_DEFINE(CHASSIS_STATE_PATH, "/xyz/openbmc_project/state/chassis0",
+    [The chassis state path.])
+AC_DEFINE(CHASSIS_STATE_OBJ, "xyz.openbmc_project.State.Chassis",
+    [The chassis state interface.])
+AC_DEFINE(CHASSIS_STATE_OFF, "xyz.openbmc_project.State.Chassis.PowerState.Off",
+    [The chassis state off property value.])
+
 AC_DEFINE(MAPPER_BUSNAME, "xyz.openbmc_project.ObjectMapper",
     [The object mapper busname.])
 AC_DEFINE(MAPPER_PATH, "/xyz/openbmc_project/object_mapper",
@@ -89,6 +96,8 @@ AC_DEFINE(SYSTEMD_PATH, "/org/freedesktop/systemd1",
     [systemd path.])
 AC_DEFINE(SYSTEMD_INTERFACE, "org.freedesktop.systemd1.Manager",
     [systemd interface.])
+AC_DEFINE(SYSTEMD_PROPERTY_INTERFACE, "org.freedesktop.DBus.Properties",
+    [systemd properties interface.])
 
 AC_DEFINE(PNOR_TOC_FILE, "pnor.toc",
     [The name of the PNOR table of contents file])

@@ -26,11 +26,6 @@ using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace phosphor::logging;
 
 constexpr auto squashFSImage = "pnor.xz.squashfs";
-constexpr auto CHASSIS_STATE_PATH = "/xyz/openbmc_project/state/chassis0";
-constexpr auto CHASSIS_STATE_OBJ = "xyz.openbmc_project.State.Chassis";
-constexpr auto CHASSIS_STATE_OFF =
-                        "xyz.openbmc_project.State.Chassis.PowerState.Off";
-constexpr auto SYSTEMD_PROPERTY_INTERFACE = "org.freedesktop.DBus.Properties";
 
 // TODO: Change paths once openbmc/openbmc#1663 is completed.
 constexpr auto MBOXD_INTERFACE = "org.openbmc.mboxd";
@@ -135,6 +130,12 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                         extendedVersion,
                         activationState,
                         associations)));
+
+        activations.find(versionId)->second->deleteObject =
+                std::make_unique<Delete>(bus,
+                                         path,
+                                         *activations.find(versionId)->second);
+
         versions.insert(std::make_pair(
                             versionId,
                             std::make_unique<Version>(
@@ -220,6 +221,16 @@ void ItemUpdater::processPNORImage()
                                        extendedVersion,
                                        activationState,
                                        associations)));
+
+            // Add Delete() if this isn't the functional version
+            if ((!isVersionFunctional(id)) || (!isChassisOn()))
+            {
+                activations.find(id)->second->deleteObject =
+                        std::make_unique<Delete>(bus,
+                                                 path,
+                                                 *activations.find(id)->second);
+            }
+
 
             // If Active, create RedundancyPriority instance for this version.
             if (activationState == server::Activation::Activations::Active)
@@ -355,7 +366,7 @@ void ItemUpdater::reset()
     return;
 }
 
-bool ItemUpdater::isVersionFunctional(std::string versionId)
+bool ItemUpdater::isVersionFunctional(const std::string& versionId)
 {
     if (!fs::exists(PNOR_RO_ACTIVE_PATH))
     {
