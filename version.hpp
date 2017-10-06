@@ -2,7 +2,6 @@
 
 #include <sdbusplus/bus.hpp>
 #include "xyz/openbmc_project/Software/Version/server.hpp"
-#include "xyz/openbmc_project/Object/Delete/server.hpp"
 #include "xyz/openbmc_project/Common/FilePath/server.hpp"
 
 namespace openpower
@@ -16,7 +15,6 @@ class ItemUpdater;
 
 using VersionInherit = sdbusplus::server::object::object<
         sdbusplus::xyz::openbmc_project::Software::server::Version,
-        sdbusplus::xyz::openbmc_project::Object::server::Delete,
         sdbusplus::xyz::openbmc_project::Common::server::FilePath>;
 
 /** @class Version
@@ -78,11 +76,6 @@ class Version : public VersionInherit
          * @return The id.
          */
         static std::string getId(const std::string& version);
-
-        /** @brief Deletes the D-Bus object and removes image.
-         *
-         */
-        void delete_() override;
 
     private:
         ItemUpdater& parent;
