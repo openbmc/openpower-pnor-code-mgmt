@@ -119,6 +119,14 @@ class ItemUpdater : public ItemUpdaterInherit
          */
         void removeActiveAssociation(const std::string& path);
 
+        /** @brief Check whether the provided image id is the functional one
+         *
+         * @param[in] - versionId - The id of the image to check.
+         *
+         * @return - Returns true if this version is currently functional.
+         */
+        static bool isVersionFunctional(std::string versionId);
+
     private:
         /** @brief Callback function for Software.Version match.
          *  @details Creates an Activation D-Bus object.
@@ -173,14 +181,6 @@ class ItemUpdater : public ItemUpdaterInherit
         /** @brief Host factory reset - clears PNOR partitions for each
           * Activation D-Bus object */
         void reset() override;
-
-        /** @brief Check whether the provided image id is the functional one
-         *
-         * @param[in] - versionId - The id of the image to check.
-         *
-         * @return - Returns true if this version is currently functional.
-         */
-        static bool isVersionFunctional(std::string versionId);
 
         /** @brief Check whether the host is running
          *
