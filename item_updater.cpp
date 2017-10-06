@@ -131,6 +131,17 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                         extendedVersion,
                         activationState,
                         associations)));
+
+        // Add Delete() if this isn't the functional version
+        if (!isVersionFunctional(versionId) || !isChassisOn())
+        {
+            activations.find(versionId)->second->deleteObject =
+                    std::make_unique<Delete>(bus,
+                                             path,
+                                             *activations.find(versionId)->
+                                                    second);
+        }
+
         versions.insert(std::make_pair(
                             versionId,
                             std::make_unique<Version>(
@@ -221,6 +232,16 @@ void ItemUpdater::processPNORImage()
                                        extendedVersion,
                                        activationState,
                                        associations)));
+
+            // Add Delete() if this isn't the functional version
+            if (!isVersionFunctional(id) || !isChassisOn())
+            {
+                activations.find(id)->second->deleteObject =
+                        std::make_unique<Delete>(bus,
+                                                 path,
+                                                 *activations.find(id)->second);
+            }
+
 
             // If Active, create RedundancyPriority instance for this version.
             if (activationState == server::Activation::Activations::Active)

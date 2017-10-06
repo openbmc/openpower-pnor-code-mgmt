@@ -208,12 +208,44 @@ void Activation::unitStateChange(sdbusplus::message::message& msg)
     return;
 }
 
-void Activation::delete_()
+void Activation::updateDeleteInterface(sdbusplus::message::message& msg)
+{
+    std::string interface, hostState;
+    std::map<std::string, sdbusplus::message::variant<std::string>> properties;
+
+    msg.read(interface, properties);
+
+    for(const auto& p : properties)
+    {
+        if (p.first == "CurrentHostState")
+        {
+            hostState = p.second.get<std::string>();
+        }
+    }
+
+    if(parent.isVersionFunctional(this->versionId) &&
+            hostState == "xyz.openbmc_project.State.Host.HostState.Running")
+    {
+        if(deleteObject)
+        {
+            deleteObject.reset(nullptr);
+        }
+    }
+    else
+    {
+        if(!deleteObject)
+        {
+            deleteObject = std::make_unique<Delete>(bus, path, *this);
+        }
+    }
+}
+
+void Delete::delete_()
 {
     // Remove active association
-    parent.removeActiveAssociation(path);
+    parent.parent.removeActiveAssociation(parent.path);
 
-    parent.erase(versionId);
+    parent.parent.erase(parent.versionId);
 }
 
 } // namespace updater
