@@ -8,6 +8,7 @@
 #include "xyz/openbmc_project/Software/ActivationProgress/server.hpp"
 #include "xyz/openbmc_project/Object/Delete/server.hpp"
 #include "org/openbmc/Associations/server.hpp"
+#include "config.h"
 
 namespace openpower
 {
@@ -19,7 +20,6 @@ namespace updater
 using AssociationList =
         std::vector<std::tuple<std::string, std::string, std::string>>;
 using ActivationInherit = sdbusplus::server::object::object<
-    sdbusplus::xyz::openbmc_project::Object::server::Delete,
     sdbusplus::xyz::openbmc_project::Software::server::ExtendedVersion,
     sdbusplus::xyz::openbmc_project::Software::server::Activation,
     sdbusplus::org::openbmc::server::Associations>;
@@ -29,6 +29,8 @@ using RedundancyPriorityInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Software::server::RedundancyPriority>;
 using ActivationProgressInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Software::server::ActivationProgress>;
+using DeleteInherit = sdbusplus::server::object::object<
+        sdbusplus::xyz::openbmc_project::Object::server::Delete>;
 
 namespace sdbusRule = sdbusplus::bus::match::rules;
 
@@ -168,6 +170,53 @@ class ActivationProgress : public ActivationProgressInherit
         std::string path;
 };
 
+/** @class ActivationDelete
+ *  @brief OpenBMC Delete implementation.
+ *  @details A concrete implementation for xyz.openbmc_project.Object.Delete
+ *  D-Bus API.
+ */
+class Delete : public DeleteInherit
+{
+    public:
+        /** @brief Constructs Delete.
+          *
+          * @param[in] bus    - The D-Bus bus object
+          * @param[in] path   - The D-Bus object path
+          * @param[in] parent - Parent object.
+          */
+        Delete(sdbusplus::bus::bus& bus,
+               const std::string& path,
+               Activation& parent) :
+                DeleteInherit(bus, path.c_str(), true),
+                parent(parent),
+                bus(bus),
+                path(path)
+        {
+            std::vector<std::string> interfaces({interface});
+            bus.emit_interfaces_added(path.c_str(), interfaces);
+        }
+
+        ~Delete()
+        {
+            std::vector<std::string> interfaces({interface});
+            bus.emit_interfaces_removed(path.c_str(), interfaces);
+        }
+
+        /**
+         * @brief delete the D-Bus object.
+         */
+        void delete_() override;
+
+        /** @brief Parent Object. */
+        Activation& parent;
+
+    private:
+        static constexpr auto interface =
+                "xyz.openbmc_project.Object.Delete";
+        sdbusplus::bus::bus& bus;
+        std::string path;
+};
+
 /** @class Activation
  *  @brief OpenBMC activation software management implementation.
  *  @details A concrete implementation for
@@ -206,7 +255,17 @@ class Activation : public ActivationInherit
                            sdbusRule::interface(
                                    "org.freedesktop.systemd1.Manager"),
                            std::bind(std::mem_fn(&Activation::unitStateChange),
-                                  this, std::placeholders::_1))
+                                  this, std::placeholders::_1)),
+                  chassisStateSignals(
+                          bus,
+                          sdbusRule::type::signal() +
+                          sdbusRule::member("PropertiesChanged") +
+                          sdbusRule::path(CHASSIS_STATE_PATH) +
+                          sdbusRule::argN(0, CHASSIS_STATE_OBJ) +
+                          sdbusRule::interface(SYSTEMD_PROPERTY_INTERFACE),
+                          std::bind(std::mem_fn(
+                                  &Activation::updateDeleteInterface), this,
+                                  std::placeholders::_1))
         {
             // Enable systemd signals
             subscribeToSystemdSignals();
@@ -252,6 +311,17 @@ class Activation : public ActivationInherit
          */
         void unitStateChange(sdbusplus::message::message& msg);
 
+        /** @brief Update the Object.Delete interface for this activation
+         *
+         * Update the delete interface based on whether or not this activation
+         * is currently functional. A functional activation will have no
+         * Object.Delete, while a non-functional activation will have one.
+         *
+         * @param[in]  msg       - Data associated with subscribed signal
+         *
+         */
+        void updateDeleteInterface(sdbusplus::message::message& msg);
+
         /**
          * @brief subscribe to the systemd signals
          *
@@ -291,8 +361,14 @@ class Activation : public ActivationInherit
         /** @brief Persistent RedundancyPriority dbus object */
         std::unique_ptr<RedundancyPriority> redundancyPriority;
 
+        /** @brief Persistent Delete dbus object */
+        std::unique_ptr<Delete> deleteObject;
+
         /** @brief Used to subscribe to dbus systemd signals **/
         sdbusplus::bus::match_t systemdSignals;
+
+        /** @brief Used to subscribe to chassis power state changes **/
+        sdbusplus::bus::match_t chassisStateSignals;
 
         /** @brief Tracks whether the read-only & read-write volumes have been
          *created as part of the activation process. **/
@@ -303,12 +379,6 @@ class Activation : public ActivationInherit
          * @returns Activations - The activation value
          */
         using ActivationInherit::activation;
-
-        /** @brief Deletes the d-bus object.
-         *
-         *
-         * */
-        void delete_() override;
 
     private:
         /** @brief Member function for clarity & brevity at activation start */

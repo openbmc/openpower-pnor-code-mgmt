@@ -208,12 +208,44 @@ void Activation::unitStateChange(sdbusplus::message::message& msg)
     return;
 }
 
-void Activation::delete_()
+void Activation::updateDeleteInterface(sdbusplus::message::message& msg)
+{
+    std::string interface, chassisState;
+    std::map<std::string, sdbusplus::message::variant<std::string>> properties;
+
+    msg.read(interface, properties);
+
+    for (const auto& p : properties)
+    {
+        if (p.first == "CurrentPowerState")
+        {
+            chassisState = p.second.get<std::string>();
+        }
+    }
+
+    if ((parent.isVersionFunctional(this->versionId)) &&
+        (chassisState != CHASSIS_STATE_OFF))
+    {
+        if (deleteObject)
+        {
+            deleteObject.reset(nullptr);
+        }
+    }
+    else
+    {
+        if (!deleteObject)
+        {
+            deleteObject = std::make_unique<Delete>(bus, path, *this);
+        }
+    }
+}
+
+void Delete::delete_()
 {
     // Remove active association
-    parent.removeActiveAssociation(path);
+    parent.parent.removeActiveAssociation(parent.path);
 
-    parent.erase(versionId);
+    parent.parent.erase(parent.versionId);
 }
 
 } // namespace updater
