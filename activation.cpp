@@ -208,12 +208,30 @@ void Activation::unitStateChange(sdbusplus::message::message& msg)
     return;
 }
 
-void Activation::delete_()
+void Activation::updateDeleteInterface()
+{
+    if(parent.isVersionFunctional(this->versionId) && parent.isChassisOn())
+    {
+        if(deleteObject)
+        {
+            deleteObject.reset(nullptr);
+        }
+    }
+    else
+    {
+        if(!deleteObject)
+        {
+            deleteObject = std::make_unique<Delete>(bus, path, *this);
+        }
+    }
+}
+
+void Delete::delete_()
 {
     // Remove active association
-    parent.removeActiveAssociation(path);
+    parent.parent.removeActiveAssociation(parent.path);
 
-    parent.erase(versionId);
+    parent.parent.erase(parent.versionId);
 }
 
 } // namespace updater
