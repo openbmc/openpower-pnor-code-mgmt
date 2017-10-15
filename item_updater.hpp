@@ -18,10 +18,56 @@ using ItemUpdaterInherit = sdbusplus::server::object::object<
         sdbusplus::xyz::openbmc_project::Common::server::FactoryReset,
         sdbusplus::org::openbmc::server::Associations,
         sdbusplus::xyz::openbmc_project::Collection::server::DeleteAll>;
+using GuardResetInherit = sdbusplus::server::object::object<
+        sdbusplus::xyz::openbmc_project::Common::server::FactoryReset>;
 namespace MatchRules = sdbusplus::bus::match::rules;
 
 using AssociationList =
         std::vector<std::tuple<std::string, std::string, std::string>>;
+
+constexpr auto GUARD_PATH = "/org/openpower/control/guard";
+
+/** @class GuardReset
+ *  @brief OpenBMC GUARD factory reset implementation.
+ *  @details An implementation of xyz.openbmc_project.Common.FactoryReset under
+ *  /org/openpower/control/guard.
+ */
+class GuardReset : public GuardResetInherit
+{
+    public:
+        /** @brief Constructs GuardReset.
+         *
+         * @param[in] bus    - The Dbus bus object
+         * @param[in] path   - The Dbus object path
+         */
+        GuardReset(sdbusplus::bus::bus& bus,
+                   const std::string& path) :
+                GuardResetInherit(bus, path.c_str(), true),
+                bus(bus),
+                path(path)
+        {
+            std::vector<std::string> interfaces({interface});
+            bus.emit_interfaces_added(path.c_str(), interfaces);
+        }
+
+        ~GuardReset()
+        {
+            std::vector<std::string> interfaces({interface});
+            bus.emit_interfaces_removed(path.c_str(), interfaces);
+        }
+
+    private:
+        // TODO Remove once openbmc/openbmc#1975 is resolved
+        static constexpr auto interface =
+                "xyz.openbmc_project.Common.FactoryReset";
+        sdbusplus::bus::bus& bus;
+        std::string path;
+
+        /**
+         * @brief GUARD factory reset - clears the PNOR GUARD partition.
+         */
+        void reset() override;
+};
 
 /** @class ItemUpdater
  *  @brief Manages the activation of the host version items.
@@ -47,6 +93,10 @@ class ItemUpdater : public ItemUpdaterInherit
                                     std::placeholders::_1))
         {
             processPNORImage();
+            guardReset = std::make_unique<GuardReset>(bus, GUARD_PATH);
+
+            // Emit deferred signal.
+            emit_object_added();
         }
 
         /** @brief Sets the given priority free by incrementing
@@ -118,6 +168,9 @@ class ItemUpdater : public ItemUpdaterInherit
          * @param[in]  path - The path to remove the association from.
          */
         void removeActiveAssociation(const std::string& path);
+
+        /** @brief Persistent GuardReset dbus object */
+        std::unique_ptr<GuardReset> guardReset;
 
     private:
         /** @brief Callback function for Software.Version match.
