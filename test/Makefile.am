@@ -13,3 +13,4 @@ utest_LDFLAGS = -lgtest_main -lgtest $(PTHREAD_LIBS) $(OESDK_TESTCASE_FLAGS) \
 	$(PHOSPHOR_LOGGING_LIBS)
 
 utest_SOURCES = utest.cpp
+utest_LDADD = $(top_builddir)/openpower_update_manager-version.o
