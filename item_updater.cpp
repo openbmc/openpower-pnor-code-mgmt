@@ -31,6 +31,8 @@ constexpr auto CHASSIS_STATE_OBJ = "xyz.openbmc_project.State.Chassis";
 constexpr auto CHASSIS_STATE_OFF =
                         "xyz.openbmc_project.State.Chassis.PowerState.Off";
 constexpr auto SYSTEMD_PROPERTY_INTERFACE = "org.freedesktop.DBus.Properties";
+constexpr auto MBOXD_INTERFACE = "org.openbmc.mboxd";
+constexpr auto MBOXD_PATH = "/org/openbmc/mboxd";
 
 void ItemUpdater::createActivation(sdbusplus::message::message& m)
 {
@@ -611,6 +613,50 @@ std::string ItemUpdater::determineId(const std::string& symlinkPath)
     // for example /media/ro-2a1022fe
     static const auto PNOR_RO_PREFIX_LEN = strlen(PNOR_RO_PREFIX);
     return target.substr(PNOR_RO_PREFIX_LEN);
+}
+
+void GuardReset::reset()
+{
+    auto path = fs::path("/media/pnor-prsv/GUARD");
+    std::vector<uint8_t> mboxdArgs;
+
+    auto dbusCall = bus.new_method_call(
+            MBOXD_INTERFACE,
+            MBOXD_PATH,
+            MBOXD_INTERFACE,
+            "cmd");
+
+    // Suspend mboxd - no args required.
+    dbusCall.append((uint8_t)3, mboxdArgs);
+
+    auto responseMsg = bus.call(dbusCall);
+    if (responseMsg.is_method_error())
+    {
+        log<level::ERR>("Error in mboxd suspend call");
+        elog<InternalFailure>();
+    }
+
+    if (fs::is_regular_file(path))
+    {
+        fs::remove(path);
+    }
+
+    dbusCall = bus.new_method_call(
+            MBOXD_INTERFACE,
+            MBOXD_PATH,
+            MBOXD_INTERFACE,
+            "cmd");
+
+    // Resume mboxd with arg 1, indicating that the flash is modified.
+    mboxdArgs.push_back(1);
+    dbusCall.append((uint8_t)4, mboxdArgs);
+
+    responseMsg = bus.call(dbusCall);
+    if (responseMsg.is_method_error())
+    {
+        log<level::ERR>("Error in mboxd resume call");
+        elog<InternalFailure>();
+    }
 }
 
 } // namespace updater
