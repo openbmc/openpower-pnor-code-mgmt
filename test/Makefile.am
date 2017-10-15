@@ -9,7 +9,14 @@ TESTS = $(check_PROGRAMS)
 # Build/add utest to test suite
 utest_CPPFLAGS = -Igtest $(GTEST_CPPFLAGS) $(AM_CPPFLAGS)
 utest_CXXFLAGS = $(PTHREAD_CFLAGS) $(PHOSPHOR_LOGGING_CFLAGS)
-utest_LDFLAGS = -lgtest_main -lgtest $(PTHREAD_LIBS) $(OESDK_TESTCASE_FLAGS) \
-	$(PHOSPHOR_LOGGING_LIBS)
+utest_LDFLAGS = \
+	-lgtest_main \
+	-lgtest \
+	$(PTHREAD_LIBS) \
+	$(OESDK_TESTCASE_FLAGS) \
+	$(PHOSPHOR_LOGGING_LIBS) \
+	-lssl \
+	-lcrypto
 
 utest_SOURCES = utest.cpp
+utest_LDADD = $(top_builddir)/openpower_update_manager-version.o
