@@ -613,6 +613,48 @@ std::string ItemUpdater::determineId(const std::string& symlinkPath)
     return target.substr(PNOR_RO_PREFIX_LEN);
 }
 
+void GuardReset::reset()
+{
+    auto path = fs::path("/media/pnor-prsv/GUARD");
+
+    auto dbusCall = bus.new_method_call(
+            "org.openbmc.mboxd",
+            "/org/openbmc/mboxd",
+            "org.openbmc.mboxd",
+            "cmd");
+
+    // SUSPEND mboxd
+    dbusCall.append(3, 0);
+
+    auto responseMsg = bus.call(dbusCall);
+    if (responseMsg.is_method_error())
+    {
+        log<level::ERR>("Error in mboxd suspend call");
+        elog<InternalFailure>();
+    }
+
+    if (fs::is_regular_file(path))
+    {
+        fs::remove(path);
+    }
+
+    dbusCall = bus.new_method_call(
+            "org.openbmc.mboxd",
+            "/org/openbmc/mboxd",
+            "org.openbmc.mboxd",
+            "cmd");
+
+    // RESUME mboxd
+    dbusCall.append(4, 1, 0);
+
+    responseMsg = bus.call(dbusCall);
+    if (responseMsg.is_method_error())
+    {
+        log<level::ERR>("Error in mboxd resume call");
+        elog<InternalFailure>();
+    }
+}
+
 } // namespace updater
 } // namespace software
 } // namespace openpower
