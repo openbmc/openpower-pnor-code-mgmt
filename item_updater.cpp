@@ -169,8 +169,8 @@ void ItemUpdater::processPNORImage()
             auto pnorTOC = iter.path() / PNOR_TOC_FILE;
             if (!fs::is_regular_file(pnorTOC))
             {
-                log<level::ERR>("Failed to read pnorTOC.\n",
-                                entry("FileName=%s", pnorTOC.string()));
+                log<level::ERR>("Failed to read pnorTOC.",
+                                entry("FILENAME=%s", pnorTOC.string()));
                 ItemUpdater::erase(id);
                 continue;
             }
@@ -413,7 +413,7 @@ bool ItemUpdater::isChassisOn()
     if (response.is_method_error())
     {
         log<level::ERR>("Error in fetching current Chassis State",
-                        entry("MapperResponse=%s",
+                        entry("MAPPERRESPONSE=%s",
                               (mapperResponse.begin()->first).c_str()));
         elog<InternalFailure>();
     }
