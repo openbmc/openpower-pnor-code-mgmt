@@ -76,6 +76,11 @@ AC_ARG_VAR(MANIFEST_FILE, [The path to the MANIFEST file])
 AS_IF([test "x$MANIFEST_FILE" == "x"], [MANIFEST_FILE="MANIFEST"])
 AC_DEFINE_UNQUOTED([MANIFEST_FILE], ["$MANIFEST_FILE"], [The path to the MANIFEST file])
 
+AC_ARG_VAR(DELETE_BUSNAME, [The D-Bus busname to own])
+AS_IF([test "x$DELETE_BUSNAME" == "x"],
+    [DELETE_BUSNAME="xyz.openbmc_project.Object.Delete"])
+AC_DEFINE_UNQUOTED([DELETE_BUSNAME], ["$DELETE_BUSNAME"], [The D-Bus busname to own])
+
 AC_DEFINE(MAPPER_BUSNAME, "xyz.openbmc_project.ObjectMapper",
     [The object mapper busname.])
 AC_DEFINE(MAPPER_PATH, "/xyz/openbmc_project/object_mapper",
