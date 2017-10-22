@@ -350,6 +350,7 @@ void ItemUpdater::reset()
 
     if (reply.is_method_error())
     {
+        log<level::ERR>("Error in Mapper call while deleting pnor-prsv");
         elog<InternalFailure>();
     }
 
@@ -477,9 +478,18 @@ void ItemUpdater::erase(std::string entryId)
         log<level::ERR>(("Error: Failed to find version " + entryId + \
                          " in item updater versions map." \
                          " Unable to remove.").c_str());
-        return;
     }
-    versions.erase(entryId);
+    else
+    {
+        // Remove the file from image upload dir
+        fs::path imageDirPath = (*(it->second)).path();
+        if (fs::exists(imageDirPath))
+        {
+            fs::remove_all(imageDirPath);
+        }
+
+        versions.erase(entryId);
+    }
 
     // Removing entry in activations map
     auto ita = activations.find(entryId);
@@ -488,26 +498,22 @@ void ItemUpdater::erase(std::string entryId)
         log<level::ERR>(("Error: Failed to find version " + entryId + \
                          " in item updater activations map." \
                          " Unable to remove.").c_str());
-        return;
     }
-    activations.erase(entryId);
+    else
+    {
+        activations.erase(entryId);
+    }
+    return;
 }
 
 void ItemUpdater::deleteAll()
 {
-    std::vector<std::string> deletableActivations;
-
     for (const auto& activationIt : activations)
     {
         if (!isVersionFunctional(activationIt.first))
         {
-            deletableActivations.push_back(activationIt.first);
+            ItemUpdater::erase(activationIt.first);
         }
-    }
-
-    for (const auto& deletableIt : deletableActivations)
-    {
-        ItemUpdater::erase(deletableIt);
     }
 
     // Remove any remaining pnor-ro- or pnor-rw- volumes that do not match
