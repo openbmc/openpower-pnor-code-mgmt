@@ -6,7 +6,6 @@
 #include "xyz/openbmc_project/Software/ExtendedVersion/server.hpp"
 #include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
 #include "xyz/openbmc_project/Software/ActivationProgress/server.hpp"
-#include "xyz/openbmc_project/Object/Delete/server.hpp"
 #include "org/openbmc/Associations/server.hpp"
 
 namespace openpower
@@ -19,7 +18,6 @@ namespace updater
 using AssociationList =
         std::vector<std::tuple<std::string, std::string, std::string>>;
 using ActivationInherit = sdbusplus::server::object::object<
-    sdbusplus::xyz::openbmc_project::Object::server::Delete,
     sdbusplus::xyz::openbmc_project::Software::server::ExtendedVersion,
     sdbusplus::xyz::openbmc_project::Software::server::Activation,
     sdbusplus::org::openbmc::server::Associations>;
@@ -270,6 +268,12 @@ class Activation : public ActivationInherit
          **/
         void unsubscribeFromSystemdSignals();
 
+        /**
+         * @brief Deletes the version from Image Manager and the
+         *        untar image from image upload dir.
+         */
+        void deleteImageManagerObject();
+
         /** @brief Persistent sdbusplus DBus bus connection */
         sdbusplus::bus::bus& bus;
 
@@ -303,12 +307,6 @@ class Activation : public ActivationInherit
          * @returns Activations - The activation value
          */
         using ActivationInherit::activation;
-
-        /** @brief Deletes the d-bus object.
-         *
-         *
-         * */
-        void delete_() override;
 
     private:
         /** @brief Member function for clarity & brevity at activation start */
