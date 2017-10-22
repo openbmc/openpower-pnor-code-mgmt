@@ -93,6 +93,14 @@ std::map<std::string, std::string> Version::getValue(
     return keys;
 }
 
+void Delete::delete_()
+{
+    if (parent.eraseCallback)
+    {
+        parent.eraseCallback(parent.getId(parent.version()));
+    }
+}
+
 } // namespace updater
 } // namespace software
 } // namespace openpower
