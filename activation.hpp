@@ -6,7 +6,6 @@
 #include "xyz/openbmc_project/Software/ExtendedVersion/server.hpp"
 #include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
 #include "xyz/openbmc_project/Software/ActivationProgress/server.hpp"
-#include "xyz/openbmc_project/Object/Delete/server.hpp"
 #include "org/openbmc/Associations/server.hpp"
 
 namespace openpower
@@ -19,7 +18,6 @@ namespace updater
 using AssociationList =
         std::vector<std::tuple<std::string, std::string, std::string>>;
 using ActivationInherit = sdbusplus::server::object::object<
-    sdbusplus::xyz::openbmc_project::Object::server::Delete,
     sdbusplus::xyz::openbmc_project::Software::server::ExtendedVersion,
     sdbusplus::xyz::openbmc_project::Software::server::Activation,
     sdbusplus::org::openbmc::server::Associations>;
@@ -46,8 +44,8 @@ class RedundancyPriority : public RedundancyPriorityInherit
     public:
         /** @brief Constructs RedundancyPriority.
          *
-         *  @param[in] bus    - The Dbus bus object
-         *  @param[in] path   - The Dbus object path
+         *  @param[in] bus    - The DBus bus object
+         *  @param[in] path   - The DBus object path
          *  @param[in] parent - Parent object.
          *  @param[in] value  - The redundancyPriority value
          */
@@ -108,8 +106,8 @@ class ActivationBlocksTransition : public ActivationBlocksTransitionInherit
     public:
         /** @brief Constructs ActivationBlocksTransition.
          *
-         * @param[in] bus    - The Dbus bus object
-         * @param[in] path   - The Dbus object path
+         * @param[in] bus    - The DBus bus object
+         * @param[in] path   - The DBus object path
          */
         ActivationBlocksTransition(sdbusplus::bus::bus& bus,
                                    const std::string& path) :
@@ -140,8 +138,8 @@ class ActivationProgress : public ActivationProgressInherit
     public:
         /** @brief Constructs ActivationProgress.
          *
-         * @param[in] bus    - The Dbus bus object
-         * @param[in] path   - The Dbus object path
+         * @param[in] bus    - The DBus bus object
+         * @param[in] path   - The DBus object path
          */
         ActivationProgress(sdbusplus::bus::bus& bus,
                            const std::string& path) :
@@ -178,8 +176,8 @@ class Activation : public ActivationInherit
     public:
         /** @brief Constructs Activation Software Manager
          *
-         * @param[in] bus    - The Dbus bus object
-         * @param[in] path   - The Dbus object path
+         * @param[in] bus    - The DBus bus object
+         * @param[in] path   - The DBus object path
          * @param[in] parent - Parent object.
          * @param[in] versionId  - The software version id
          * @param[in] extVersion - The extended version
@@ -270,6 +268,12 @@ class Activation : public ActivationInherit
          **/
         void unsubscribeFromSystemdSignals();
 
+        /**
+         * @brief Deletes the version from Image Manager and the
+         *        untar image from image upload dir.
+         */
+        void deleteImageManagerObject();
+
         /** @brief Persistent sdbusplus DBus bus connection */
         sdbusplus::bus::bus& bus;
 
@@ -282,16 +286,16 @@ class Activation : public ActivationInherit
         /** @brief Version id */
         std::string versionId;
 
-        /** @brief Persistent ActivationBlocksTransition dbus object */
+        /** @brief Persistent ActivationBlocksTransition DBus object */
         std::unique_ptr<ActivationBlocksTransition> activationBlocksTransition;
 
-        /** @brief Persistent ActivationProgress dbus object */
+        /** @brief Persistent ActivationProgress DBus object */
         std::unique_ptr<ActivationProgress> activationProgress;
 
-        /** @brief Persistent RedundancyPriority dbus object */
+        /** @brief Persistent RedundancyPriority DBus object */
         std::unique_ptr<RedundancyPriority> redundancyPriority;
 
-        /** @brief Used to subscribe to dbus systemd signals **/
+        /** @brief Used to subscribe to DBus systemd signals **/
         sdbusplus::bus::match_t systemdSignals;
 
         /** @brief Tracks whether the read-only & read-write volumes have been
@@ -303,12 +307,6 @@ class Activation : public ActivationInherit
          * @returns Activations - The activation value
          */
         using ActivationInherit::activation;
-
-        /** @brief Deletes the d-bus object.
-         *
-         *
-         * */
-        void delete_() override;
 
     private:
         /** @brief Member function for clarity & brevity at activation start */
