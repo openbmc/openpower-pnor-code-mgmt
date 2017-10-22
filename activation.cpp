@@ -3,6 +3,7 @@
 #include "config.h"
 #include "item_updater.hpp"
 #include "serialize.hpp"
+#include <phosphor-logging/log.hpp>
 
 namespace openpower
 {
@@ -13,6 +14,8 @@ namespace updater
 
 namespace fs = std::experimental::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
+
+using namespace phosphor::logging;
 
 constexpr auto SYSTEMD_SERVICE   = "org.freedesktop.systemd1";
 constexpr auto SYSTEMD_OBJ_PATH  = "/org/freedesktop/systemd1";
@@ -89,6 +92,8 @@ void Activation::finishActivation()
 
     ubiVolumesCreated = false;
     Activation::unsubscribeFromSystemdSignals();
+    // Remove version object from image manager
+    Activation::deleteImageManagerObject();
     // Create active association
     parent.createActiveAssociation(path);
 }
@@ -167,6 +172,47 @@ auto Activation::requestedActivation(RequestedActivations value) ->
     return softwareServer::Activation::requestedActivation(value);
 }
 
+void Activation::deleteImageManagerObject()
+{
+    // Get the Delete object for <versionID> inside image_manager
+    auto method = this->bus.new_method_call(MAPPER_BUSNAME,
+                                            MAPPER_PATH,
+                                            MAPPER_INTERFACE,
+                                            "GetObject");
+    auto versionPath = SOFTWARE_OBJPATH + std::string("/") + versionId.c_str();
+    method.append(versionPath);
+    method.append(std::vector<std::string>({DELETE_BUSNAME}));
+    auto mapperResponseMsg = bus.call(method);
+    if (mapperResponseMsg.is_method_error())
+    {
+        log<level::ERR>("Error in Get Delete Object",
+                        entry("VERSIONPATH=%s", versionPath));
+        return;
+    }
+    std::map<std::string, std::vector<std::string>> mapperResponse;
+    mapperResponseMsg.read(mapperResponse);
+    if (mapperResponse.begin() == mapperResponse.end())
+    {
+        log<level::ERR>("ERROR in reading the mapper response",
+                        entry("VERSIONPATH=%s", versionPath));
+        return;
+    }
+
+    // Call the Delete object for <versionID> inside image_manager
+    method = this->bus.new_method_call((mapperResponse.begin()->first).c_str(),
+                                       versionPath.c_str(),
+                                       DELETE_BUSNAME,
+                                       "Delete");
+    mapperResponseMsg = bus.call(method);
+    //Check that the bus call didn't result in an error
+    if (mapperResponseMsg.is_method_error())
+    {
+        log<level::ERR>("Error in Deleting image from image manager",
+                        entry("VERSIONPATH=%s", versionPath));
+        return;
+    }
+}
+
 uint8_t RedundancyPriority::priority(uint8_t value)
 {
     parent.parent.freePriority(value, parent.versionId);
@@ -206,14 +252,6 @@ void Activation::unitStateChange(sdbusplus::message::message& msg)
     }
 
     return;
-}
-
-void Activation::delete_()
-{
-    // Remove active association
-    parent.removeActiveAssociation(path);
-
-    parent.erase(versionId);
 }
 
 } // namespace updater
