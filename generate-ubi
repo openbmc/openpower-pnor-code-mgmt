@@ -1,0 +1,52 @@
+#!/bin/bash
+set -eo pipefail
+
+help=$'Generate PNOR UBI image from a PNOR SquashFS Tarball
+
+Generates a UBI, Unsorted Block Images, PNOR image from a PNOR SquashFS Tarball.
+The PNOR SquashFS Tarball is generated from the generate-squashfs script.
+
+usage: generate-ubi [OPTION] <PNOR SquashFS Tarball>...
+
+Options:
+   -f, --file <file>      Specify destination file. Defaults to
+                          `pwd`/<PNOR Tarball FILE, removing .squashfs.tar>.ubi
+                          (For example, "generate-ubi my.pnor.squashfs.tar"
+                          would generate `pwd`/my.pnor.ubi output.)
+   -h, --help             Display this help text and exit.
+'
+
+while [[ $# -gt 0 ]]; do
+  key="$1"
+  case $key in
+    -f|--file)
+      outfile="$2"
+      shift 2
+      ;;
+    -h|--help)
+      echo "$help"
+      exit
+      ;;
+    *)
+      tarball="$1"
+      shift 1
+      ;;
+  esac
+done
+
+if [ ! -f "${tarball}" ]; then
+  echo "Please enter a PNOR SquashFS Tarball."
+  echo "To generate PNOR SquashFS Tarball see generate-squashfs"
+  echo "$help"
+  exit 1
+fi
+
+if [[ -z $outfile ]]; then
+    # Remove .squashfs.tar from end if present and add .ubi
+    outfile=`pwd`/${tarball%".squashfs.tar"}.ubi
+else
+  if [[ $outfile != /* ]]; then
+    outfile=`pwd`/$outfile
+  fi
+fi
+
