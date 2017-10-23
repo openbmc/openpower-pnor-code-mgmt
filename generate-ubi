@@ -50,3 +50,21 @@ else
   fi
 fi
 
+echo "Generating PNOR UBI image."
+
+squashfs_file_name="pnor.xz.squashfs"
+
+# Scratch directory for untarring and config file
+scratch_dir=`mktemp -d`
+
+# Untar tarball
+tar -xvf ${tarball} -C ${scratch_dir}
+
+# All valid PNOR SquashFS Tarballs have a file named "pnor.xz.squashfs"
+if [ ! -f "${scratch_dir}/${squashfs_file_name}" ]; then
+  echo "No \"${squashfs_file_name}\" file in the tarball!"
+  rm -r "${scratch_dir}"
+  exit 1
+fi
+
+rm -r "${scratch_dir}"
