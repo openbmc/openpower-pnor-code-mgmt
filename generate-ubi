@@ -53,18 +53,88 @@ fi
 echo "Generating PNOR UBI image."
 
 squashfs_file_name="pnor.xz.squashfs"
+manifest_file_name="MANIFEST"
 
 # Scratch directory for untarring and config file
 scratch_dir=`mktemp -d`
 
+squashfs_file=${scratch_dir}/${squashfs_file_name}
+manifest_file=${scratch_dir}/${manifest_file_name}
 # Untar tarball
 tar -xvf ${tarball} -C ${scratch_dir}
 
 # All valid PNOR SquashFS Tarballs have a file named "pnor.xz.squashfs"
-if [ ! -f "${scratch_dir}/${squashfs_file_name}" ]; then
+if [ ! -f "${squashfs_file}" ]; then
   echo "No \"${squashfs_file_name}\" file in the tarball!"
   rm -r "${scratch_dir}"
   exit 1
 fi
 
+# Need the manifest file for calculating the version id
+if [ ! -f "${manifest_file}" ]; then
+  echo "No \"${manifest_file_name}\" file in the tarball!"
+  rm -r "${scratch_dir}"
+  exit 1
+fi
+
+# Flash page size in bytes
+FLASH_PAGE_SIZE="1"
+# These next 2 are in kilobytes(KiB)
+FLASH_PEB_SIZE="64"
+# Future enhancement would be to allow this to be passed in
+# 128MiB (128 * 1024)
+FLASH_SIZE="131072"
+
+# Create UBI volume
+add_volume()
+{
+  config_file=$1
+  vol_id=$2
+  vol_type=$3
+  vol_name=$4
+  image=$5
+  vol_size=$6
+
+  echo \[$vol_name\] >> $config_file
+  echo mode=ubi >> $config_file
+  if [ ! -z $image ]; then
+    echo image=$image >> $config_file
+  fi
+  echo vol_type=$vol_type >> $config_file
+  echo vol_name=$vol_name >> $config_file
+  echo vol_id=$vol_id >> $config_file
+  if [ ! -z $vol_size ]; then
+    echo vol_size=$vol_size >> $config_file
+  fi
+}
+
+# Create an image with all 1's
+mk_nor_image()
+{
+  image_dst=$1
+  image_size_kb=$2
+  dd if=/dev/zero bs=1k count=$image_size_kb | tr '\000' '\377' > $image_dst
+}
+
+# Used to temporary hold the UBI volume
+tmpfile=$(mktemp ${scratch_dir}/ubinized.XXXXXX)
+
+# Configuration file used to create UBI image
+config_file=${scratch_dir}/ubinize-PNOR.cfg
+
+# The version is listed in the MANIFEST file as "version=v1.99.10-19"
+# Use the version to calculate the version id, a unique 8 hexadecimal digit id
+version_id=$(sed -ne '/version=/ {s/version=//;p}' ${manifest_file} | head -n1 | \
+  tr -d '\n' | sha512sum | cut -b 1-8)
+
+add_volume $config_file 0 static pnor-ro-${version_id} ${squashfs_file}
+add_volume $config_file 1 dynamic pnor-prsv "" 2MiB
+add_volume $config_file 2 dynamic pnor-rw-${version_id} "" 16MiB
+
+# Build the UBI image
+ubinize -p ${FLASH_PEB_SIZE}KiB -m ${FLASH_PAGE_SIZE} -o ${tmpfile} $config_file
+mk_nor_image ${outfile} ${FLASH_SIZE}
+dd bs=1k conv=notrunc seek=0 if=${tmpfile} of=${outfile}
+
+echo "PNOR UBI image at ${outfile}"
 rm -r "${scratch_dir}"
