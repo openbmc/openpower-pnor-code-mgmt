@@ -66,6 +66,9 @@ manifest_file_name="MANIFEST"
 # Scratch directory for untarring and config file
 scratch_dir=`mktemp -d`
 
+# Make sure scratch directory always gets cleaned up
+trap "{ rm -r ${scratch_dir}; }" EXIT
+
 squashfs_file=${scratch_dir}/${squashfs_file_name}
 manifest_file=${scratch_dir}/${manifest_file_name}
 # Untar tarball
@@ -124,7 +127,7 @@ mk_nor_image()
   dd if=/dev/zero bs=1k count=$image_size_kb | tr '\000' '\377' > $image_dst
 }
 
-# Used to temporary hold the UBI volume
+# Used to temporary hold the UBI image
 tmpfile=$(mktemp ${scratch_dir}/ubinized.XXXXXX)
 
 # Configuration file used to create UBI image
@@ -145,4 +148,3 @@ mk_nor_image ${outfile} ${image_size}
 dd bs=1k conv=notrunc seek=0 if=${tmpfile} of=${outfile}
 
 echo "PNOR UBI image at ${outfile}"
-rm -r "${scratch_dir}"
