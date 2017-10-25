@@ -1,10 +1,10 @@
 #!/bin/bash
 set -eo pipefail
 
-help=$'Generate Tarball with SquashFS image and MANIFEST Script
+help=$'Generate Tarball with PNOR SquashFS image and MANIFEST Script
 
-Generates a SquashFS image from the PNOR image
-Creates a MANIFEST for image verification
+Generates a PNOR SquashFS image from the PNOR image
+Creates a MANIFEST for image verification and recreation
 Packages the SquashFS image and MANIFEST together in a tarball
 
 usage: generate-squashfs [OPTION] <PNOR FILE>...
