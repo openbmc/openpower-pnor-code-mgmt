@@ -13,14 +13,22 @@ Options:
                           `pwd`/<PNOR Tarball FILE, removing .squashfs.tar>.ubi.mtd
                           (For example, "generate-ubi my.pnor.squashfs.tar"
                           would generate `pwd`/my.pnor.ubi.mtd output.)
+   -s, --size <MiB>       Specify the size of the PNOR UBI image in MiBs.
+                          Defaults to 128.
    -h, --help             Display this help text and exit.
 '
+# 128MiB is the default image size
+image_size="128"
 
 while [[ $# -gt 0 ]]; do
   key="$1"
   case $key in
     -f|--file)
       outfile="$2"
+      shift 2
+      ;;
+    -s|--size)
+      image_size="$2"
       shift 2
       ;;
     -h|--help)
@@ -81,9 +89,9 @@ fi
 FLASH_PAGE_SIZE="1"
 # kibibyte(KiB)
 FLASH_PEB_SIZE="64"
-# Future enhancement would be to allow this to be passed in
-# 128MiB (128 * 1024)
-FLASH_SIZE="131072"
+
+# Convert image size from MiB to KiB
+image_size=$((${image_size} * 1024))
 
 # Create UBI volume
 add_volume()
@@ -133,7 +141,7 @@ add_volume $config_file 2 dynamic pnor-rw-${version_id} "" 16MiB
 
 # Build the UBI image
 ubinize -p ${FLASH_PEB_SIZE}KiB -m ${FLASH_PAGE_SIZE} -o ${tmpfile} $config_file
-mk_nor_image ${outfile} ${FLASH_SIZE}
+mk_nor_image ${outfile} ${image_size}
 dd bs=1k conv=notrunc seek=0 if=${tmpfile} of=${outfile}
 
 echo "PNOR UBI image at ${outfile}"
