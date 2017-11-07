@@ -3,6 +3,7 @@
 #include <sdbusplus/server.hpp>
 #include "activation.hpp"
 #include <xyz/openbmc_project/Common/FactoryReset/server.hpp>
+#include <xyz/openbmc_project/Object/Enable/server.hpp>
 #include "version.hpp"
 #include "org/openbmc/Associations/server.hpp"
 #include "xyz/openbmc_project/Collection/DeleteAll/server.hpp"
@@ -20,12 +21,15 @@ using ItemUpdaterInherit = sdbusplus::server::object::object<
         sdbusplus::xyz::openbmc_project::Collection::server::DeleteAll>;
 using GardResetInherit = sdbusplus::server::object::object<
         sdbusplus::xyz::openbmc_project::Common::server::FactoryReset>;
+using ObjectEnable = sdbusplus::server::object::object<
+        sdbusplus::xyz::openbmc_project::Object::server::Enable>;
 namespace MatchRules = sdbusplus::bus::match::rules;
 
 using AssociationList =
         std::vector<std::tuple<std::string, std::string, std::string>>;
 
 constexpr auto GARD_PATH = "/org/openpower/control/gard";
+constexpr auto VOLATILE_PATH = "/org/openpower/control/volatile";
 
 /** @class GardReset
  *  @brief OpenBMC GARD factory reset implementation.
@@ -94,6 +98,7 @@ class ItemUpdater : public ItemUpdaterInherit
         {
             processPNORImage();
             gardReset = std::make_unique<GardReset>(bus, GARD_PATH);
+            volatileEnable = std::make_unique<ObjectEnable>(bus, VOLATILE_PATH);
 
             // Emit deferred signal.
             emit_object_added();
@@ -171,6 +176,9 @@ class ItemUpdater : public ItemUpdaterInherit
 
         /** @brief Persistent GardReset dbus object */
         std::unique_ptr<GardReset> gardReset;
+
+        /** @brief Persistent ObjectEnable dbus object */
+        std::unique_ptr<ObjectEnable> volatileEnable;
 
     private:
         /** @brief Callback function for Software.Version match.
