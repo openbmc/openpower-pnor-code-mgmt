@@ -333,22 +333,28 @@ void ItemUpdater::reset()
 
         if (reply.is_method_error())
         {
+            log<level::ERR>("Failure to clear read-write partitions",
+                    entry("SERVICE_FILE=%s", serviceFile));
             elog<InternalFailure>();
         }
 
         removeFile(it.first);
     }
+    static constexpr auto serviceFile =
+            "obmc-flash-bios-ubiclear@pnor-prsv.service";
     // Clear the preserved partition.
     auto method = bus.new_method_call(
             SYSTEMD_BUSNAME,
             SYSTEMD_PATH,
             SYSTEMD_INTERFACE,
             "StartUnit");
-    method.append("obmc-flash-bios-ubiclear@pnor-prsv.service", "replace");
+    method.append(serviceFile, "replace");
     auto reply = bus.call(method);
 
     if (reply.is_method_error())
     {
+        log<level::ERR>("Failure to clear preserved partition",
+                    entry("SERVICE_FILE=%s", serviceFile));
         elog<InternalFailure>();
     }
 
