@@ -532,7 +532,11 @@ void ItemUpdater::freeSpace()
         if (iter.second.get()->activation() == server::Activation::Activations::Active)
         {
             count++;
-            if (iter.second->redundancyPriority.get()->priority() > highestPriority)
+            if (isVersionFunctional(iter.second->versionId))
+            {
+                continue;
+            }
+            if (iter.second->redundancyPriority.get()->priority() >= highestPriority)
             {
                 highestPriority = iter.second->redundancyPriority.get()->priority();
                 highestPriorityVersion = iter.second->versionId;
