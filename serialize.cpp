@@ -3,6 +3,7 @@
 #include <cereal/archives/json.hpp>
 #include <fstream>
 #include "serialize.hpp"
+#include <sdbusplus/server.hpp>
 
 namespace openpower
 {
@@ -15,6 +16,8 @@ namespace fs = std::experimental::filesystem;
 
 void storeToFile(std::string versionId, uint8_t priority)
 {
+    auto bus = sdbusplus::bus::new_default();
+
     if (!fs::is_directory(PERSIST_DIR))
     {
         fs::create_directories(PERSIST_DIR);
@@ -34,10 +37,23 @@ void storeToFile(std::string versionId, uint8_t priority)
         cereal::JSONOutputArchive rwArchive(rwOutput);
         rwArchive(cereal::make_nvp("priority", priority));
     }
+
+    std::string serviceFile = "obmc-flash-bmc-setenv@pnor\\x2d" + versionId +
+            "\\x3d" + std::to_string(priority) + ".service";
+    auto method = bus.new_method_call(
+            SYSTEMD_BUSNAME,
+            SYSTEMD_PATH,
+            SYSTEMD_INTERFACE,
+            "StartUnit");
+    method.append(serviceFile, "replace");
+    bus.call_noreply(method);
 }
 
 bool restoreFromFile(std::string versionId, uint8_t& priority)
 {
+    // TODO: openbmc/openbmc#2666 - Reevaluate how priority values should be
+    //                              stored. Environment variables better?
+
     auto varPath = PERSIST_DIR + versionId;
     if (fs::exists(varPath))
     {
@@ -69,11 +85,43 @@ bool restoreFromFile(std::string versionId, uint8_t& priority)
             fs::remove(rwPath);
         }
     }
+
+    try
+    {
+        std::string getEnvVar = "f()                                           \
+                                 {                                             \
+                                     string=$(fw_printenv pnor-" + versionId +
+                                             " 2>/dev/null);                   \
+                                     if [[ $string == *'='* ]];                \
+                                         then return ${string#*=};             \
+                                     fi;                                       \
+                                     return 255;                               \
+                                 };                                            \
+                                 f";
+
+        priority = WEXITSTATUS(system(getEnvVar.c_str()));
+
+        return true;
+    }
+    catch (const std::exception& e){}
+
     return false;
 }
 
 void removeFile(std::string versionId)
 {
+    auto bus = sdbusplus::bus::new_default();
+
+    std::string serviceFile = "obmc-flash-bmc-setenv@pnor\\x2d" + versionId +
+            ".service";
+    auto method = bus.new_method_call(
+            SYSTEMD_BUSNAME,
+            SYSTEMD_PATH,
+            SYSTEMD_INTERFACE,
+            "StartUnit");
+    method.append(serviceFile, "replace");
+    bus.call_noreply(method);
+
     std::string path = PERSIST_DIR + versionId;
     if (fs::exists(path))
     {
