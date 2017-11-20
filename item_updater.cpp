@@ -357,8 +357,6 @@ void ItemUpdater::reset()
                     entry("SERVICE_FILE=%s", serviceFile));
             elog<InternalFailure>();
         }
-
-        removeFile(it.first);
     }
     static constexpr auto serviceFile =
             "obmc-flash-bios-ubiclear@pnor-prsv.service";
