@@ -317,6 +317,15 @@ void ItemUpdater::removeReadWritePartition(std::string versionId)
 
 void ItemUpdater::reset()
 {
+    std::string patchDir = "/usr/local/share/pnor";
+    if (fs::is_directory(patchDir))
+    {
+        for (const auto& iter : fs::directory_iterator(patchDir))
+        {
+            fs::remove_all(iter);
+        }
+    }
+
     for (const auto& it : activations)
     {
         auto serviceFile = "obmc-flash-bios-ubiclear@pnor-rw-" + it.first +
