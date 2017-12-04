@@ -28,4 +28,8 @@ utest_LDFLAGS = \
 	-lcrypto
 
 utest_SOURCES = utest.cpp
-utest_LDADD = $(top_builddir)/openpower_update_manager-version.o
+utest_LDADD = \
+        $(top_builddir)/org/openbmc/Associations/openpower_update_manager-server.o \
+	$(top_builddir)/openpower_update_manager-activation.o \
+	$(top_builddir)/openpower_update_manager-item_updater.o \
+	$(top_builddir)/openpower_update_manager-version.o
