@@ -93,6 +93,46 @@ std::map<std::string, std::string> Version::getValue(
     return keys;
 }
 
+void Delete::delete_()
+{
+    if (parent.eraseCallback)
+    {
+        parent.eraseCallback(parent.getId(parent.version()));
+    }
+}
+
+void Version::updateDeleteInterface(sdbusplus::message::message& msg)
+{
+    std::string interface, chassisState;
+    std::map<std::string, sdbusplus::message::variant<std::string>> properties;
+
+    msg.read(interface, properties);
+
+    for (const auto& p : properties)
+    {
+        if (p.first == "CurrentPowerState")
+        {
+            chassisState = p.second.get<std::string>();
+        }
+    }
+
+    if ((parent.isVersionFunctional(parent.versionId)) &&
+        (chassisState != CHASSIS_STATE_OFF))
+    {
+        if (deleteObject)
+        {
+            deleteObject.reset(nullptr);
+        }
+    }
+    else
+    {
+        if (!deleteObject)
+        {
+            deleteObject = std::make_unique<Delete>(bus, objPath, *this);
+        }
+    }
+}
+
 } // namespace updater
 } // namespace software
 } // namespace openpower
