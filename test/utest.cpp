@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <openssl/sha.h>
 #include <string>
+#include "item_updater.hpp"
 #include "version.hpp"
 
 using namespace openpower::software::updater;
