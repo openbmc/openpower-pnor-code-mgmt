@@ -7,7 +7,7 @@
 #include "version.hpp"
 #include <phosphor-logging/elog-errors.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
-#include "item_updater.hpp"
+#include "item_updater.cpp"
 #include <openssl/sha.h>
 
 namespace openpower
@@ -91,6 +91,46 @@ std::map<std::string, std::string> Version::getValue(
     }
 
     return keys;
+}
+
+void Delete::delete_()
+{
+    if (parent.eraseCallback)
+    {
+        parent.eraseCallback(parent.getId(parent.version()));
+    }
+}
+
+void Version::updateDeleteInterface(sdbusplus::message::message& msg)
+{
+    std::string interface, chassisState;
+    std::map<std::string, sdbusplus::message::variant<std::string>> properties;
+
+    msg.read(interface, properties);
+
+    for (const auto& p : properties)
+    {
+        if (p.first == "CurrentPowerState")
+        {
+            chassisState = p.second.get<std::string>();
+        }
+    }
+
+    if ((parent.isVersionFunctional(this->versionId)) &&
+        (chassisState != CHASSIS_STATE_OFF))
+    {
+        if (deleteObject)
+        {
+            deleteObject.reset(nullptr);
+        }
+    }
+    else
+    {
+        if (!deleteObject)
+        {
+            deleteObject = std::make_unique<Delete>(bus, objPath, *this);
+        }
+    }
 }
 
 } // namespace updater
