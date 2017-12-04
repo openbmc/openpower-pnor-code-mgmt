@@ -6,11 +6,11 @@ sbin_PROGRAMS = \
 	openpower-update-manager
 
 openpower_update_manager_SOURCES = \
+        item_updater.cpp \
 	activation.cpp \
 	version.cpp \
 	serialize.cpp \
 	watch.cpp \
-	item_updater.cpp \
 	item_updater_main.cpp
 
 nodist_openpower_update_manager_SOURCES = \
