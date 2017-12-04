@@ -178,7 +178,7 @@ class ItemUpdater : public ItemUpdaterInherit
          *
          * @return - Returns true if this version is currently functional.
          */
-        static bool isVersionFunctional(const std::string& versionId);
+        static bool isVersionFunctional(const std::string versionId);
 
     private:
         /** @brief Callback function for Software.Version match.
