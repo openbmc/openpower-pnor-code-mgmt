@@ -25,7 +25,7 @@ namespace MatchRules = sdbusplus::bus::match::rules;
 using AssociationList =
         std::vector<std::tuple<std::string, std::string, std::string>>;
 
-constexpr auto GARD_PATH = "/org/openpower/control/gard";
+constexpr auto GARD_PATH = "/org/open_power/control/gard";
 
 /** @class GardReset
  *  @brief OpenBMC GARD factory reset implementation.
