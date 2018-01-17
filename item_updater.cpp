@@ -1,6 +1,7 @@
 #include <string>
 #include <experimental/filesystem>
 #include <fstream>
+#include <queue>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include "xyz/openbmc_project/Common/error.hpp"
@@ -546,31 +547,36 @@ void ItemUpdater::deleteAll()
 // TODO: openbmc/openbmc#1402 Monitor flash usage
 void ItemUpdater::freeSpace()
 {
+    //  Versions with the highest priority in front
+    std::priority_queue<std::pair<int, std::string>,
+                        std::vector<std::pair<int, std::string>>,
+                        std::less<std::pair<int, std::string>>> versionsPQ;
+
     std::size_t count = 0;
-    decltype(activations.begin()->second->redundancyPriority.get()->priority())
-            highestPriority = 0;
-    decltype(activations.begin()->second->versionId) highestPriorityVersion;
     for (const auto& iter : activations)
     {
         if (iter.second.get()->activation() == server::Activation::Activations::Active)
         {
             count++;
+            // Don't put the functional version on the queue since we can't
+            // remove the "running" PNOR version.
             if (isVersionFunctional(iter.second->versionId))
             {
                 continue;
             }
-            if (iter.second->redundancyPriority.get()->priority() >= highestPriority)
-            {
-                highestPriority = iter.second->redundancyPriority.get()->priority();
-                highestPriorityVersion = iter.second->versionId;
-            }
+            versionsPQ.push(std::make_pair(
+                    iter.second->redundancyPriority.get()->priority(),
+                    iter.second->versionId));
         }
     }
-    // Remove the pnor version with highest priority since the PNOR
-    // can't hold more than 2 versions.
-    if (count >= ACTIVE_PNOR_MAX_ALLOWED)
+
+    // If the number of PNOR versions is over ACTIVE_PNOR_MAX_ALLOWED -1,
+    // remove the highest priority one(s).
+    while (count >= ACTIVE_PNOR_MAX_ALLOWED && !versionsPQ.empty())
     {
-        erase(highestPriorityVersion);
+        erase(versionsPQ.top().second);
+        versionsPQ.pop();
+        count--;
     }
 }
 
