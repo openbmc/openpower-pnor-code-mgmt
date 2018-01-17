@@ -141,8 +141,12 @@ class ItemUpdater : public ItemUpdaterInherit
          */
         void deleteAll();
 
-        /** @brief Deletes the active PNOR version with highest priority
-                   if the total number of volumes exceeds the threshold.
+        /** @brief Brings the total number of active PNOR versions to
+         *         ACTIVE_PNOR_MAX_ALLOWED -1. This function is intended to be
+         *         run before activating a new PNOR version. If this function
+         *         needs to delete any PNOR version(s) it will delete the
+         *         version(s) with the highest priority, skipping the
+         *         functional PNOR version.
          */
         void freeSpace();
 
