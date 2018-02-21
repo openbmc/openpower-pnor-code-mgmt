@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <cstddef>
 #include <cstring>
+#include <functional>
 #include <string>
 #include <sys/inotify.h>
 #include <unistd.h>
