@@ -63,6 +63,15 @@ fi
 
 scratch_dir=`mktemp -d`
 
+if [[ -z "${PRIVATE_KEY_PATH}" ]]; then
+  echo "Image is NOT secure!! Signing with the open private key!"
+  PRIVATE_KEY_PATH="${HOST_DIR}/usr/share/OpenBMC.priv"
+fi
+public_key_file=publickey
+public_key_path=${scratch_dir}/$public_key_file
+openssl pkey -in "${PRIVATE_KEY_PATH}" -pubout -out ${public_key_path}
+echo "Using Private key: $PRIVATE_KEY_PATH"
+
 echo "Parsing PNOR TOC..."
 
 pflash --partition=part --read=${scratch_dir}/part -F ${pnorfile}
@@ -118,8 +127,17 @@ manifest_location="MANIFEST"
 echo -e "purpose=xyz.openbmc_project.Software.Version.VersionPurpose.Host\nversion=$version\n\
 extended_version=$extended_version" >> $manifest_location
 
+private_key_name=$(basename "${PRIVATE_KEY_PATH}")
+key_type="${private_key_name%.*}"
+echo KeyType="${key_type}" >> $manifest_location
+echo HashType="RSA-SHA256" >> $manifest_location
+
+for file in pnor.xz.squashfs $manifest_location $public_key_file; do
+  openssl dgst -sha256 -sign ${PRIVATE_KEY_PATH} -out "${file}.sig" $file
+done
+
 echo "Generating tarball to contain the SquashFS image and its MANIFEST"
-tar -cvf $outfile $manifest_location pnor.xz.squashfs
+tar -cvf $outfile $manifest_location $public_key_file pnor.xz.squashfs *.sig
 
 echo "SquashFSTarball at ${outfile}"
 rm -r "${scratch_dir}"
