@@ -14,13 +14,38 @@ Options:
                           `pwd`/<PNOR FILE>.pnor.squashfs.tar if unspecified.
                           (For example, "generate-squashfs my.pnor" would
                           generate `pwd`/my.pnor.squashfs.tar output.)
+   -s, --sign <path>      Sign the image. The optional path argument specifies
+                          the private key file. Defaults to the bash variable
+                          PRIVATE_KEY_PATH if available, or else uses the
+                          open-source private key in this script.
    -h, --help             Display this help text and exit.
 '
+
+private_key=$'-----BEGIN PRIVATE KEY-----
+MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBAPvSDLu6slkP1gri
+PaeQXL9ysD69J/HjbBCIQ0RPfeWBb75US1tRTjPP0Ub8CtH8ExVf8iF1ulsZA78B
+zIjBYZVp9pyD6LbpZ/hjV7rIH6dTNhoVpdA+F8LzmQ7cyhHG8l2JMvdunwF2uX5k
+D4WDcZt/ITKZNQNavPtmIyD5HprdAgMBAAECgYEAuQkTSi5ZNpAoWz76xtGRFSwU
+zUT4wQi3Mz6tDtjKTYXasiQGa0dHC1M9F8fDu6BZ9W7W4Dc9hArRcdzEighuxoI/
+nZI/0uL89iUEywnDEIHuS6D5JlZaj86/nx9YvQnO8F/seM+MX0EAWVrd5wC7aAF1
+h6Fu7ykZB4ggUjQAWwECQQD+AUiDOEO+8btLJ135dQfSGc5VFcZiequnKWVm6uXt
+rX771hEYjYMjLqWGFg9G4gE3GuABM5chMINuQQUivy8tAkEA/cxfy19XkjtqcMgE
+x/UDt6Nr+Ky/tk+4Y65WxPRDas0uxFOPk/vEjgVmz1k/TAy9G4giisluTvtmltr5
+DCLocQJBAJnRHx9PiD7uVhRJz6/L/iNuOzPtTsi+Loq5F83+O6T15qsM1CeBMsOw
+cM5FN5UeMcwz+yjfHAsePMkcmMaU7jUCQHlg9+N8upXuIo7Dqj2zOU7nMmkgvSNE
+5yuNImRZabC3ZolwaTdd7nf5r1y1Eyec5Ag5yENV6JKPe1Xkbb1XKJECQDngA0h4
+6ATvfP1Vrx4CbP11eKXbCsZ9OGPHSgyvVjn68oY5ZP3uPsIattoN7dE2BRfuJm7m
+F0nIdUAhR0yTfKM=
+-----END PRIVATE KEY-----
+'
+
 # Reference the ffs structures at:
 # https://github.com/open-power/hostboot/blob/master/src/usr/pnor/common/ffs_hb.H
 # https://github.com/open-power/hostboot/blob/master/src/usr/pnor/ffs.h
 let ffs_entry_size=128
 let vercheck_offset=112
+do_sign=false
+private_key_path="${PRIVATE_KEY_PATH}"
 outfile=""
 declare -a partitions=()
 tocfile="pnor.toc"
@@ -31,6 +56,15 @@ while [[ $# -gt 0 ]]; do
     -f|--file)
       outfile="$2"
       shift 2
+      ;;
+    -s|--sign)
+      do_sign=true
+      if [[ ! -z "${2}"  && "${2}" != -* ]]; then
+        private_key_path="$2"
+        shift 2
+      else
+        shift 1
+      fi
       ;;
     -h|--help)
       echo "$help"
@@ -62,6 +96,25 @@ else
 fi
 
 scratch_dir=`mktemp -d`
+
+if [[ "${do_sign}" == true ]]; then
+  if [[ -z "${private_key_path}" ]]; then
+    private_key_path=${scratch_dir}/OpenBMC.priv
+    echo "${private_key}" > "${private_key_path}"
+    echo "Image is NOT secure!! Signing with the open private key!"
+  else
+    if [[ ! -f "${private_key_path}" ]]; then
+      echo "Couldn't find private key ${private_key_path}."
+      exit 1
+    fi
+
+    echo "Signing with ${private_key_path}."
+  fi
+
+  public_key_file=publickey
+  public_key_path=${scratch_dir}/$public_key_file
+  openssl pkey -in "${private_key_path}" -pubout -out ${public_key_path}
+fi
 
 echo "Parsing PNOR TOC..."
 
@@ -118,8 +171,21 @@ manifest_location="MANIFEST"
 echo -e "purpose=xyz.openbmc_project.Software.Version.VersionPurpose.Host\nversion=$version\n\
 extended_version=$extended_version" >> $manifest_location
 
+if [[ "${do_sign}" == true ]]; then
+  private_key_name=$(basename "${private_key_path}")
+  key_type="${private_key_name%.*}"
+  echo KeyType="${key_type}" >> $manifest_location
+  echo HashType="RSA-SHA256" >> $manifest_location
+
+  for file in pnor.xz.squashfs $manifest_location $public_key_file; do
+    openssl dgst -sha256 -sign ${private_key_path} -out "${file}.sig" $file
+  done
+
+  additional_files="${public_key_file} *.sig"
+fi
+
 echo "Generating tarball to contain the SquashFS image and its MANIFEST"
-tar -cvf $outfile $manifest_location pnor.xz.squashfs
+tar -cvf $outfile $manifest_location pnor.xz.squashfs $additional_files
 
 echo "SquashFSTarball at ${outfile}"
 rm -r "${scratch_dir}"
