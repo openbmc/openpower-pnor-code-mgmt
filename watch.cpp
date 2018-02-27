@@ -23,8 +23,8 @@ namespace fs = std::experimental::filesystem;
 
 Watch::Watch(sd_event* loop,
              std::function<void(std::string&)> functionalCallback) :
-        functionalCallback(functionalCallback),
-        fd(inotifyInit())
+    functionalCallback(functionalCallback),
+    fd(inotifyInit())
 
 {
     // Create PNOR_ACTIVE_PATH if doesn't exist.
@@ -37,25 +37,18 @@ Watch::Watch(sd_event* loop,
     if (-1 == wd)
     {
         auto error = errno;
-        throw std::system_error(error,
-                                std::generic_category(),
+        throw std::system_error(error, std::generic_category(),
                                 "Error occurred during the inotify_init1");
     }
 
     decltype(eventSource.get()) sourcePtr = nullptr;
-    auto rc = sd_event_add_io(loop,
-                              &sourcePtr,
-                              fd(),
-                              EPOLLIN,
-                              callback,
-                              this);
+    auto rc = sd_event_add_io(loop, &sourcePtr, fd(), EPOLLIN, callback, this);
 
     eventSource.reset(sourcePtr);
 
     if (0 > rc)
     {
-        throw std::system_error(-rc,
-                                std::generic_category(),
+        throw std::system_error(-rc, std::generic_category(),
                                 "Error occurred during the inotify_init1");
     }
 }
@@ -68,9 +61,7 @@ Watch::~Watch()
     }
 }
 
-int Watch::callback(sd_event_source* s,
-                    int fd,
-                    uint32_t revents,
+int Watch::callback(sd_event_source* s, int fd, uint32_t revents,
                     void* userdata)
 {
     if (!(revents & EPOLLIN))
@@ -84,8 +75,7 @@ int Watch::callback(sd_event_source* s,
     if (0 > bytes)
     {
         auto error = errno;
-        throw std::system_error(error,
-                                std::generic_category(),
+        throw std::system_error(error, std::generic_category(),
                                 "failed to read inotify event");
     }
 
@@ -117,8 +107,7 @@ int Watch::inotifyInit()
     if (-1 == fd)
     {
         auto error = errno;
-        throw std::system_error(error,
-                                std::generic_category(),
+        throw std::system_error(error, std::generic_category(),
                                 "Error occurred during the inotify_init1");
     }
 

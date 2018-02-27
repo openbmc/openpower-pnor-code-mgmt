@@ -36,10 +36,10 @@ std::string Version::getId(const std::string& version)
     SHA512_Init(&ctx);
     SHA512_Update(&ctx, version.c_str(), strlen(version.c_str()));
     SHA512_Final(digest, &ctx);
-    char mdString[SHA512_DIGEST_LENGTH*2+1];
+    char mdString[SHA512_DIGEST_LENGTH * 2 + 1];
     for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
     {
-        snprintf(&mdString[i*2], 3, "%02x", (unsigned int)digest[i]);
+        snprintf(&mdString[i * 2], 3, "%02x", (unsigned int)digest[i]);
     }
 
     // Only need 8 hex digits.
@@ -47,8 +47,9 @@ std::string Version::getId(const std::string& version)
     return (hexId.substr(0, 8));
 }
 
-std::map<std::string, std::string> Version::getValue(
-        const std::string& filePath, std::map<std::string, std::string> keys)
+std::map<std::string, std::string>
+    Version::getValue(const std::string& filePath,
+                      std::map<std::string, std::string> keys)
 {
     if (filePath.empty())
     {
@@ -59,8 +60,7 @@ std::map<std::string, std::string> Version::getValue(
 
     std::ifstream efile;
     std::string line;
-    efile.exceptions(std::ifstream::failbit |
-                     std::ifstream::badbit |
+    efile.exceptions(std::ifstream::failbit | std::ifstream::badbit |
                      std::ifstream::eofbit);
 
     try
@@ -68,7 +68,7 @@ std::map<std::string, std::string> Version::getValue(
         efile.open(filePath);
         while (getline(efile, line))
         {
-            for(auto& key : keys)
+            for (auto& key : keys)
             {
                 auto value = key.first + "=";
                 auto keySize = value.length();
