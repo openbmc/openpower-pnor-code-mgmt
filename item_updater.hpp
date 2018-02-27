@@ -16,17 +16,17 @@ namespace updater
 {
 
 using ItemUpdaterInherit = sdbusplus::server::object::object<
-        sdbusplus::xyz::openbmc_project::Common::server::FactoryReset,
-        sdbusplus::org::openbmc::server::Associations,
-        sdbusplus::xyz::openbmc_project::Collection::server::DeleteAll>;
+    sdbusplus::xyz::openbmc_project::Common::server::FactoryReset,
+    sdbusplus::org::openbmc::server::Associations,
+    sdbusplus::xyz::openbmc_project::Collection::server::DeleteAll>;
 using GardResetInherit = sdbusplus::server::object::object<
-        sdbusplus::xyz::openbmc_project::Common::server::FactoryReset>;
+    sdbusplus::xyz::openbmc_project::Common::server::FactoryReset>;
 using ObjectEnable = sdbusplus::server::object::object<
-        sdbusplus::xyz::openbmc_project::Object::server::Enable>;
+    sdbusplus::xyz::openbmc_project::Object::server::Enable>;
 namespace MatchRules = sdbusplus::bus::match::rules;
 
 using AssociationList =
-        std::vector<std::tuple<std::string, std::string, std::string>>;
+    std::vector<std::tuple<std::string, std::string, std::string>>;
 
 constexpr auto GARD_PATH = "/org/open_power/control/gard";
 constexpr static auto volatilePath = "/org/open_power/control/volatile";
@@ -38,39 +38,35 @@ constexpr static auto volatilePath = "/org/open_power/control/volatile";
  */
 class GardReset : public GardResetInherit
 {
-    public:
-        /** @brief Constructs GardReset.
-         *
-         * @param[in] bus    - The Dbus bus object
-         * @param[in] path   - The Dbus object path
-         */
-        GardReset(sdbusplus::bus::bus& bus,
-                  const std::string& path) :
-                GardResetInherit(bus, path.c_str(), true),
-                bus(bus),
-                path(path)
-        {
-            std::vector<std::string> interfaces({interface});
-            bus.emit_interfaces_added(path.c_str(), interfaces);
-        }
+  public:
+    /** @brief Constructs GardReset.
+     *
+     * @param[in] bus    - The Dbus bus object
+     * @param[in] path   - The Dbus object path
+     */
+    GardReset(sdbusplus::bus::bus& bus, const std::string& path) :
+        GardResetInherit(bus, path.c_str(), true), bus(bus), path(path)
+    {
+        std::vector<std::string> interfaces({interface});
+        bus.emit_interfaces_added(path.c_str(), interfaces);
+    }
 
-        ~GardReset()
-        {
-            std::vector<std::string> interfaces({interface});
-            bus.emit_interfaces_removed(path.c_str(), interfaces);
-        }
+    ~GardReset()
+    {
+        std::vector<std::string> interfaces({interface});
+        bus.emit_interfaces_removed(path.c_str(), interfaces);
+    }
 
-    private:
-        // TODO Remove once openbmc/openbmc#1975 is resolved
-        static constexpr auto interface =
-                "xyz.openbmc_project.Common.FactoryReset";
-        sdbusplus::bus::bus& bus;
-        std::string path;
+  private:
+    // TODO Remove once openbmc/openbmc#1975 is resolved
+    static constexpr auto interface = "xyz.openbmc_project.Common.FactoryReset";
+    sdbusplus::bus::bus& bus;
+    std::string path;
 
-        /**
-         * @brief GARD factory reset - clears the PNOR GARD partition.
-         */
-        void reset() override;
+    /**
+     * @brief GARD factory reset - clears the PNOR GARD partition.
+     */
+    void reset() override;
 };
 
 /** @class ItemUpdater
@@ -78,180 +74,176 @@ class GardReset : public GardResetInherit
  */
 class ItemUpdater : public ItemUpdaterInherit
 {
-    public:
-        /** @brief Constructs ItemUpdater
-         *
-         * @param[in] bus    - The D-Bus bus object
-         * @param[in] path   - The D-Bus path
-         */
-        ItemUpdater(sdbusplus::bus::bus& bus, const std::string& path) :
-                    ItemUpdaterInherit(bus, path.c_str()),
-                    bus(bus),
-                    versionMatch(
-                            bus,
-                            MatchRules::interfacesAdded() +
-                            MatchRules::path("/xyz/openbmc_project/software"),
-                            std::bind(
-                                    std::mem_fn(&ItemUpdater::createActivation),
-                                    this,
-                                    std::placeholders::_1))
-        {
-            processPNORImage();
-            gardReset = std::make_unique<GardReset>(bus, GARD_PATH);
-            volatileEnable = std::make_unique<ObjectEnable>(bus, volatilePath);
+  public:
+    /** @brief Constructs ItemUpdater
+     *
+     * @param[in] bus    - The D-Bus bus object
+     * @param[in] path   - The D-Bus path
+     */
+    ItemUpdater(sdbusplus::bus::bus& bus, const std::string& path) :
+        ItemUpdaterInherit(bus, path.c_str()), bus(bus),
+        versionMatch(bus,
+                     MatchRules::interfacesAdded() +
+                         MatchRules::path("/xyz/openbmc_project/software"),
+                     std::bind(std::mem_fn(&ItemUpdater::createActivation),
+                               this, std::placeholders::_1))
+    {
+        processPNORImage();
+        gardReset = std::make_unique<GardReset>(bus, GARD_PATH);
+        volatileEnable = std::make_unique<ObjectEnable>(bus, volatilePath);
 
-            // Emit deferred signal.
-            emit_object_added();
-        }
+        // Emit deferred signal.
+        emit_object_added();
+    }
 
-        /** @brief Sets the given priority free by incrementing
-         *  any existing priority with the same value by 1
-         *
-         *  @param[in] value - The priority that needs to be set free.
-         *  @param[in] versionId - The Id of the version for which we
-         *                         are trying to free up the priority.
-         *  @return None
-         */
-        void freePriority(uint8_t value, const std::string& versionId);
+    /** @brief Sets the given priority free by incrementing
+     *  any existing priority with the same value by 1
+     *
+     *  @param[in] value - The priority that needs to be set free.
+     *  @param[in] versionId - The Id of the version for which we
+     *                         are trying to free up the priority.
+     *  @return None
+     */
+    void freePriority(uint8_t value, const std::string& versionId);
 
-        /** @brief Determine is the given priority is the lowest
-         *
-         *  @param[in] value - The priority that needs to be checked.
-         *
-         *  @return boolean corresponding to whether the given
-         *           priority is lowest.
-         */
-        bool isLowestPriority(uint8_t value);
+    /** @brief Determine is the given priority is the lowest
+     *
+     *  @param[in] value - The priority that needs to be checked.
+     *
+     *  @return boolean corresponding to whether the given
+     *           priority is lowest.
+     */
+    bool isLowestPriority(uint8_t value);
 
-        /**
-         * @brief Create and populate the active PNOR Version.
-         */
-        void processPNORImage();
+    /**
+     * @brief Create and populate the active PNOR Version.
+     */
+    void processPNORImage();
 
-        /** @brief Deletes version
-         *
-         *  @param[in] entryId - Id of the version to delete
-         *
-         *  @return None
-         */
-        void erase(std::string entryId);
+    /** @brief Deletes version
+     *
+     *  @param[in] entryId - Id of the version to delete
+     *
+     *  @return None
+     */
+    void erase(std::string entryId);
 
-        /**
-         * @brief Erases any non-active pnor versions.
-         */
-        void deleteAll();
+    /**
+     * @brief Erases any non-active pnor versions.
+     */
+    void deleteAll();
 
-        /** @brief Brings the total number of active PNOR versions to
-         *         ACTIVE_PNOR_MAX_ALLOWED -1. This function is intended to be
-         *         run before activating a new PNOR version. If this function
-         *         needs to delete any PNOR version(s) it will delete the
-         *         version(s) with the highest priority, skipping the
-         *         functional PNOR version.
-         */
-        void freeSpace();
+    /** @brief Brings the total number of active PNOR versions to
+     *         ACTIVE_PNOR_MAX_ALLOWED -1. This function is intended to be
+     *         run before activating a new PNOR version. If this function
+     *         needs to delete any PNOR version(s) it will delete the
+     *         version(s) with the highest priority, skipping the
+     *         functional PNOR version.
+     */
+    void freeSpace();
 
-        /** @brief Determine the software version id
-         *         from the symlink target (e.g. /media/ro-2a1022fe).
-         *
-         * @param[in] symlinkPath - The path of the symlink.
-         * @param[out] id - The version id as a string.
-         */
-        static std::string determineId(const std::string& symlinkPath);
+    /** @brief Determine the software version id
+     *         from the symlink target (e.g. /media/ro-2a1022fe).
+     *
+     * @param[in] symlinkPath - The path of the symlink.
+     * @param[out] id - The version id as a string.
+     */
+    static std::string determineId(const std::string& symlinkPath);
 
-        /** @brief Creates an active association to the
-         *  newly active software image
-         *
-         * @param[in]  path - The path to create the association to.
-         */
-        void createActiveAssociation(const std::string& path);
+    /** @brief Creates an active association to the
+     *  newly active software image
+     *
+     * @param[in]  path - The path to create the association to.
+     */
+    void createActiveAssociation(const std::string& path);
 
-        /** @brief Updates the functional association to the
-         *  new "running" PNOR image
-         *
-         * @param[in]  path - The path to update the association to.
-         */
-        void updateFunctionalAssociation(const std::string& path);
+    /** @brief Updates the functional association to the
+     *  new "running" PNOR image
+     *
+     * @param[in]  path - The path to update the association to.
+     */
+    void updateFunctionalAssociation(const std::string& path);
 
-        /** @brief Removes an active association to the software image
-         *
-         * @param[in]  path - The path to remove the association from.
-         */
-        void removeActiveAssociation(const std::string& path);
+    /** @brief Removes an active association to the software image
+     *
+     * @param[in]  path - The path to remove the association from.
+     */
+    void removeActiveAssociation(const std::string& path);
 
-        /** @brief Persistent GardReset dbus object */
-        std::unique_ptr<GardReset> gardReset;
+    /** @brief Persistent GardReset dbus object */
+    std::unique_ptr<GardReset> gardReset;
 
-        /** @brief Check whether the provided image id is the functional one
-         *
-         * @param[in] - versionId - The id of the image to check.
-         *
-         * @return - Returns true if this version is currently functional.
-         */
-        static bool isVersionFunctional(const std::string& versionId);
+    /** @brief Check whether the provided image id is the functional one
+     *
+     * @param[in] - versionId - The id of the image to check.
+     *
+     * @return - Returns true if this version is currently functional.
+     */
+    static bool isVersionFunctional(const std::string& versionId);
 
-        /** @brief Persistent ObjectEnable D-Bus object */
-        std::unique_ptr<ObjectEnable> volatileEnable;
+    /** @brief Persistent ObjectEnable D-Bus object */
+    std::unique_ptr<ObjectEnable> volatileEnable;
 
-    private:
-        /** @brief Callback function for Software.Version match.
-         *  @details Creates an Activation D-Bus object.
-         *
-         * @param[in]  msg       - Data associated with subscribed signal
-         */
-        void createActivation(sdbusplus::message::message& msg);
+  private:
+    /** @brief Callback function for Software.Version match.
+     *  @details Creates an Activation D-Bus object.
+     *
+     * @param[in]  msg       - Data associated with subscribed signal
+     */
+    void createActivation(sdbusplus::message::message& msg);
 
-        /**
-         * @brief Validates the presence of SquashFS image in the image dir.
-         *
-         * @param[in]  filePath - The path to the SquashFS image.
-         * @param[out] result    - 0 --> if validation was successful
-         *                       - -1--> Otherwise
-         */
-        static int validateSquashFSImage(const std::string& filePath);
+    /**
+     * @brief Validates the presence of SquashFS image in the image dir.
+     *
+     * @param[in]  filePath - The path to the SquashFS image.
+     * @param[out] result    - 0 --> if validation was successful
+     *                       - -1--> Otherwise
+     */
+    static int validateSquashFSImage(const std::string& filePath);
 
-        /** @brief Persistent sdbusplus D-Bus bus connection. */
-        sdbusplus::bus::bus& bus;
+    /** @brief Persistent sdbusplus D-Bus bus connection. */
+    sdbusplus::bus::bus& bus;
 
-        /** @brief Persistent map of Activation D-Bus objects and their
-          * version id */
-        std::map<std::string, std::unique_ptr<Activation>> activations;
+    /** @brief Persistent map of Activation D-Bus objects and their
+     * version id */
+    std::map<std::string, std::unique_ptr<Activation>> activations;
 
-        /** @brief Persistent map of Version D-Bus objects and their
-          * version id */
-        std::map<std::string, std::unique_ptr<Version>> versions;
+    /** @brief Persistent map of Version D-Bus objects and their
+     * version id */
+    std::map<std::string, std::unique_ptr<Version>> versions;
 
-        /** @brief sdbusplus signal match for Software.Version */
-        sdbusplus::bus::match_t versionMatch;
+    /** @brief sdbusplus signal match for Software.Version */
+    sdbusplus::bus::match_t versionMatch;
 
-        /** @brief This entry's associations */
-        AssociationList assocs = {};
+    /** @brief This entry's associations */
+    AssociationList assocs = {};
 
-        /** @brief Clears read only PNOR partition for
-         *  given Activation D-Bus object
-         *
-         * @param[in]  versionId - The id of the ro partition to remove.
-         */
-        void removeReadOnlyPartition(std::string versionId);
+    /** @brief Clears read only PNOR partition for
+     *  given Activation D-Bus object
+     *
+     * @param[in]  versionId - The id of the ro partition to remove.
+     */
+    void removeReadOnlyPartition(std::string versionId);
 
-        /** @brief Clears read write PNOR partition for
-         *  given Activation D-Bus object
-         *
-         *  @param[in]  versionId - The id of the rw partition to remove.
-         */
-        void removeReadWritePartition(std::string versionId);
+    /** @brief Clears read write PNOR partition for
+     *  given Activation D-Bus object
+     *
+     *  @param[in]  versionId - The id of the rw partition to remove.
+     */
+    void removeReadWritePartition(std::string versionId);
 
-        /** @brief Clears preserved PNOR partition */
-        void removePreservedPartition();
+    /** @brief Clears preserved PNOR partition */
+    void removePreservedPartition();
 
-        /** @brief Host factory reset - clears PNOR partitions for each
-          * Activation D-Bus object */
-        void reset() override;
+    /** @brief Host factory reset - clears PNOR partitions for each
+     * Activation D-Bus object */
+    void reset() override;
 
-        /** @brief Check whether the host is running
-         *
-         * @return - Returns true if the Chassis is powered on.
-         */
-        bool isChassisOn();
+    /** @brief Check whether the host is running
+     *
+     * @return - Returns true if the Chassis is powered on.
+     */
+    bool isChassisOn();
 };
 
 } // namespace updater

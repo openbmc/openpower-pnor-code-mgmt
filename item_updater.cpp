@@ -40,8 +40,8 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
     namespace variant_ns = msg::variant_ns;
 
     sdbusplus::message::object_path objPath;
-    std::map<std::string,
-             std::map<std::string, msg::variant<std::string>>> interfaces;
+    std::map<std::string, std::map<std::string, msg::variant<std::string>>>
+        interfaces;
     m.read(objPath, interfaces);
 
     std::string path(std::move(objPath));
@@ -59,7 +59,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                 {
                     // Only process the Host and System images
                     auto value = SVersion::convertVersionPurposeFromString(
-                            variant_ns::get<std::string>(property.second));
+                        variant_ns::get<std::string>(property.second));
 
                     if (value == VersionPurpose::Host ||
                         value == VersionPurpose::System)
@@ -110,41 +110,29 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
             activationState = server::Activation::Activations::Ready;
             // Create an association to the host inventory item
             associations.emplace_back(std::make_tuple(
-                                              ACTIVATION_FWD_ASSOCIATION,
-                                              ACTIVATION_REV_ASSOCIATION,
-                                              HOST_INVENTORY_PATH));
+                ACTIVATION_FWD_ASSOCIATION, ACTIVATION_REV_ASSOCIATION,
+                HOST_INVENTORY_PATH));
         }
 
         fs::path manifestPath(filePath);
         manifestPath /= MANIFEST_FILE;
-        std::string extendedVersion = (Version::getValue(manifestPath.string(),
-                 std::map<std::string, std::string>
-                 {{"extended_version", ""}})).begin()->second;
+        std::string extendedVersion =
+            (Version::getValue(
+                 manifestPath.string(),
+                 std::map<std::string, std::string>{{"extended_version", ""}}))
+                .begin()
+                ->second;
 
         activations.insert(std::make_pair(
-                versionId,
-                std::make_unique<Activation>(
-                        bus,
-                        path,
-                        *this,
-                        versionId,
-                        extendedVersion,
-                        activationState,
-                        associations)));
+            versionId, std::make_unique<Activation>(
+                           bus, path, *this, versionId, extendedVersion,
+                           activationState, associations)));
 
         auto versionPtr = std::make_unique<Version>(
-                                  bus,
-                                  path,
-                                  *this,
-                                  versionId,
-                                  version,
-                                  purpose,
-                                  filePath,
-                                  std::bind(&ItemUpdater::erase,
-                                            this,
-                                            std::placeholders::_1));
+            bus, path, *this, versionId, version, purpose, filePath,
+            std::bind(&ItemUpdater::erase, this, std::placeholders::_1));
         versionPtr->deleteObject =
-                std::make_unique<Delete>(bus, path, *versionPtr);
+            std::make_unique<Delete>(bus, path, *versionPtr);
         versions.insert(std::make_pair(versionId, std::move(versionPtr)));
     }
     return;
@@ -162,8 +150,8 @@ void ItemUpdater::processPNORImage()
         static const auto PNOR_RW_PREFIX_LEN = strlen(PNOR_RW_PREFIX);
 
         // Check if the PNOR_RO_PREFIX is the prefix of the iter.path
-        if (0 == iter.path().native().compare(0, PNOR_RO_PREFIX_LEN,
-                                              PNOR_RO_PREFIX))
+        if (0 ==
+            iter.path().native().compare(0, PNOR_RO_PREFIX_LEN, PNOR_RO_PREFIX))
         {
             // The versionId is extracted from the path
             // for example /media/pnor-ro-2a1022fe.
@@ -176,10 +164,8 @@ void ItemUpdater::processPNORImage()
                 ItemUpdater::erase(id);
                 continue;
             }
-            auto keyValues =
-                    Version::getValue(pnorTOC,
-                                      {{ "version", "" },
-                                       { "extended_version", "" } });
+            auto keyValues = Version::getValue(
+                pnorTOC, {{"version", ""}, {"extended_version", ""}});
             auto& version = keyValues.at("version");
             if (version.empty())
             {
@@ -204,25 +190,18 @@ void ItemUpdater::processPNORImage()
             {
                 // Create an association to the host inventory item
                 associations.emplace_back(std::make_tuple(
-                                                  ACTIVATION_FWD_ASSOCIATION,
-                                                  ACTIVATION_REV_ASSOCIATION,
-                                                  HOST_INVENTORY_PATH));
+                    ACTIVATION_FWD_ASSOCIATION, ACTIVATION_REV_ASSOCIATION,
+                    HOST_INVENTORY_PATH));
 
                 // Create an active association since this image is active
                 createActiveAssociation(path);
             }
 
             // Create Activation instance for this version.
-            activations.insert(std::make_pair(
-                                   id,
-                                   std::make_unique<Activation>(
-                                       bus,
-                                       path,
-                                       *this,
-                                       id,
-                                       extendedVersion,
-                                       activationState,
-                                       associations)));
+            activations.insert(
+                std::make_pair(id, std::make_unique<Activation>(
+                                       bus, path, *this, id, extendedVersion,
+                                       activationState, associations)));
 
             // If Active, create RedundancyPriority instance for this version.
             if (activationState == server::Activation::Activations::Active)
@@ -234,33 +213,20 @@ void ItemUpdater::processPNORImage()
                                     entry("VERSIONID=%s", id));
                 }
                 activations.find(id)->second->redundancyPriority =
-                         std::make_unique<RedundancyPriority>(
-                             bus,
-                             path,
-                             *(activations.find(id)->second),
-                             priority);
+                    std::make_unique<RedundancyPriority>(
+                        bus, path, *(activations.find(id)->second), priority);
             }
 
             // Create Version instance for this version.
             auto versionPtr = std::make_unique<Version>(
-                                      bus,
-                                      path,
-                                      *this,
-                                      id,
-                                      version,
-                                      purpose,
-                                      "",
-                                      std::bind(&ItemUpdater::erase,
-                                                this,
-                                                std::placeholders::_1));
+                bus, path, *this, id, version, purpose, "",
+                std::bind(&ItemUpdater::erase, this, std::placeholders::_1));
             versionPtr->deleteObject =
-                        std::make_unique<Delete>(bus, path, *versionPtr);
-            versions.insert(std::make_pair(
-                                    id,
-                                    std::move(versionPtr)));
+                std::make_unique<Delete>(bus, path, *versionPtr);
+            versions.insert(std::make_pair(id, std::move(versionPtr)));
         }
         else if (0 == iter.path().native().compare(0, PNOR_RW_PREFIX_LEN,
-                                                      PNOR_RW_PREFIX))
+                                                   PNOR_RW_PREFIX))
         {
             auto id = iter.path().native().substr(PNOR_RW_PREFIX_LEN);
             auto roDir = PNOR_RO_PREFIX + id;
@@ -298,32 +264,24 @@ int ItemUpdater::validateSquashFSImage(const std::string& filePath)
 
 void ItemUpdater::removeReadOnlyPartition(std::string versionId)
 {
-        auto serviceFile = "obmc-flash-bios-ubiumount-ro@" + versionId +
-                ".service";
+    auto serviceFile = "obmc-flash-bios-ubiumount-ro@" + versionId + ".service";
 
-        // Remove the read-only partitions.
-        auto method = bus.new_method_call(
-                SYSTEMD_BUSNAME,
-                SYSTEMD_PATH,
-                SYSTEMD_INTERFACE,
-                "StartUnit");
-        method.append(serviceFile, "replace");
-        bus.call_noreply(method);
+    // Remove the read-only partitions.
+    auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                      SYSTEMD_INTERFACE, "StartUnit");
+    method.append(serviceFile, "replace");
+    bus.call_noreply(method);
 }
 
 void ItemUpdater::removeReadWritePartition(std::string versionId)
 {
-        auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + versionId +
-                ".service";
+    auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + versionId + ".service";
 
-        // Remove the read-write partitions.
-        auto method = bus.new_method_call(
-                SYSTEMD_BUSNAME,
-                SYSTEMD_PATH,
-                SYSTEMD_INTERFACE,
-                "StartUnit");
-        method.append(serviceFile, "replace");
-        bus.call_noreply(method);
+    // Remove the read-write partitions.
+    auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                      SYSTEMD_INTERFACE, "StartUnit");
+    method.append(serviceFile, "replace");
+    bus.call_noreply(method);
 }
 
 void ItemUpdater::reset()
@@ -339,40 +297,34 @@ void ItemUpdater::reset()
 
     for (const auto& it : activations)
     {
-        auto serviceFile = "obmc-flash-bios-ubiclear@pnor-rw-" + it.first +
-                ".service";
+        auto serviceFile =
+            "obmc-flash-bios-ubiclear@pnor-rw-" + it.first + ".service";
 
         // Clear the read-write partitions.
-        auto method = bus.new_method_call(
-                SYSTEMD_BUSNAME,
-                SYSTEMD_PATH,
-                SYSTEMD_INTERFACE,
-                "StartUnit");
+        auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                          SYSTEMD_INTERFACE, "StartUnit");
         method.append(serviceFile, "replace");
         auto reply = bus.call(method);
 
         if (reply.is_method_error())
         {
             log<level::ERR>("Failed to clear read-write partitions",
-                    entry("SERVICE_FILE=%s", serviceFile));
+                            entry("SERVICE_FILE=%s", serviceFile));
             elog<InternalFailure>();
         }
     }
     static constexpr auto serviceFile =
-            "obmc-flash-bios-ubiclear@pnor-prsv.service";
+        "obmc-flash-bios-ubiclear@pnor-prsv.service";
     // Clear the preserved partition.
-    auto method = bus.new_method_call(
-            SYSTEMD_BUSNAME,
-            SYSTEMD_PATH,
-            SYSTEMD_INTERFACE,
-            "StartUnit");
+    auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                      SYSTEMD_INTERFACE, "StartUnit");
     method.append(serviceFile, "replace");
     auto reply = bus.call(method);
 
     if (reply.is_method_error())
     {
         log<level::ERR>("Failed to clear preserved partition",
-                    entry("SERVICE_FILE=%s", serviceFile));
+                        entry("SERVICE_FILE=%s", serviceFile));
         elog<InternalFailure>();
     }
 
@@ -404,11 +356,8 @@ bool ItemUpdater::isVersionFunctional(const std::string& versionId)
 
 bool ItemUpdater::isChassisOn()
 {
-    auto mapperCall = bus.new_method_call(
-            MAPPER_BUSNAME,
-            MAPPER_PATH,
-            MAPPER_INTERFACE,
-            "GetObject");
+    auto mapperCall = bus.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
+                                          MAPPER_INTERFACE, "GetObject");
 
     mapperCall.append(CHASSIS_STATE_PATH,
                       std::vector<std::string>({CHASSIS_STATE_OBJ}));
@@ -429,8 +378,7 @@ bool ItemUpdater::isChassisOn()
 
     auto method = bus.new_method_call((mapperResponse.begin()->first).c_str(),
                                       CHASSIS_STATE_PATH,
-                                      SYSTEMD_PROPERTY_INTERFACE,
-                                      "Get");
+                                      SYSTEMD_PROPERTY_INTERFACE, "Get");
     method.append(CHASSIS_STATE_OBJ, "CurrentPowerState");
     auto response = bus.call(method);
     if (response.is_method_error())
@@ -449,7 +397,7 @@ bool ItemUpdater::isChassisOn()
 
 void ItemUpdater::freePriority(uint8_t value, const std::string& versionId)
 {
-    //TODO openbmc/openbmc#1896 Improve the performance of this function
+    // TODO openbmc/openbmc#1896 Improve the performance of this function
     for (const auto& intf : activations)
     {
         if (intf.second->redundancyPriority)
@@ -480,10 +428,12 @@ bool ItemUpdater::isLowestPriority(uint8_t value)
 
 void ItemUpdater::erase(std::string entryId)
 {
-    if (isVersionFunctional(entryId) && isChassisOn()) {
-        log<level::ERR>(("Error: Version " + entryId + \
-                         " is currently active and running on the host." \
-                         " Unable to remove.").c_str());
+    if (isVersionFunctional(entryId) && isChassisOn())
+    {
+        log<level::ERR>(("Error: Version " + entryId +
+                         " is currently active and running on the host."
+                         " Unable to remove.")
+                            .c_str());
         return;
     }
     // Remove priority persistence file
@@ -497,9 +447,10 @@ void ItemUpdater::erase(std::string entryId)
     auto it = versions.find(entryId);
     if (it == versions.end())
     {
-        log<level::ERR>(("Error: Failed to find version " + entryId + \
-                         " in item updater versions map." \
-                         " Unable to remove.").c_str());
+        log<level::ERR>(("Error: Failed to find version " + entryId +
+                         " in item updater versions map."
+                         " Unable to remove.")
+                            .c_str());
     }
     else
     {
@@ -510,9 +461,10 @@ void ItemUpdater::erase(std::string entryId)
     auto ita = activations.find(entryId);
     if (ita == activations.end())
     {
-        log<level::ERR>(("Error: Failed to find version " + entryId + \
-                         " in item updater activations map." \
-                         " Unable to remove.").c_str());
+        log<level::ERR>(("Error: Failed to find version " + entryId +
+                         " in item updater activations map."
+                         " Unable to remove.")
+                            .c_str());
     }
     else
     {
@@ -533,11 +485,8 @@ void ItemUpdater::deleteAll()
 
     // Remove any remaining pnor-ro- or pnor-rw- volumes that do not match
     // the current version.
-    auto method = bus.new_method_call(
-            SYSTEMD_BUSNAME,
-            SYSTEMD_PATH,
-            SYSTEMD_INTERFACE,
-            "StartUnit");
+    auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                      SYSTEMD_INTERFACE, "StartUnit");
     method.append("obmc-flash-bios-cleanup.service", "replace");
     bus.call_noreply(method);
 }
@@ -548,12 +497,14 @@ void ItemUpdater::freeSpace()
     //  Versions with the highest priority in front
     std::priority_queue<std::pair<int, std::string>,
                         std::vector<std::pair<int, std::string>>,
-                        std::less<std::pair<int, std::string>>> versionsPQ;
+                        std::less<std::pair<int, std::string>>>
+        versionsPQ;
 
     std::size_t count = 0;
     for (const auto& iter : activations)
     {
-        if (iter.second.get()->activation() == server::Activation::Activations::Active)
+        if (iter.second.get()->activation() ==
+            server::Activation::Activations::Active)
         {
             count++;
             // Don't put the functional version on the queue since we can't
@@ -563,8 +514,8 @@ void ItemUpdater::freeSpace()
                 continue;
             }
             versionsPQ.push(std::make_pair(
-                    iter.second->redundancyPriority.get()->priority(),
-                    iter.second->versionId));
+                iter.second->redundancyPriority.get()->priority(),
+                iter.second->versionId));
         }
     }
 
@@ -580,9 +531,8 @@ void ItemUpdater::freeSpace()
 
 void ItemUpdater::createActiveAssociation(const std::string& path)
 {
-    assocs.emplace_back(std::make_tuple(ACTIVE_FWD_ASSOCIATION,
-                                        ACTIVE_REV_ASSOCIATION,
-                                        path));
+    assocs.emplace_back(
+        std::make_tuple(ACTIVE_FWD_ASSOCIATION, ACTIVE_REV_ASSOCIATION, path));
     associations(assocs);
 }
 
@@ -601,8 +551,7 @@ void ItemUpdater::updateFunctionalAssociation(const std::string& path)
         }
     }
     assocs.emplace_back(std::make_tuple(FUNCTIONAL_FWD_ASSOCIATION,
-                                        FUNCTIONAL_REV_ASSOCIATION,
-                                        path));
+                                        FUNCTIONAL_REV_ASSOCIATION, path));
     associations(assocs);
 }
 
@@ -651,11 +600,8 @@ void GardReset::reset()
     path /= "GUARD";
     std::vector<uint8_t> mboxdArgs;
 
-    auto dbusCall = bus.new_method_call(
-            MBOXD_INTERFACE,
-            MBOXD_PATH,
-            MBOXD_INTERFACE,
-            "cmd");
+    auto dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH,
+                                        MBOXD_INTERFACE, "cmd");
 
     // Suspend mboxd - no args required.
     dbusCall.append(static_cast<uint8_t>(3), mboxdArgs);
@@ -672,11 +618,8 @@ void GardReset::reset()
         fs::remove(path);
     }
 
-    dbusCall = bus.new_method_call(
-            MBOXD_INTERFACE,
-            MBOXD_PATH,
-            MBOXD_INTERFACE,
-            "cmd");
+    dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH, MBOXD_INTERFACE,
+                                   "cmd");
 
     // Resume mboxd with arg 1, indicating that the flash is modified.
     mboxdArgs.push_back(1);

@@ -17,15 +17,13 @@ namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
 
 using namespace phosphor::logging;
 
-constexpr auto SYSTEMD_SERVICE   = "org.freedesktop.systemd1";
-constexpr auto SYSTEMD_OBJ_PATH  = "/org/freedesktop/systemd1";
+constexpr auto SYSTEMD_SERVICE = "org.freedesktop.systemd1";
+constexpr auto SYSTEMD_OBJ_PATH = "/org/freedesktop/systemd1";
 
 void Activation::subscribeToSystemdSignals()
 {
-    auto method = this->bus.new_method_call(SYSTEMD_SERVICE,
-                                            SYSTEMD_OBJ_PATH,
-                                            SYSTEMD_INTERFACE,
-                                            "Subscribe");
+    auto method = this->bus.new_method_call(SYSTEMD_SERVICE, SYSTEMD_OBJ_PATH,
+                                            SYSTEMD_INTERFACE, "Subscribe");
     this->bus.call_noreply(method);
 
     return;
@@ -33,10 +31,8 @@ void Activation::subscribeToSystemdSignals()
 
 void Activation::unsubscribeFromSystemdSignals()
 {
-    auto method = this->bus.new_method_call(SYSTEMD_SERVICE,
-                                            SYSTEMD_OBJ_PATH,
-                                            SYSTEMD_INTERFACE,
-                                            "Unsubscribe");
+    auto method = this->bus.new_method_call(SYSTEMD_SERVICE, SYSTEMD_OBJ_PATH,
+                                            SYSTEMD_INTERFACE, "Unsubscribe");
     this->bus.call_noreply(method);
 
     return;
@@ -50,24 +46,20 @@ void Activation::startActivation()
 
     if (!activationProgress)
     {
-        activationProgress = std::make_unique<ActivationProgress>(
-                bus, path);
+        activationProgress = std::make_unique<ActivationProgress>(bus, path);
     }
 
     if (!activationBlocksTransition)
     {
         activationBlocksTransition =
-                std::make_unique<ActivationBlocksTransition>(bus, path);
+            std::make_unique<ActivationBlocksTransition>(bus, path);
     }
 
     constexpr auto ubimountService = "obmc-flash-bios-ubimount@";
-    auto ubimountServiceFile = std::string(ubimountService) +
-           versionId + ".service";
-    auto method = bus.new_method_call(
-            SYSTEMD_BUSNAME,
-            SYSTEMD_PATH,
-            SYSTEMD_INTERFACE,
-            "StartUnit");
+    auto ubimountServiceFile =
+        std::string(ubimountService) + versionId + ".service";
+    auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                      SYSTEMD_INTERFACE, "StartUnit");
     method.append(ubimountServiceFile, "replace");
     bus.call_noreply(method);
 
@@ -81,8 +73,8 @@ void Activation::finishActivation()
     // Set Redundancy Priority before setting to Active
     if (!redundancyPriority)
     {
-        redundancyPriority = std::make_unique<RedundancyPriority>(
-                bus, path, *this, 0);
+        redundancyPriority =
+            std::make_unique<RedundancyPriority>(bus, path, *this, 0);
     }
 
     activationProgress->progress(100);
@@ -98,8 +90,7 @@ void Activation::finishActivation()
     parent.createActiveAssociation(path);
 }
 
-auto Activation::activation(Activations value) ->
-        Activations
+auto Activation::activation(Activations value) -> Activations
 {
 
     if (value != softwareServer::Activation::Activations::Active)
@@ -130,14 +121,14 @@ auto Activation::activation(Activations value) ->
             {
                 Activation::finishActivation();
                 return softwareServer::Activation::activation(
-                        softwareServer::Activation::Activations::Active);
+                    softwareServer::Activation::Activations::Active);
             }
             else
             {
                 activationBlocksTransition.reset(nullptr);
                 activationProgress.reset(nullptr);
                 return softwareServer::Activation::activation(
-                        softwareServer::Activation::Activations::Failed);
+                    softwareServer::Activation::Activations::Failed);
             }
         }
     }
@@ -150,23 +141,22 @@ auto Activation::activation(Activations value) ->
     return softwareServer::Activation::activation(value);
 }
 
-auto Activation::requestedActivation(RequestedActivations value) ->
-        RequestedActivations
+auto Activation::requestedActivation(RequestedActivations value)
+    -> RequestedActivations
 {
     ubiVolumesCreated = false;
 
     if ((value == softwareServer::Activation::RequestedActivations::Active) &&
         (softwareServer::Activation::requestedActivation() !=
-                  softwareServer::Activation::RequestedActivations::Active))
+         softwareServer::Activation::RequestedActivations::Active))
     {
         if ((softwareServer::Activation::activation() ==
-                    softwareServer::Activation::Activations::Ready) ||
+             softwareServer::Activation::Activations::Ready) ||
             (softwareServer::Activation::activation() ==
-                    softwareServer::Activation::Activations::Failed))
+             softwareServer::Activation::Activations::Failed))
         {
             Activation::activation(
-                    softwareServer::Activation::Activations::Activating);
-
+                softwareServer::Activation::Activations::Activating);
         }
     }
     return softwareServer::Activation::requestedActivation(value);
@@ -175,14 +165,12 @@ auto Activation::requestedActivation(RequestedActivations value) ->
 void Activation::deleteImageManagerObject()
 {
     // Get the Delete object for <versionID> inside image_manager
-    auto method = this->bus.new_method_call(MAPPER_BUSNAME,
-                                            MAPPER_PATH,
-                                            MAPPER_INTERFACE,
-                                            "GetObject");
+    auto method = this->bus.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
+                                            MAPPER_INTERFACE, "GetObject");
 
     method.append(path);
-    method.append(std::vector<std::string>({
-            "xyz.openbmc_project.Object.Delete"}));
+    method.append(
+        std::vector<std::string>({"xyz.openbmc_project.Object.Delete"}));
     auto mapperResponseMsg = bus.call(method);
     if (mapperResponseMsg.is_method_error())
     {
@@ -200,13 +188,12 @@ void Activation::deleteImageManagerObject()
     }
 
     // Call the Delete object for <versionID> inside image_manager
-    method = this->bus.new_method_call((mapperResponse.begin()->first).c_str(),
-                                       path.c_str(),
-                                       "xyz.openbmc_project.Object.Delete",
-                                       "Delete");
+    method = this->bus.new_method_call(
+        (mapperResponse.begin()->first).c_str(), path.c_str(),
+        "xyz.openbmc_project.Object.Delete", "Delete");
     mapperResponseMsg = bus.call(method);
 
-    //Check that the bus call didn't result in an error
+    // Check that the bus call didn't result in an error
     if (mapperResponseMsg.is_method_error())
     {
         log<level::ERR>("Error in Deleting image from image manager",
@@ -224,30 +211,30 @@ uint8_t RedundancyPriority::priority(uint8_t value)
 
 void Activation::unitStateChange(sdbusplus::message::message& msg)
 {
-    uint32_t newStateID {};
+    uint32_t newStateID{};
     sdbusplus::message::object_path newStateObjPath;
     std::string newStateUnit{};
     std::string newStateResult{};
 
-    //Read the msg and populate each variable
+    // Read the msg and populate each variable
     msg.read(newStateID, newStateObjPath, newStateUnit, newStateResult);
 
     auto ubimountServiceFile =
-            "obmc-flash-bios-ubimount@" + versionId + ".service";
+        "obmc-flash-bios-ubimount@" + versionId + ".service";
 
-    if(newStateUnit == ubimountServiceFile && newStateResult == "done")
+    if (newStateUnit == ubimountServiceFile && newStateResult == "done")
     {
         ubiVolumesCreated = true;
         activationProgress->progress(activationProgress->progress() + 50);
     }
 
-    if(ubiVolumesCreated)
+    if (ubiVolumesCreated)
     {
         Activation::activation(
-                softwareServer::Activation::Activations::Activating);
+            softwareServer::Activation::Activations::Activating);
     }
 
-    if((newStateUnit == ubimountServiceFile) &&
+    if ((newStateUnit == ubimountServiceFile) &&
         (newStateResult == "failed" || newStateResult == "dependency"))
     {
         Activation::activation(softwareServer::Activation::Activations::Failed);

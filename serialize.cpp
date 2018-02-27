@@ -40,12 +40,9 @@ void storeToFile(std::string versionId, uint8_t priority)
 
     // lastly, store the priority as an environment variable pnor-[versionId]
     std::string serviceFile = "obmc-flash-bmc-setenv@pnor\\x2d" + versionId +
-            "\\x3d" + std::to_string(priority) + ".service";
-    auto method = bus.new_method_call(
-            SYSTEMD_BUSNAME,
-            SYSTEMD_PATH,
-            SYSTEMD_INTERFACE,
-            "StartUnit");
+                              "\\x3d" + std::to_string(priority) + ".service";
+    auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                      SYSTEMD_INTERFACE, "StartUnit");
     method.append(serviceFile, "replace");
     bus.call_noreply(method);
 }
@@ -107,7 +104,9 @@ bool restoreFromFile(std::string versionId, uint8_t& priority)
             }
         }
     }
-    catch (const std::exception& e){}
+    catch (const std::exception& e)
+    {
+    }
 
     return false;
 }
@@ -117,13 +116,10 @@ void removeFile(std::string versionId)
     auto bus = sdbusplus::bus::new_default();
 
     // Clear the environment variable pnor-[versionId].
-    std::string serviceFile = "obmc-flash-bmc-setenv@pnor\\x2d" + versionId +
-            ".service";
-    auto method = bus.new_method_call(
-            SYSTEMD_BUSNAME,
-            SYSTEMD_PATH,
-            SYSTEMD_INTERFACE,
-            "StartUnit");
+    std::string serviceFile =
+        "obmc-flash-bmc-setenv@pnor\\x2d" + versionId + ".service";
+    auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                      SYSTEMD_INTERFACE, "StartUnit");
     method.append(serviceFile, "replace");
     bus.call_noreply(method);
 

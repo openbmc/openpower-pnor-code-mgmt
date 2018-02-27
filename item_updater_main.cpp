@@ -30,11 +30,9 @@ int main(int argc, char* argv[])
     try
     {
         openpower::software::updater::Watch watch(
-                loop,
-                std::bind(std::mem_fn(
-                                  &ItemUpdater::updateFunctionalAssociation),
-                          &updater,
-                          std::placeholders::_1));
+            loop,
+            std::bind(std::mem_fn(&ItemUpdater::updateFunctionalAssociation),
+                      &updater, std::placeholders::_1));
         bus.attach_event(loop, SD_EVENT_PRIORITY_NORMAL);
         auto rc = sd_event_loop(loop);
         if (rc < 0)
