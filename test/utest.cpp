@@ -14,10 +14,10 @@ TEST(VersionTest, TestGetId)
     SHA512_Init(&ctx);
     SHA512_Update(&ctx, version, strlen(version));
     SHA512_Final(digest, &ctx);
-    char mdString[SHA512_DIGEST_LENGTH*2+1];
+    char mdString[SHA512_DIGEST_LENGTH * 2 + 1];
     for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
     {
-        snprintf(&mdString[i*2], 3, "%02x", (unsigned int)digest[i]);
+        snprintf(&mdString[i * 2], 3, "%02x", (unsigned int)digest[i]);
     }
     std::string hexId = std::string(mdString);
     hexId = hexId.substr(0, 8);

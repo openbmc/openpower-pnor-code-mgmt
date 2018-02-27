@@ -26,35 +26,37 @@ using EventSourcePtr = std::unique_ptr<sd_event_source, EventSourceDeleter>;
  */
 struct CustomFd
 {
-    public:
-        CustomFd() = delete;
-        CustomFd(const CustomFd&) = delete;
-        CustomFd& operator=(const CustomFd&) = delete;
-        CustomFd(CustomFd&&) = delete;
-        CustomFd& operator=(CustomFd&&) = delete;
+  public:
+    CustomFd() = delete;
+    CustomFd(const CustomFd&) = delete;
+    CustomFd& operator=(const CustomFd&) = delete;
+    CustomFd(CustomFd&&) = delete;
+    CustomFd& operator=(CustomFd&&) = delete;
 
-        /** @brief Saves File descriptor and uses it to do file operation
-         *
-         *  @param[in] fd - File descriptor
-         */
-        CustomFd(int fd) : fd(fd) {}
+    /** @brief Saves File descriptor and uses it to do file operation
+     *
+     *  @param[in] fd - File descriptor
+     */
+    CustomFd(int fd) : fd(fd)
+    {
+    }
 
-        ~CustomFd()
+    ~CustomFd()
+    {
+        if (fd >= 0)
         {
-            if (fd >= 0)
-            {
-                close(fd);
-            }
+            close(fd);
         }
+    }
 
-        int operator()() const
-        {
-            return fd;
-        }
+    int operator()() const
+    {
+        return fd;
+    }
 
-    private:
-        /** @brief File descriptor */
-        int fd = -1;
+  private:
+    /** @brief File descriptor */
+    int fd = -1;
 };
 
 /** @class Watch
@@ -68,54 +70,51 @@ struct CustomFd
  */
 class Watch
 {
-    public:
-        /** @brief ctor - hook inotify watch with sd-event
-         *
-         *  @param[in] loop - sd-event object
-         *  @param[in] functionalCallback - The callback function for updating
-         *                                  the functional associations.
-         */
-        Watch(sd_event* loop,
-              std::function<void(std::string&)> functionalCallback);
+  public:
+    /** @brief ctor - hook inotify watch with sd-event
+     *
+     *  @param[in] loop - sd-event object
+     *  @param[in] functionalCallback - The callback function for updating
+     *                                  the functional associations.
+     */
+    Watch(sd_event* loop, std::function<void(std::string&)> functionalCallback);
 
-        Watch(const Watch&) = delete;
-        Watch& operator=(const Watch&) = delete;
-        Watch(Watch&&) = delete;
-        Watch& operator=(Watch&&) = delete;
+    Watch(const Watch&) = delete;
+    Watch& operator=(const Watch&) = delete;
+    Watch(Watch&&) = delete;
+    Watch& operator=(Watch&&) = delete;
 
-        /** @brief dtor - remove inotify watch
-         */
-        ~Watch();
+    /** @brief dtor - remove inotify watch
+     */
+    ~Watch();
 
-    private:
-        /** @brief sd-event callback
-         *
-         *  @param[in] s - event source, floating (unused) in our case
-         *  @param[in] fd - inotify fd
-         *  @param[in] revents - events that matched for fd
-         *  @param[in] userdata - pointer to Watch object
-         *  @returns 0 on success, -1 on fail
-         */
-        static int callback(sd_event_source* s,
-                            int fd,
-                            uint32_t revents,
-                            void* userdata);
+  private:
+    /** @brief sd-event callback
+     *
+     *  @param[in] s - event source, floating (unused) in our case
+     *  @param[in] fd - inotify fd
+     *  @param[in] revents - events that matched for fd
+     *  @param[in] userdata - pointer to Watch object
+     *  @returns 0 on success, -1 on fail
+     */
+    static int callback(sd_event_source* s, int fd, uint32_t revents,
+                        void* userdata);
 
-        /**  initialize an inotify instance and returns file descriptor */
-        int inotifyInit();
+    /**  initialize an inotify instance and returns file descriptor */
+    int inotifyInit();
 
-        /** @brief PNOR symlink file watch descriptor */
-        int wd = -1;
+    /** @brief PNOR symlink file watch descriptor */
+    int wd = -1;
 
-        /** @brief event source */
-        EventSourcePtr eventSource;
+    /** @brief event source */
+    EventSourcePtr eventSource;
 
-        /** @brief The callback function for updating the
-                   functional associations. */
-        std::function<void(std::string&)> functionalCallback;
+    /** @brief The callback function for updating the
+               functional associations. */
+    std::function<void(std::string&)> functionalCallback;
 
-        /** @brief inotify file descriptor */
-        CustomFd fd;
+    /** @brief inotify file descriptor */
+    CustomFd fd;
 };
 
 } // namespace updater
