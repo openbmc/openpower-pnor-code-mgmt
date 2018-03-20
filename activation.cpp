@@ -5,6 +5,14 @@
 #include "serialize.hpp"
 #include <phosphor-logging/log.hpp>
 
+#ifdef WANT_SIGNATURE_VERIFY
+#include <phosphor-logging/elog.hpp>
+#include <phosphor-logging/elog-errors.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
+#include "image_verify.hpp"
+#include "config.h"
+#endif
+
 namespace openpower
 {
 namespace software
@@ -16,6 +24,11 @@ namespace fs = std::experimental::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
 
 using namespace phosphor::logging;
+
+#ifdef WANT_SIGNATURE_VERIFY
+using InternalFailure =
+    sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+#endif
 
 constexpr auto SYSTEMD_SERVICE = "org.freedesktop.systemd1";
 constexpr auto SYSTEMD_OBJ_PATH = "/org/freedesktop/systemd1";
@@ -105,6 +118,25 @@ auto Activation::activation(Activations value) -> Activations
 
         if (ubiVolumesCreated == false)
         {
+
+#ifdef WANT_SIGNATURE_VERIFY
+            using Signature = openpower::software::image::Signature;
+
+            fs::path imagePath(IMG_DIR);
+
+            Signature signature(imagePath / versionId, SIGNED_IMAGE_CONF_PATH);
+
+            // Validate the signed image.
+            if (!signature.verify())
+            {
+                log<level::ERR>("Error occurred during image validation");
+                report<InternalFailure>();
+
+                return softwareServer::Activation::activation(
+                    softwareServer::Activation::Activations::Failed);
+            }
+#endif
+
             Activation::startActivation();
             return softwareServer::Activation::activation(value);
         }
