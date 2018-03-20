@@ -76,6 +76,29 @@ AC_ARG_VAR(MANIFEST_FILE, [The path to the MANIFEST file])
 AS_IF([test "x$MANIFEST_FILE" == "x"], [MANIFEST_FILE="MANIFEST"])
 AC_DEFINE_UNQUOTED([MANIFEST_FILE], ["$MANIFEST_FILE"], [The path to the MANIFEST file])
 
+AC_ARG_VAR(PUBLICKEY_FILE_NAME, [The name of the public key file])
+AS_IF([test "x$PUBLICKEY_FILE_NAME" == "x"], [PUBLICKEY_FILE_NAME="publickey"])
+AC_DEFINE_UNQUOTED([PUBLICKEY_FILE_NAME], ["$PUBLICKEY_FILE_NAME"], [The name of the public key file])
+
+AC_ARG_VAR(HASH_FILE_NAME, [Hash file name])
+AS_IF([test "x$HASH_FILE_NAME" == "x"], [HASH_FILE_NAME="hashfunc"])
+AC_DEFINE_UNQUOTED([HASH_FILE_NAME], ["$HASH_FILE_NAME"], [The name of the hash file])
+
+AC_ARG_VAR(PNOR_SIGNED_IMAGE_CONF_PATH, [Path of PNOR image public key and hash function files])
+AS_IF([test "x$PNOR_SIGNED_IMAGE_CONF_PATH" == "x"], [PNOR_SIGNED_IMAGE_CONF_PATH="/etc/activationdata/"])
+AC_DEFINE_UNQUOTED([PNOR_SIGNED_IMAGE_CONF_PATH], ["$PNOR_SIGNED_IMAGE_CONF_PATH"], [Path of PNOR image public key and hash function files])
+
+AC_ARG_VAR(SIGNATURE_FILE_EXT, [The extension of the Signature file])
+AS_IF([test "x$SIGNATURE_FILE_EXT" == "x"], [SIGNATURE_FILE_EXT=".sig"])
+AC_DEFINE_UNQUOTED([SIGNATURE_FILE_EXT], ["$SIGNATURE_FILE_EXT"], [The extension of the Signature file])
+
+# setup signature verification
+AC_ARG_ENABLE([verify_signature],
+    AS_HELP_STRING([--enable-verify_signature], [Enable image signature validation.]))
+AS_IF([test "x$enable_verify_signature" == "xyes"], \
+    [AC_DEFINE([WANT_SIGNATURE_VERIFY],[],[Enable image signature validation.])])
+AM_CONDITIONAL([WANT_SIGNATURE_VERIFY_BUILD], [test "x$enable_verify_signature" == "xyes"])
+
 AC_DEFINE(CHASSIS_STATE_PATH, "/xyz/openbmc_project/state/chassis0",
     [The chassis state path.])
 AC_DEFINE(CHASSIS_STATE_OBJ, "xyz.openbmc_project.State.Chassis",
