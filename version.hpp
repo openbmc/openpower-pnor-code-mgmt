@@ -156,6 +156,17 @@ class Version : public VersionInherit
      */
     static std::string getId(const std::string& version);
 
+    /**
+     * @brief Read the manifest file to get the value of the key.
+     *
+     * @param[in] manifestFilePath - Manifest file path
+     * @param[in] key - Key string
+     *
+     * @return The value of the key.
+     */
+    static std::string getValue(const std::string& manifestFilePath,
+                                std::string key);
+
     /** @brief Persistent Delete D-Bus object */
     std::unique_ptr<Delete> deleteObject;
 
