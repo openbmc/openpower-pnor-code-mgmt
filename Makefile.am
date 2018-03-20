@@ -13,6 +13,10 @@ openpower_update_manager_SOURCES = \
 	item_updater.cpp \
 	item_updater_main.cpp
 
+if WANT_SIGNATURE_VERIFY_BUILD
+openpower_update_manager_SOURCES += image_verify.cpp
+endif
+
 nodist_openpower_update_manager_SOURCES = \
 	org/openbmc/Associations/server.cpp
 
