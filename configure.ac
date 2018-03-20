@@ -72,6 +72,10 @@ AC_DEFINE(FILEPATH_IFACE, "xyz.openbmc_project.Common.FilePath",
 AC_DEFINE(BUSNAME_UPDATER, "org.open_power.Software.Host.Updater",
     [The item updater DBus busname to own.])
 
+AC_ARG_VAR(IMG_UPLOAD_DIR, [Directory where downloaded software images are placed])
+AS_IF([test "x$IMG_UPLOAD_DIR" == "x"], [IMG_UPLOAD_DIR="/tmp/images"])
+AC_DEFINE_UNQUOTED([IMG_UPLOAD_DIR], ["$IMG_UPLOAD_DIR"], [Directory where downloaded software images are placed])
+
 AC_ARG_VAR(MANIFEST_FILE, [The path to the MANIFEST file])
 AS_IF([test "x$MANIFEST_FILE" == "x"], [MANIFEST_FILE="MANIFEST"])
 AC_DEFINE_UNQUOTED([MANIFEST_FILE], ["$MANIFEST_FILE"], [The path to the MANIFEST file])
