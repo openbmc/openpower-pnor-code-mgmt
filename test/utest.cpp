@@ -108,7 +108,6 @@ class SignatureTest : public testing::Test
         std::cout << "CAME TO TEAR DOWN " << std::endl;
         command("rm -rf " + std::string(testPath));
     }
-
     std::unique_ptr<Signature> signature;
     fs::path extractPath;
     fs::path signedConfPath;
@@ -119,4 +118,39 @@ class SignatureTest : public testing::Test
 TEST_F(SignatureTest, TestSignatureVerify)
 {
     EXPECT_TRUE(signature->verify());
+}
+
+/** @brief Test failure scenario with corrupted signature file*/
+TEST_F(SignatureTest, TestCorruptSignatureFile)
+{
+    // corrupt the image-kernel.sig file and ensure that verification fails
+    std::string kernelFile = extractPath.string() + "/" + "pnor.xz.squashfs";
+    command("echo \"dummy data\" > " + kernelFile + ".sig ");
+    EXPECT_FALSE(signature->verify());
+}
+
+/** @brief Test failure scenario with no public key in the image*/
+TEST_F(SignatureTest, TestNoPublicKeyInImage)
+{
+    // Remove publickey file from the image and ensure that verify fails
+    std::string pubkeyFile = extractPath.string() + "/" + "publickey";
+    command("rm " + pubkeyFile);
+    EXPECT_FALSE(signature->verify());
+}
+
+/** @brief Test failure scenario with invalid hash function value*/
+TEST_F(SignatureTest, TestInvalidHashValue)
+{
+    // Change the hashfunc value and ensure that verification fails
+    std::string hashFile = signedConfPNORPath.string() + "/hashfunc";
+    command("echo \"HashType=md5\" > " + hashFile);
+    EXPECT_FALSE(signature->verify());
+}
+
+/** @brief Test for failure scenario with no config file in system*/
+TEST_F(SignatureTest, TestNoConfigFileInSystem)
+{
+    // Remove the conf folder in the system and ensure that verify fails
+    command("rm -rf " + signedConfPNORPath.string());
+    EXPECT_FALSE(signature->verify());
 }
