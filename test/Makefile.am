@@ -35,4 +35,5 @@ utest_LDADD = \
 	$(top_builddir)/openpower_update_manager-watch.o \
 	$(top_builddir)/openpower_update_manager-item_updater.o \
 	$(top_builddir)/org/openbmc/Associations/openpower_update_manager-server.o \
+	$(top_builddir)/image_verify.cpp \
 	-lstdc++fs
