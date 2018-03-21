@@ -1,9 +1,12 @@
 #include <gtest/gtest.h>
 #include <openssl/sha.h>
 #include <string>
+#include <experimental/filesystem>
 #include "version.hpp"
+#include "image_verify.hpp"
 
 using namespace openpower::software::updater;
+using namespace openpower::software::image;
 
 /** @brief Make sure we correctly get the Id from getId()*/
 TEST(VersionTest, TestGetId)
@@ -22,4 +25,99 @@ TEST(VersionTest, TestGetId)
     std::string hexId = std::string(mdString);
     hexId = hexId.substr(0, 8);
     EXPECT_EQ(Version::getId(version), hexId);
+}
+
+class SignatureTest : public testing::Test
+{
+    static constexpr auto opensslCmd = "openssl dgst -sha256 -sign ";
+    static constexpr auto testPath = "/tmp/_testSig";
+
+  protected:
+    void command(const std::string& cmd)
+    {
+        std::cout << "COMMAND " << cmd << std::endl;
+        auto val = std::system(cmd.c_str());
+        if (val)
+        {
+            std::cout << "COMMAND Error: " << val << std::endl;
+        }
+    }
+    virtual void SetUp()
+    {
+        // Create test base directory.
+        fs::create_directories(testPath);
+
+        // Create unique temporary path for images.
+        std::string tmpDir(testPath);
+        tmpDir += "/extractXXXXXX";
+        std::string imageDir = mkdtemp(const_cast<char*>(tmpDir.c_str()));
+
+        // Create unique temporary configuration path
+        std::string tmpConfDir(testPath);
+        tmpConfDir += "/confXXXXXX";
+        std::string confDir = mkdtemp(const_cast<char*>(tmpConfDir.c_str()));
+
+        extractPath = imageDir;
+        extractPath /= "images";
+
+        signedConfPath = confDir;
+        signedConfPath /= "conf";
+
+        signedConfPNORPath = confDir;
+        signedConfPNORPath /= "conf";
+        signedConfPNORPath /= "OpenBMC";
+
+        std::cout << "SETUP " << std::endl;
+
+        command("mkdir " + extractPath.string());
+        command("mkdir " + signedConfPath.string());
+        command("mkdir " + signedConfPNORPath.string());
+
+        std::string hashFile = signedConfPNORPath.string() + "/hashfunc";
+        command("echo \"HashType=RSA-SHA256\" > " + hashFile);
+
+        std::string manifestFile = extractPath.string() + "/" + "MANIFEST";
+        command("echo \"HashType=RSA-SHA256\" > " + manifestFile);
+        command("echo \"KeyType=OpenBMC\" >> " + manifestFile);
+
+        std::string pnorFile = extractPath.string() + "/" + "pnor.xz.squashfs";
+        command("echo \"pnor.xz.squashfs file \" > " + pnorFile);
+
+        std::string pkeyFile = extractPath.string() + "/" + "private.pem";
+        command("openssl genrsa  -out " + pkeyFile + " 2048");
+
+        std::string pubkeyFile = extractPath.string() + "/" + "publickey";
+        command("openssl rsa -in " + pkeyFile + " -outform PEM " +
+                "-pubout -out " + pubkeyFile);
+
+        std::string pubKeyConfFile =
+            signedConfPNORPath.string() + "/" + "publickey";
+        command("cp " + pubkeyFile + " " + signedConfPNORPath.string());
+        command(opensslCmd + pkeyFile + " -out " + pnorFile + ".sig " +
+                pnorFile);
+
+        command(opensslCmd + pkeyFile + " -out " + manifestFile + ".sig " +
+                manifestFile);
+        command(opensslCmd + pkeyFile + " -out " + pubkeyFile + ".sig " +
+                pubkeyFile);
+
+
+        signature = std::make_unique<Signature>(extractPath, signedConfPath);
+    }
+    virtual void TearDown()
+    {
+        std::cout << "CAME TO TEAR DOWN " << std::endl;
+        command("rm -rf " + std::string(testPath));
+    }
+
+    std::unique_ptr<Signature> signature;
+    fs::path extractPath;
+    fs::path signedConfPath;
+    fs::path signedConfPNORPath;
+};
+
+/** @brief Test for sucess scenario*/
+TEST_F(SignatureTest, TestSignatureVerify)
+{
+    EXPECT_TRUE(signature->verify());
 }
