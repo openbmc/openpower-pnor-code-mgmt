@@ -95,7 +95,7 @@ bool Signature::verify()
             return false;
         }
 
-        // image specfic publickey file name.
+        // image specific publickey file name.
         fs::path publicKeyFile(imageDirPath / PUBLICKEY_FILE_NAME);
 
         // Validate the PNOR image file.
@@ -117,7 +117,7 @@ bool Signature::verify()
             return false;
         }
 
-        log<level::DEBUG>("Sucessfully completed Signature vaildation.");
+        log<level::DEBUG>("Successfully completed Signature vaildation.");
 
         return true;
     }
@@ -236,7 +236,7 @@ bool Signature::verifyFile(const fs::path& file, const fs::path& sigFile,
 
     if (result <= 0)
     {
-        log<level::ERR>("Error occured during EVP_DigestVerifyInit",
+        log<level::ERR>("Error occurred during EVP_DigestVerifyInit",
                         entry("ERRCODE=%lu", ERR_get_error()));
         elog<InternalFailure>();
     }
@@ -248,7 +248,7 @@ bool Signature::verifyFile(const fs::path& file, const fs::path& sigFile,
     result = EVP_DigestVerifyUpdate(rsaVerifyCtx.get(), dataPtr(), size);
     if (result <= 0)
     {
-        log<level::ERR>("Error occured during EVP_DigestVerifyUpdate",
+        log<level::ERR>("Error occurred during EVP_DigestVerifyUpdate",
                         entry("ERRCODE=%lu", ERR_get_error()));
         elog<InternalFailure>();
     }
@@ -264,7 +264,7 @@ bool Signature::verifyFile(const fs::path& file, const fs::path& sigFile,
     // Check the verification result.
     if (result < 0)
     {
-        log<level::ERR>("Error occured during EVP_DigestVerifyFinal",
+        log<level::ERR>("Error occurred during EVP_DigestVerifyFinal",
                         entry("ERRCODE=%lu", ERR_get_error()));
         elog<InternalFailure>();
     }
