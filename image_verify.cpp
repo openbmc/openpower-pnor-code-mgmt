@@ -113,7 +113,7 @@ bool Signature::verify()
         if (valid == false)
         {
             log<level::ERR>("Image file Signature Validation failed",
-                            entry("IMAGE=%s", squashFSImage.c_str()));
+                            entry("IMAGE=%s", squashFSImage));
             return false;
         }
 
