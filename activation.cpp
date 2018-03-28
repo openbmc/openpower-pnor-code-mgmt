@@ -124,7 +124,8 @@ auto Activation::activation(Activations value) -> Activations
 
             fs::path imagePath(IMG_DIR);
 
-            Signature signature(imagePath / versionId, SIGNED_IMAGE_CONF_PATH);
+            Signature signature(imagePath / versionId,
+               PNOR_SIGNED_IMAGE_CONF_PATH);
 
             // Validate the signed image.
             if (!signature.verify())
