@@ -7,6 +7,7 @@
 #include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
 #include "xyz/openbmc_project/Software/ActivationProgress/server.hpp"
 #include "org/openbmc/Associations/server.hpp"
+#include "config.h"
 
 namespace openpower
 {
@@ -300,6 +301,32 @@ class Activation : public ActivationInherit
 
     /** @brief Member function for clarity & brevity at activation end */
     void finishActivation();
+
+#ifdef WANT_SIGNATURE_VERIFY
+    /**
+     * @brief check whether continue code update after
+     *        signature validation failure.
+     *
+     * @return  false for BMC is in field mode or any internal
+     *          failure during the mapper call. return true for
+     *          all other use cases
+     */
+    bool continueUpdate();
+
+    /**
+     * @brief Gets the D-Bus Service name for the input D-Bus path
+     *
+     * @param[in] bus  -  Bus handler
+     * @param[in] path -  Object Path
+     * @param[in] intf -  Interface
+     *
+     * @return  Service name
+     * @error   InternalFailure exception thrown
+     */
+    std::string getService(sdbusplus::bus::bus& bus,
+                       const std::string& path,
+                       const std::string& intf);
+#endif
 };
 
 } // namespace updater
