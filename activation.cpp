@@ -6,11 +6,11 @@
 #include <phosphor-logging/log.hpp>
 
 #ifdef WANT_SIGNATURE_VERIFY
+#include <sdbusplus/server.hpp>
 #include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/elog-errors.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 #include "image_verify.hpp"
-#include "config.h"
 #endif
 
 namespace openpower
@@ -28,6 +28,10 @@ using namespace phosphor::logging;
 #ifdef WANT_SIGNATURE_VERIFY
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
+
+// Field mode path and interface.
+constexpr auto FIELDMODE_PATH("/xyz/openbmc_project/software");
+constexpr auto FIELDMODE_INTERFACE("xyz.openbmc_project.Control.FieldMode");
 #endif
 
 constexpr auto SYSTEMD_SERVICE = "org.freedesktop.systemd1";
@@ -120,24 +124,17 @@ auto Activation::activation(Activations value) -> Activations
         {
 
 #ifdef WANT_SIGNATURE_VERIFY
-            using Signature = openpower::software::image::Signature;
-
-            fs::path imagePath(IMG_DIR);
-
-            Signature signature(imagePath / versionId,
-                                PNOR_SIGNED_IMAGE_CONF_PATH);
-
             // Validate the signed image.
-            if (!signature.verify())
+            if (!validateSignature())
             {
-                log<level::ERR>("Error occurred during image validation");
-                report<InternalFailure>();
+                // Cleanup
+                activationBlocksTransition.reset(nullptr);
+                activationProgress.reset(nullptr);
 
                 return softwareServer::Activation::activation(
                     softwareServer::Activation::Activations::Failed);
             }
 #endif
-
             Activation::startActivation();
             return softwareServer::Activation::activation(value);
         }
@@ -275,6 +272,95 @@ void Activation::unitStateChange(sdbusplus::message::message& msg)
 
     return;
 }
+
+#ifdef WANT_SIGNATURE_VERIFY
+inline bool Activation::validateSignature()
+{
+    using Signature = openpower::software::image::Signature;
+    fs::path imagePath(IMG_DIR);
+
+    Signature signature(imagePath / versionId, PNOR_SIGNED_IMAGE_CONF_PATH);
+
+    try
+    {
+        // Validate the signed image.
+        if (signature.verify())
+        {
+            return true;
+        }
+        // Log error and continue activation process, if field mode disabled.
+        log<level::ERR>("Error occurred during image validation");
+        report<InternalFailure>();
+
+        if (!fieldModeEnabled())
+        {
+            return true;
+        }
+    }
+    catch (const InternalFailure& e)
+    {
+        report<InternalFailure>();
+    }
+    return false;
+}
+
+bool Activation::fieldModeEnabled()
+{
+    auto bus = sdbusplus::bus::new_default();
+
+    auto fieldModeSvc = getService(bus, FIELDMODE_PATH, FIELDMODE_INTERFACE);
+
+    auto method = bus.new_method_call(fieldModeSvc.c_str(), FIELDMODE_PATH,
+                                      "org.freedesktop.DBus.Properties", "Get");
+
+    method.append(FIELDMODE_INTERFACE, "FieldModeEnabled");
+    auto reply = bus.call(method);
+    if (reply.is_method_error())
+    {
+        log<level::ERR>("Error in fieldModeEnabled getValue");
+        elog<InternalFailure>();
+    }
+    sdbusplus::message::variant<bool> fieldMode;
+    reply.read(fieldMode);
+
+    return (fieldMode.get<bool>());
+}
+
+std::string Activation::getService(sdbusplus::bus::bus& bus,
+                                   const std::string& path,
+                                   const std::string& intf)
+{
+    auto mapperCall = bus.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
+                                          MAPPER_INTERFACE, "GetObject");
+
+    mapperCall.append(path);
+    mapperCall.append(std::vector<std::string>({intf}));
+
+    auto mapperResponseMsg = bus.call(mapperCall);
+
+    if (mapperResponseMsg.is_method_error())
+    {
+        log<level::ERR>("ERROR in getting service",
+                        entry("PATH=%s", path.c_str()),
+                        entry("INTERFACE=%s", intf.c_str()));
+
+        elog<InternalFailure>();
+    }
+
+    std::map<std::string, std::vector<std::string>> mapperResponse;
+    mapperResponseMsg.read(mapperResponse);
+
+    if (mapperResponse.begin() == mapperResponse.end())
+    {
+        log<level::ERR>("ERROR reading mapper response",
+                        entry("PATH=%s", path.c_str()),
+                        entry("INTERFACE=%s", intf.c_str()));
+
+        elog<InternalFailure>();
+    }
+    return mapperResponse.begin()->first;
+}
+#endif
 
 } // namespace updater
 } // namespace software
