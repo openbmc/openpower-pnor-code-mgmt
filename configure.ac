@@ -97,11 +97,11 @@ AS_IF([test "x$SIGNATURE_FILE_EXT" == "x"], [SIGNATURE_FILE_EXT=".sig"])
 AC_DEFINE_UNQUOTED([SIGNATURE_FILE_EXT], ["$SIGNATURE_FILE_EXT"], [The extension of the Signature file])
 
 # setup signature verification
-AC_ARG_ENABLE([verify_signature],
-    AS_HELP_STRING([--enable-verify_signature], [Enable image signature validation.]))
-AS_IF([test "x$enable_verify_signature" == "xyes"], \
+AC_ARG_ENABLE([verify_pnor_signature],
+    AS_HELP_STRING([--enable-verify_pnor_signature], [Enable image signature validation.]))
+AS_IF([test "x$enable_verify_pnor_signature" == "xyes"], \
     [AC_DEFINE([WANT_SIGNATURE_VERIFY],[],[Enable image signature validation.])])
-AM_CONDITIONAL([WANT_SIGNATURE_VERIFY_BUILD], [test "x$enable_verify_signature" == "xyes"])
+AM_CONDITIONAL([WANT_SIGNATURE_VERIFY_BUILD], [test "x$enable_verify_pnor_signature" == "xyes"])
 
 AC_DEFINE(CHASSIS_STATE_PATH, "/xyz/openbmc_project/state/chassis0",
     [The chassis state path.])

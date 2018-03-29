@@ -7,6 +7,7 @@
 #include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
 #include "xyz/openbmc_project/Software/ActivationProgress/server.hpp"
 #include "org/openbmc/Associations/server.hpp"
+#include "config.h"
 
 namespace openpower
 {
@@ -300,6 +301,43 @@ class Activation : public ActivationInherit
 
     /** @brief Member function for clarity & brevity at activation end */
     void finishActivation();
+
+#ifdef WANT_SIGNATURE_VERIFY
+    /**
+     * @brief Wrapper function for the signature verify function.
+     *        Signature class verify function used for validating
+     *        signed image. Also added additional logic to continue
+     *        update process in lab environment by checking the
+     *        fieldModeEnabled property.
+     *
+     * @return  true if successful signature validation or field
+     *          mode is disabled.
+     *          false for unsuccessful signature validation or
+     *          any internal failure during the mapper call.
+     */
+    inline bool validateSignature();
+
+    /**
+     * @brief Gets the fieldModeEnabled property value.
+     *
+     * @return fieldModeEnabled property value
+     * @error  InternalFailure exception thrown
+     */
+    bool fieldModeEnabled();
+
+    /**
+     * @brief Gets the D-Bus Service name for the input D-Bus path
+     *
+     * @param[in] bus  -  Bus handler
+     * @param[in] path -  Object Path
+     * @param[in] intf -  Interface
+     *
+     * @return  Service name
+     * @error   InternalFailure exception thrown
+     */
+    std::string getService(sdbusplus::bus::bus& bus, const std::string& path,
+                           const std::string& intf);
+#endif
 };
 
 } // namespace updater
