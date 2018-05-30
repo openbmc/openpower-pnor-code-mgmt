@@ -94,7 +94,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
     if (pos == std::string::npos)
     {
         log<level::ERR>("No version id found in object path",
-                        entry("OBJPATH=%s", path));
+                        entry("OBJPATH=%s", path.c_str()));
         return;
     }
 
@@ -160,7 +160,7 @@ void ItemUpdater::processPNORImage()
             if (!fs::is_regular_file(pnorTOC))
             {
                 log<level::ERR>("Failed to read pnorTOC.",
-                                entry("FILENAME=%s", pnorTOC.string()));
+                                entry("FILENAME=%s", pnorTOC.string().c_str()));
                 ItemUpdater::erase(id);
                 continue;
             }
@@ -170,7 +170,7 @@ void ItemUpdater::processPNORImage()
             if (version.empty())
             {
                 log<level::ERR>("Failed to read version from pnorTOC",
-                                entry("FILENAME=%s", pnorTOC.string()));
+                                entry("FILENAME=%s", pnorTOC.string().c_str()));
                 activationState = server::Activation::Activations::Invalid;
             }
 
@@ -178,7 +178,7 @@ void ItemUpdater::processPNORImage()
             if (extendedVersion.empty())
             {
                 log<level::ERR>("Failed to read extendedVersion from pnorTOC",
-                                entry("FILENAME=%s", pnorTOC.string()));
+                                entry("FILENAME=%s", pnorTOC.string().c_str()));
                 activationState = server::Activation::Activations::Invalid;
             }
 
@@ -210,7 +210,7 @@ void ItemUpdater::processPNORImage()
                 if (!restoreFromFile(id, priority))
                 {
                     log<level::ERR>("Unable to restore priority from file.",
-                                    entry("VERSIONID=%s", id));
+                                    entry("VERSIONID=%s", id.c_str()));
                 }
                 activations.find(id)->second->redundancyPriority =
                     std::make_unique<RedundancyPriority>(
@@ -233,7 +233,7 @@ void ItemUpdater::processPNORImage()
             if (!fs::is_directory(roDir))
             {
                 log<level::ERR>("No corresponding read-only volume found.",
-                                entry("DIRNAME=%s", roDir));
+                                entry("DIRNAME=%s", roDir.c_str()));
                 ItemUpdater::erase(id);
             }
         }
@@ -309,7 +309,7 @@ void ItemUpdater::reset()
         if (reply.is_method_error())
         {
             log<level::ERR>("Failed to clear read-write partitions",
-                            entry("SERVICE_FILE=%s", serviceFile));
+                            entry("SERVICE_FILE=%s", serviceFile.c_str()));
             elog<InternalFailure>();
         }
     }

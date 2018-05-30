@@ -205,7 +205,7 @@ void Activation::deleteImageManagerObject()
     if (mapperResponseMsg.is_method_error())
     {
         log<level::ERR>("Error in Get Delete Object",
-                        entry("VERSIONPATH=%s", path));
+                        entry("VERSIONPATH=%s", path.c_str()));
         return;
     }
     std::map<std::string, std::vector<std::string>> mapperResponse;
@@ -213,7 +213,7 @@ void Activation::deleteImageManagerObject()
     if (mapperResponse.begin() == mapperResponse.end())
     {
         log<level::ERR>("ERROR in reading the mapper response",
-                        entry("VERSIONPATH=%s", path));
+                        entry("VERSIONPATH=%s", path.c_str()));
         return;
     }
 
@@ -227,7 +227,7 @@ void Activation::deleteImageManagerObject()
     if (mapperResponseMsg.is_method_error())
     {
         log<level::ERR>("Error in Deleting image from image manager",
-                        entry("VERSIONPATH=%s", path));
+                        entry("VERSIONPATH=%s", path.c_str()));
         return;
     }
 }
