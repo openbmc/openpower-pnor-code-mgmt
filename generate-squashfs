@@ -120,6 +120,16 @@ echo "Parsing PNOR TOC..."
 
 pflash --partition=part --read=${scratch_dir}/part -F ${pnorfile}
 pflash --partition=VERSION --read=${scratch_dir}/VERSION -F ${pnorfile}
+version_size=$(du -k ${scratch_dir}/VERSION | head -1 | cut -f 1)
+magic_number=$(xxd -p -l 4 ${scratch_dir}/VERSION)
+# Check if VERSION is signed. A signed version partition will have an extra
+# 4K header starting with the magic number 0x17082011, see:
+# https://github.com/open-power/skiboot/blob/master/libstb/container.h#L47
+if [ "$version_size" == "8" -a "$magic_number" == "17082011" ]; then
+  # Advance past the STB header (4K, indexed from 1)
+  cp ${scratch_dir}/VERSION ${scratch_dir}/VERSION_FULL
+  tail --bytes=+4097 ${scratch_dir}/VERSION_FULL > ${scratch_dir}/VERSION
+fi
 {
   version=$(head -n 1 ${scratch_dir}/VERSION)
   echo "version=$version"
