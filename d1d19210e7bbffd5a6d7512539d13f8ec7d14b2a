@@ -1,0 +1,9 @@
+Ok-To-Test+1: Brad Bishop <bradleyb@fuzziesquirrel.com>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+1: Gunnar Mills <gmills@us.ibm.com>
+Code-Review+2: Adriana Kobylak <anoo@linux.ibm.com>
+Submitted-by: Adriana Kobylak <anoo@linux.ibm.com>
+Submitted-at: Mon, 25 Jun 2018 21:18:11 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/11111
+Project: openbmc/openpower-pnor-code-mgmt
+Branch: refs/heads/master
