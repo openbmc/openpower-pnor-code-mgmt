@@ -286,6 +286,21 @@ void ItemUpdater::removeReadWritePartition(std::string versionId)
 
 void ItemUpdater::reset()
 {
+    std::vector<uint8_t> mboxdArgs;
+
+    // Suspend mboxd - no args required.
+    auto dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH,
+                                        MBOXD_INTERFACE, "cmd");
+
+    dbusCall.append(static_cast<uint8_t>(3), mboxdArgs);
+
+    auto responseMsg = bus.call(dbusCall);
+    if (responseMsg.is_method_error())
+    {
+        log<level::ERR>("Error in mboxd suspend call");
+        elog<InternalFailure>();
+    }
+
     constexpr static auto patchDir = "/usr/local/share/pnor";
     if (fs::is_directory(patchDir))
     {
@@ -315,6 +330,20 @@ void ItemUpdater::reset()
         {
             fs::remove_all(iter);
         }
+    }
+
+    // Resume mboxd with arg 1, indicating that the flash was modified.
+    dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH, MBOXD_INTERFACE,
+                                   "cmd");
+
+    mboxdArgs.push_back(1);
+    dbusCall.append(static_cast<uint8_t>(4), mboxdArgs);
+
+    responseMsg = bus.call(dbusCall);
+    if (responseMsg.is_method_error())
+    {
+        log<level::ERR>("Error in mboxd resume call");
+        elog<InternalFailure>();
     }
 
     return;
