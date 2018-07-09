@@ -295,37 +295,26 @@ void ItemUpdater::reset()
         }
     }
 
+    // Clear the read-write partitions.
     for (const auto& it : activations)
     {
-        auto serviceFile =
-            "obmc-flash-bios-ubiclear@pnor-rw-" + it.first + ".service";
-
-        // Clear the read-write partitions.
-        auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
-                                          SYSTEMD_INTERFACE, "StartUnit");
-        method.append(serviceFile, "replace");
-        auto reply = bus.call(method);
-
-        if (reply.is_method_error())
+        auto rwDir = PNOR_RW_PREFIX + it.first;
+        if (fs::is_directory(rwDir))
         {
-            log<level::ERR>("Failed to clear read-write partitions",
-                            entry("SERVICE_FILE=%s", serviceFile.c_str()));
-            elog<InternalFailure>();
+            for (const auto& iter : fs::directory_iterator(rwDir))
+            {
+                fs::remove_all(iter);
+            }
         }
     }
-    static constexpr auto serviceFile =
-        "obmc-flash-bios-ubiclear@pnor-prsv.service";
-    // Clear the preserved partition.
-    auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
-                                      SYSTEMD_INTERFACE, "StartUnit");
-    method.append(serviceFile, "replace");
-    auto reply = bus.call(method);
 
-    if (reply.is_method_error())
+    // Clear the preserved partition.
+    if (fs::is_directory(PNOR_PRSV))
     {
-        log<level::ERR>("Failed to clear preserved partition",
-                        entry("SERVICE_FILE=%s", serviceFile));
-        elog<InternalFailure>();
+        for (const auto& iter : fs::directory_iterator(PNOR_PRSV))
+        {
+            fs::remove_all(iter);
+        }
     }
 
     return;
