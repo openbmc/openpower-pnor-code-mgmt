@@ -4,6 +4,7 @@
 #include "item_updater.hpp"
 #include "serialize.hpp"
 #include <phosphor-logging/log.hpp>
+#include <sdbusplus/exception.hpp>
 
 #ifdef WANT_SIGNATURE_VERIFY
 #include <sdbusplus/server.hpp>
@@ -24,6 +25,7 @@ namespace fs = std::experimental::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
 
 using namespace phosphor::logging;
+using sdbusplus::exception::SdBusError;
 
 #ifdef WANT_SIGNATURE_VERIFY
 using InternalFailure =
@@ -41,8 +43,25 @@ void Activation::subscribeToSystemdSignals()
 {
     auto method = this->bus.new_method_call(SYSTEMD_SERVICE, SYSTEMD_OBJ_PATH,
                                             SYSTEMD_INTERFACE, "Subscribe");
-    this->bus.call_noreply(method);
-
+    try
+    {
+        this->bus.call_noreply(method);
+    }
+    catch (const SdBusError& e)
+    {
+        if (e.name() != nullptr &&
+            strcmp("org.freedesktop.systemd1.AlreadySubscribed", e.name()) == 0)
+        {
+            // If an Activation attempt fails, the Unsubscribe method is not
+            // called. This may lead to an AlreadySubscribed error if the
+            // Activation is re-attempted.
+        }
+        else
+        {
+            log<level::ERR>("Error subscribing to systemd",
+                            entry("ERROR=%s", e.what()));
+        }
+    }
     return;
 }
 
@@ -122,6 +141,8 @@ auto Activation::activation(Activations value) -> Activations
 
         if (ubiVolumesCreated == false)
         {
+            // Enable systemd signals
+            Activation::subscribeToSystemdSignals();
 
 #ifdef WANT_SIGNATURE_VERIFY
             // Validate the signed image.
