@@ -193,8 +193,6 @@ class Activation : public ActivationInherit
             std::bind(std::mem_fn(&Activation::unitStateChange), this,
                       std::placeholders::_1))
     {
-        // Enable systemd signals
-        subscribeToSystemdSignals();
         // Set Properties.
         extendedVersion(extVersion);
         activation(activationStatus);
