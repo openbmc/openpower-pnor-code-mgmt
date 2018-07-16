@@ -242,13 +242,30 @@ void Activation::deleteImageManagerObject()
     method = this->bus.new_method_call(
         (mapperResponse.begin()->first).c_str(), path.c_str(),
         "xyz.openbmc_project.Object.Delete", "Delete");
-    mapperResponseMsg = bus.call(method);
-
-    // Check that the bus call didn't result in an error
-    if (mapperResponseMsg.is_method_error())
+    try
     {
-        log<level::ERR>("Error in Deleting image from image manager",
-                        entry("VERSIONPATH=%s", path.c_str()));
+        auto mapperResponseMsg = bus.call(method);
+
+        // Check that the bus call didn't result in an error
+        if (mapperResponseMsg.is_method_error())
+        {
+            log<level::ERR>("Error in Deleting image from image manager",
+                            entry("VERSIONPATH=%s", path.c_str()));
+            return;
+        }
+    }
+    catch (const SdBusError& e)
+    {
+        if (e.name() != nullptr && strcmp("System.Error.ELOOP", e.name()) == 0)
+        {
+            // TODO: Error being tracked with openbmc/openbmc#3311
+        }
+        else
+        {
+            log<level::ERR>("Error performing call to Delete object path",
+                            entry("ERROR=%s", e.what()),
+                            entry("PATH=%s", path.c_str()));
+        }
         return;
     }
 }
