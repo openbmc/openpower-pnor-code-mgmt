@@ -475,9 +475,15 @@ void ItemUpdater::erase(std::string entryId)
 
 void ItemUpdater::deleteAll()
 {
+    auto chassisOn = isChassisOn();
+
     for (const auto& activationIt : activations)
     {
-        if (!isVersionFunctional(activationIt.first))
+        if (isVersionFunctional(activationIt.first) && chassisOn)
+        {
+            continue;
+        }
+        else
         {
             ItemUpdater::erase(activationIt.first);
         }
