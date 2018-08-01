@@ -457,8 +457,12 @@ void ItemUpdater::erase(std::string entryId)
     // Remove priority persistence file
     removeFile(entryId);
 
-    // Removing read-only and read-write partitions
+    // Removing read-only and read-write partitions, sleep for 1s in between to
+    // prevent errors when removing the volumes, ubirmvol queries the existing
+    // volumes to find the specified one, and fails when a second service
+    // removes a volume while it's executing.
     removeReadWritePartition(entryId);
+    std::this_thread::sleep_for (std::chrono::seconds(1));
     removeReadOnlyPartition(entryId);
 
     // Removing entry in versions map
