@@ -50,7 +50,7 @@ org/openbmc/Associations/server.hpp: org/openbmc/Associations.interface.yaml
 	@mkdir -p `dirname $@`
 	$(SDBUSPLUSPLUS) -r $(srcdir) interface server-header org.openbmc.Associations > $@
 
-openpower_update_manager_CXXFLAGS = $(generic_cxxflags)
+openpower_update_manager_CXXFLAGS = $(generic_cxxflags) -flto
 openpower_update_manager_LDFLAGS = $(generic_ldflags)
 
 SUBDIRS = test
