@@ -115,6 +115,11 @@ void Version::updateDeleteInterface(sdbusplus::message::message& msg)
             chassisState = p.second.get<std::string>();
         }
     }
+    if (chassisState.empty())
+    {
+        // The chassis power state property did not change, return.
+        return;
+    }
 
     if ((parent.isVersionFunctional(this->versionId)) &&
         (chassisState != CHASSIS_STATE_OFF))
