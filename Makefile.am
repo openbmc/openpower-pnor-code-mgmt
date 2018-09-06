@@ -14,7 +14,9 @@ openpower_update_manager_SOURCES = \
 	item_updater_main.cpp
 
 if WANT_SIGNATURE_VERIFY_BUILD
-openpower_update_manager_SOURCES += image_verify.cpp
+openpower_update_manager_SOURCES += \
+	image_verify.cpp \
+	utils.cpp
 endif
 
 nodist_openpower_update_manager_SOURCES = \
