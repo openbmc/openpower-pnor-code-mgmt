@@ -1,13 +1,15 @@
 #pragma once
 
+#include "config.h"
+
+#include "org/openbmc/Associations/server.hpp"
+#include "xyz/openbmc_project/Software/ActivationProgress/server.hpp"
+#include "xyz/openbmc_project/Software/ExtendedVersion/server.hpp"
+#include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
+
 #include <sdbusplus/server.hpp>
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
 #include <xyz/openbmc_project/Software/ActivationBlocksTransition/server.hpp>
-#include "xyz/openbmc_project/Software/ExtendedVersion/server.hpp"
-#include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
-#include "xyz/openbmc_project/Software/ActivationProgress/server.hpp"
-#include "org/openbmc/Associations/server.hpp"
-#include "config.h"
 
 namespace openpower
 {
