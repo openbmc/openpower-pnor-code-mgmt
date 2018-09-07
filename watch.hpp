@@ -3,6 +3,9 @@
 #include <systemd/sd-event.h>
 #include <unistd.h>
 
+#include <functional>
+#include <memory>
+
 namespace openpower
 {
 namespace software

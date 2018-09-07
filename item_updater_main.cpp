@@ -1,10 +1,12 @@
+#include "config.h"
+
+#include "item_updater.hpp"
+#include "watch.hpp"
+
+#include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/server/manager.hpp>
 #include <system_error>
-#include "config.h"
-#include "item_updater.hpp"
-#include <phosphor-logging/log.hpp>
-#include "watch.hpp"
 
 int main(int argc, char* argv[])
 {

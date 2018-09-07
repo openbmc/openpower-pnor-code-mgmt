@@ -1,12 +1,13 @@
 #pragma once
 
-#include <sdbusplus/server.hpp>
 #include "activation.hpp"
+#include "org/openbmc/Associations/server.hpp"
+#include "version.hpp"
+#include "xyz/openbmc_project/Collection/DeleteAll/server.hpp"
+
+#include <sdbusplus/server.hpp>
 #include <xyz/openbmc_project/Common/FactoryReset/server.hpp>
 #include <xyz/openbmc_project/Object/Enable/server.hpp>
-#include "version.hpp"
-#include "org/openbmc/Associations/server.hpp"
-#include "xyz/openbmc_project/Collection/DeleteAll/server.hpp"
 
 namespace openpower
 {
