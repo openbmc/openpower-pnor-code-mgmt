@@ -1,15 +1,19 @@
-#include <stdexcept>
-#include <cstddef>
-#include <cstring>
-#include <functional>
-#include <string>
+#include "config.h"
+
+#include "watch.hpp"
+
+#include "item_updater.hpp"
+
 #include <sys/inotify.h>
 #include <unistd.h>
+
+#include <cstddef>
+#include <cstring>
 #include <experimental/filesystem>
+#include <functional>
 #include <phosphor-logging/log.hpp>
-#include "config.h"
-#include "watch.hpp"
-#include "item_updater.hpp"
+#include <stdexcept>
+#include <string>
 
 namespace openpower
 {
