@@ -1,9 +1,12 @@
-#include <gtest/gtest.h>
-#include <openssl/sha.h>
-#include <string>
-#include <experimental/filesystem>
-#include "version.hpp"
 #include "image_verify.hpp"
+#include "version.hpp"
+
+#include <openssl/sha.h>
+
+#include <experimental/filesystem>
+#include <string>
+
+#include <gtest/gtest.h>
 
 using namespace openpower::software::updater;
 using namespace openpower::software::image;

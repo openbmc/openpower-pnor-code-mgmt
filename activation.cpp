@@ -1,17 +1,21 @@
-#include <experimental/filesystem>
-#include "activation.hpp"
 #include "config.h"
+
+#include "activation.hpp"
+
 #include "item_updater.hpp"
 #include "serialize.hpp"
+
+#include <experimental/filesystem>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/exception.hpp>
 
 #ifdef WANT_SIGNATURE_VERIFY
-#include <sdbusplus/server.hpp>
-#include <phosphor-logging/elog.hpp>
-#include <phosphor-logging/elog-errors.hpp>
-#include <xyz/openbmc_project/Common/error.hpp>
 #include "image_verify.hpp"
+
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/elog.hpp>
+#include <sdbusplus/server.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
 #endif
 
 namespace openpower

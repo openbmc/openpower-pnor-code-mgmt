@@ -1,16 +1,19 @@
-#include <string>
-#include <experimental/filesystem>
-#include <fstream>
-#include <queue>
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
-#include "xyz/openbmc_project/Common/error.hpp"
-#include <xyz/openbmc_project/Software/Version/server.hpp>
-#include "version.hpp"
 #include "config.h"
+
 #include "item_updater.hpp"
+
 #include "activation.hpp"
 #include "serialize.hpp"
+#include "version.hpp"
+#include "xyz/openbmc_project/Common/error.hpp"
+
+#include <experimental/filesystem>
+#include <fstream>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include <queue>
+#include <string>
+#include <xyz/openbmc_project/Software/Version/server.hpp>
 
 namespace openpower
 {

@@ -1,10 +1,12 @@
 #pragma once
 
-#include <sdbusplus/bus.hpp>
-#include "xyz/openbmc_project/Software/Version/server.hpp"
+#include "config.h"
+
 #include "xyz/openbmc_project/Common/FilePath/server.hpp"
 #include "xyz/openbmc_project/Object/Delete/server.hpp"
-#include "config.h"
+#include "xyz/openbmc_project/Software/Version/server.hpp"
+
+#include <sdbusplus/bus.hpp>
 
 namespace openpower
 {
