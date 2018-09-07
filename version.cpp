@@ -1,14 +1,17 @@
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <fstream>
-#include <stdexcept>
-#include <phosphor-logging/log.hpp>
 #include "version.hpp"
-#include <phosphor-logging/elog-errors.hpp>
-#include "xyz/openbmc_project/Common/error.hpp"
+
 #include "item_updater.hpp"
+#include "xyz/openbmc_project/Common/error.hpp"
+
 #include <openssl/sha.h>
+
+#include <fstream>
+#include <iostream>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include <sstream>
+#include <stdexcept>
+#include <string>
 
 namespace openpower
 {
