@@ -47,7 +47,7 @@ AS_IF([test "x$enable_oe_sdk" == "xyes"],
 )
 
 # Checks for typedefs, structures, and compiler characteristics.
-AX_CXX_COMPILE_STDCXX_14([noext])
+AX_CXX_COMPILE_STDCXX([17], [noext], [mandatory])
 AX_APPEND_COMPILE_FLAGS([-Wall -Werror], [CXXFLAGS])
 
 AC_ARG_VAR(SOFTWARE_OBJPATH, [The software manager Dbus root])
