@@ -27,7 +27,9 @@ utest_LDFLAGS = \
 	-lssl \
 	-lcrypto
 
-utest_SOURCES = utest.cpp
+utest_SOURCES = \
+	utest.cpp \
+	msl_verify.cpp
 utest_LDADD = \
 	$(top_builddir)/openpower_update_manager-activation.o \
 	$(top_builddir)/openpower_update_manager-version.o \
@@ -36,4 +38,5 @@ utest_LDADD = \
 	$(top_builddir)/openpower_update_manager-item_updater.o \
 	$(top_builddir)/org/openbmc/Associations/openpower_update_manager-server.o \
 	$(top_builddir)/image_verify.cpp \
+	$(top_builddir)/msl_verify.cpp \
 	-lstdc++fs

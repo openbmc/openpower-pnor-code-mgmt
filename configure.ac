@@ -151,5 +151,14 @@ AC_ARG_VAR(ACTIVE_PNOR_MAX_ALLOWED, [The maximum allowed active pnor versions])
 AS_IF([test "x$ACTIVE_PNOR_MAX_ALLOWED" == "x"], [ACTIVE_PNOR_MAX_ALLOWED=2])
 AC_DEFINE_UNQUOTED([ACTIVE_PNOR_MAX_ALLOWED], [$ACTIVE_PNOR_MAX_ALLOWED], [The maximum allowed active pnor versions])
 
+AC_ARG_VAR(PNOR_MSL, [The PNOR minimum ship level])
+AS_IF([test "x$PNOR_MSL" == "x"], [PNOR_MSL=""])
+AC_DEFINE_UNQUOTED([PNOR_MSL], ["$PNOR_MSL"], [The PNOR minimum ship level])
+
+AC_ARG_VAR(PNOR_VERSION_PARTITION, [The name of the PNOR version partition])
+AS_IF([test "x$PNOR_VERSION_PARTITION" == "x"], [PNOR_VERSION_PARTITION="VERSION"])
+AC_DEFINE_UNQUOTED([PNOR_VERSION_PARTITION], ["$PNOR_VERSION_PARTITION"],
+    [The name of the PNOR version partition])
+
 AC_CONFIG_FILES([Makefile test/Makefile])
 AC_OUTPUT
