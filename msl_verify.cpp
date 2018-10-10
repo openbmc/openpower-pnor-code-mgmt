@@ -2,8 +2,11 @@
 
 #include <experimental/filesystem>
 #include <fstream>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/log.hpp>
 #include <regex>
+#include <xyz/openbmc_project/Control/MinimumShipLevel/error.hpp>
 
 namespace openpower
 {
@@ -116,6 +119,12 @@ static std::string getFunctionalPnorVersion()
  */
 static void verify()
 {
+    using namespace sdbusplus::xyz::openbmc_project::Control::MinimumShipLevel::
+        Error;
+    using notMet = xyz::openbmc_project::Control::MinimumShipLevel::NotMet;
+
+    constexpr auto purpose =
+        "xyz.openbmc_project.Software.Version.VersionPurpose.Host";
     auto min = std::string{PNOR_MSL};
 
     if (std::string(PNOR_MSL).empty())
@@ -143,12 +152,13 @@ static void verify()
     auto rc = compare(min_t, actual_t);
     if (rc != 0)
     {
-        log<level::ERR>(
-            "PNOR Mininum Ship Level NOT met",
-            entry("MIN_VERSION=%s", min.c_str()),
-            entry("ACTUAL_VERSION=%s", actual.c_str()),
-            entry("VERSION_PURPOSE=%s",
-                  "xyz.openbmc_project.Software.Version.VersionPurpose.Host"));
+        log<level::ERR>("PNOR Mininum Ship Level NOT met",
+                        entry("MIN_VERSION=%s", min.c_str()),
+                        entry("ACTUAL_VERSION=%s", actual.c_str()),
+                        entry("VERSION_PURPOSE=%s", purpose));
+        report<NotMet>(notMet::MIN_VERSION(min.c_str()),
+                       notMet::ACTUAL_VERSION(actual.c_str()),
+                       notMet::VERSION_PURPOSE(purpose));
     }
 
     return;
