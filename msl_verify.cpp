@@ -125,7 +125,7 @@ static void verify()
 
     constexpr auto purpose =
         "xyz.openbmc_project.Software.Version.VersionPurpose.Host";
-    auto min = std::string{PNOR_MSL};
+    auto minStr = std::string{PNOR_MSL};
 
     if (std::string(PNOR_MSL).empty())
     {
@@ -143,22 +143,30 @@ static void verify()
         return;
     }
 
-    Version_t min_t = {0, 0, 0};
-    parse(min, min_t);
-
     Version_t actual_t = {0, 0, 0};
     parse(actual, actual_t);
 
-    auto rc = compare(min_t, actual_t);
-    if (rc != 0)
+    std::istringstream minStream(minStr);
+    std::vector<std::string> mins(std::istream_iterator<std::string>{minStream},
+                                  std::istream_iterator<std::string>());
+
+    for (auto& min : mins)
     {
-        log<level::ERR>("PNOR Mininum Ship Level NOT met",
-                        entry("MIN_VERSION=%s", min.c_str()),
-                        entry("ACTUAL_VERSION=%s", actual.c_str()),
-                        entry("VERSION_PURPOSE=%s", purpose));
-        report<NotMet>(notMet::MIN_VERSION(min.c_str()),
-                       notMet::ACTUAL_VERSION(actual.c_str()),
-                       notMet::VERSION_PURPOSE(purpose));
+        Version_t min_t = {0, 0, 0};
+        parse(min, min_t);
+
+        auto rc = compare(min_t, actual_t);
+        if (rc != 0)
+        {
+            log<level::ERR>("PNOR Mininum Ship Level NOT met",
+                            entry("MIN_VERSION=%s", min.c_str()),
+                            entry("ACTUAL_VERSION=%s", actual.c_str()),
+                            entry("VERSION_PURPOSE=%s", purpose));
+            report<NotMet>(notMet::MIN_VERSION(min.c_str()),
+                           notMet::ACTUAL_VERSION(actual.c_str()),
+                           notMet::VERSION_PURPOSE(purpose));
+            break;
+        }
     }
 
     return;
