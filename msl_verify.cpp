@@ -16,6 +16,8 @@ namespace image
 
 namespace fs = std::experimental::filesystem;
 using namespace phosphor::logging;
+using AssociationList =
+    std::vector<std::tuple<std::string, std::string, std::string>>;
 
 int MinimumShipLevel::compare(const Version& a, const Version& b)
 {
@@ -79,23 +81,59 @@ void MinimumShipLevel::parse(const std::string& versionStr, Version& version)
 
 std::string MinimumShipLevel::getFunctionalVersion()
 {
-    if (!fs::exists(PNOR_RO_ACTIVE_PATH))
+    auto bus = sdbusplus::bus::new_default();
+    auto method = bus.new_method_call(BUSNAME_UPDATER, SOFTWARE_OBJPATH,
+                                      SYSTEMD_PROPERTY_INTERFACE, "Get");
+    method.append(ASSOCIATIONS_INTERFACE, "associations");
+    auto response = bus.call(method);
+
+    sdbusplus::message::variant<AssociationList> associations;
+    try
+    {
+        response.read(associations);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("Failed to read software associations",
+                        entry("ERROR=%s", e.what()),
+                        entry("SIGNATURE=%s", response.get_signature()));
+        return {};
+    }
+
+    auto& assocs = associations.get<AssociationList>();
+    if (assocs.empty())
     {
         return {};
     }
 
-    fs::path versionPath(PNOR_RO_ACTIVE_PATH);
-    versionPath /= PNOR_VERSION_PARTITION;
-    if (!fs::is_regular_file(versionPath))
+    for (const auto& assoc : assocs)
     {
-        return {};
+        if (std::get<0>(assoc).compare(FUNCTIONAL_FWD_ASSOCIATION) == 0)
+        {
+            auto path = std::get<2>(assoc);
+            method = bus.new_method_call(BUSNAME_UPDATER, path.c_str(),
+                                         SYSTEMD_PROPERTY_INTERFACE, "Get");
+            method.append(VERSION_IFACE, "Version");
+            response = bus.call(method);
+
+            sdbusplus::message::variant<std::string> functionalVersion;
+            try
+            {
+                response.read(functionalVersion);
+                return (functionalVersion.get<std::string>());
+            }
+            catch (const sdbusplus::exception::SdBusError& e)
+            {
+                log<level::ERR>(
+                    "Failed to read version property",
+                    entry("ERROR=%s", e.what()),
+                    entry("SIGNATURE=%s", response.get_signature()));
+                return {};
+            }
+        }
     }
 
-    std::ifstream versionFile(versionPath);
-    std::string versionStr;
-    std::getline(versionFile, versionStr);
-
-    return versionStr;
+    return {};
 }
 
 bool MinimumShipLevel::verify()
