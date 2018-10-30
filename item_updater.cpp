@@ -489,6 +489,7 @@ void ItemUpdater::erase(std::string entryId)
     }
     else
     {
+        removeAssociation(ita->second->path);
         activations.erase(entryId);
     }
     return;
@@ -582,12 +583,11 @@ void ItemUpdater::updateFunctionalAssociation(const std::string& path)
     associations(assocs);
 }
 
-void ItemUpdater::removeActiveAssociation(const std::string& path)
+void ItemUpdater::removeAssociation(const std::string& path)
 {
     for (auto iter = assocs.begin(); iter != assocs.end();)
     {
-        if ((std::get<0>(*iter)).compare(ACTIVE_FWD_ASSOCIATION) == 0 &&
-            (std::get<2>(*iter)).compare(path) == 0)
+        if ((std::get<2>(*iter)).compare(path) == 0)
         {
             iter = assocs.erase(iter);
             associations(assocs);
