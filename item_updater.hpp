@@ -165,11 +165,11 @@ class ItemUpdater : public ItemUpdaterInherit
      */
     void updateFunctionalAssociation(const std::string& path);
 
-    /** @brief Removes an active association to the software image
+    /** @brief Removes an association to the software image
      *
      * @param[in]  path - The path to remove the association from.
      */
-    void removeActiveAssociation(const std::string& path);
+    void removeAssociation(const std::string& path);
 
     /** @brief Persistent GardReset dbus object */
     std::unique_ptr<GardReset> gardReset;
