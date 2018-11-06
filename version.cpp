@@ -115,7 +115,8 @@ void Version::updateDeleteInterface(sdbusplus::message::message& msg)
     {
         if (p.first == "CurrentPowerState")
         {
-            chassisState = p.second.get<std::string>();
+            chassisState =
+                sdbusplus::message::variant_ns::get<std::string>(p.second);
         }
     }
     if (chassisState.empty())

@@ -15,6 +15,7 @@ namespace image
 {
 
 namespace fs = std::experimental::filesystem;
+namespace variant_ns = sdbusplus::message::variant_ns;
 using namespace phosphor::logging;
 using AssociationList =
     std::vector<std::tuple<std::string, std::string, std::string>>;
@@ -100,7 +101,7 @@ std::string MinimumShipLevel::getFunctionalVersion()
         return {};
     }
 
-    auto& assocs = associations.get<AssociationList>();
+    auto& assocs = variant_ns::get<AssociationList>(associations);
     if (assocs.empty())
     {
         return {};
@@ -120,7 +121,7 @@ std::string MinimumShipLevel::getFunctionalVersion()
             try
             {
                 response.read(functionalVersion);
-                return (functionalVersion.get<std::string>());
+                return variant_ns::get<std::string>(functionalVersion);
             }
             catch (const sdbusplus::exception::SdBusError& e)
             {
