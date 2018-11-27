@@ -363,7 +363,7 @@ bool Activation::fieldModeEnabled()
     sdbusplus::message::variant<bool> fieldMode;
     reply.read(fieldMode);
 
-    return (fieldMode.get<bool>());
+    return sdbusplus::message::variant_ns::get<bool>(fieldMode);
 }
 
 std::string Activation::getService(sdbusplus::bus::bus& bus,
