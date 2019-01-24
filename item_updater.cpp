@@ -536,8 +536,10 @@ void ItemUpdater::freeSpace()
         {
             count++;
             // Don't put the functional version on the queue since we can't
-            // remove the "running" PNOR version.
-            if (isVersionFunctional(iter.second->versionId))
+            // remove the "running" PNOR version if it allows multiple PNORs
+            // But removing functional version if there is only one PNOR.
+            if (ACTIVE_PNOR_MAX_ALLOWED > 1
+                && isVersionFunctional(iter.second->versionId))
             {
                 continue;
             }
