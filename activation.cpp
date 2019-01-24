@@ -220,12 +220,14 @@ auto Activation::requestedActivation(RequestedActivations value)
 void Activation::deleteImageManagerObject()
 {
     // Get the Delete object for <versionID> inside image_manager
+    constexpr auto versionServiceStr = "xyz.openbmc_project.Software.Version";
+    constexpr auto deleteInterface = "xyz.openbmc_project.Object.Delete";
+    std::string versionService;
     auto method = this->bus.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
                                             MAPPER_INTERFACE, "GetObject");
 
     method.append(path);
-    method.append(
-        std::vector<std::string>({"xyz.openbmc_project.Object.Delete"}));
+    method.append(std::vector<std::string>({deleteInterface}));
     auto mapperResponseMsg = bus.call(method);
     if (mapperResponseMsg.is_method_error())
     {
@@ -242,10 +244,25 @@ void Activation::deleteImageManagerObject()
         return;
     }
 
+    // We need to find the phosphor-software-manager's version service
+    // to invoke the delete interface
+    for (auto resp : mapperResponse)
+    {
+        if (resp.first.find(versionServiceStr) != std::string::npos)
+        {
+            versionService = resp.first;
+        }
+    }
+
+    if (versionService.empty())
+    {
+        log<level::ERR>("Error finding version service");
+        return;
+    }
+
     // Call the Delete object for <versionID> inside image_manager
-    method = this->bus.new_method_call(
-        (mapperResponse.begin()->first).c_str(), path.c_str(),
-        "xyz.openbmc_project.Object.Delete", "Delete");
+    method = this->bus.new_method_call(versionService.c_str(), path.c_str(),
+                                       deleteInterface, "Delete");
     try
     {
         auto mapperResponseMsg = bus.call(method);
