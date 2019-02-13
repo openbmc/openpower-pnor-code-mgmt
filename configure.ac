@@ -13,12 +13,9 @@ AC_PROG_INSTALL #Checks/sets the install variable to be used
 AC_PROG_MAKE_SET
 
 # Check for libraries
-PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces],,\
-    AC_MSG_ERROR(["Requires phosphor-dbus-interfaces package."]))
-PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus],,
-    AC_MSG_ERROR(["Requires sdbusplus package."]))
-PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging],,
-    [AC_MSG_ERROR([The openbmc/phosphor-logging package is required])])
+PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces])
+PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus])
+PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging])
 
 AC_PATH_PROG([SDBUSPLUSPLUS], [sdbus++])
 
