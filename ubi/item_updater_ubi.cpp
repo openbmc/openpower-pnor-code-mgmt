@@ -2,7 +2,7 @@
 
 #include "item_updater_ubi.hpp"
 
-#include "activation.hpp"
+#include "activation_ubi.hpp"
 #include "serialize.hpp"
 #include "version.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
@@ -127,7 +127,7 @@ void ItemUpdaterUbi::createActivation(sdbusplus::message::message& m)
                 ->second;
 
         activations.insert(std::make_pair(
-            versionId, std::make_unique<Activation>(
+            versionId, std::make_unique<ActivationUbi>(
                            bus, path, *this, versionId, extendedVersion,
                            activationState, associations)));
 
@@ -202,7 +202,7 @@ void ItemUpdaterUbi::processPNORImage()
 
             // Create Activation instance for this version.
             activations.insert(
-                std::make_pair(id, std::make_unique<Activation>(
+                std::make_pair(id, std::make_unique<ActivationUbi>(
                                        bus, path, *this, id, extendedVersion,
                                        activationState, associations)));
 
@@ -216,7 +216,7 @@ void ItemUpdaterUbi::processPNORImage()
                                     entry("VERSIONID=%s", id.c_str()));
                 }
                 activations.find(id)->second->redundancyPriority =
-                    std::make_unique<RedundancyPriority>(
+                    std::make_unique<RedundancyPriorityUbi>(
                         bus, path, *(activations.find(id)->second), priority);
             }
 
@@ -390,7 +390,6 @@ void ItemUpdaterUbi::freePriority(uint8_t value, const std::string& versionId)
         }
     }
 }
-
 
 bool ItemUpdaterUbi::erase(std::string entryId)
 {
