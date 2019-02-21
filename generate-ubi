@@ -4,7 +4,7 @@ set -eo pipefail
 help=$'Generate PNOR UBI image from a PNOR SquashFS Tarball
 
 Generates a UBI, Unsorted Block Images, PNOR image from a PNOR SquashFS Tarball.
-The PNOR SquashFS Tarball is generated from the generate-squashfs script.
+The PNOR SquashFS Tarball is generated from the generate-tar script.
 
 usage: generate-ubi [OPTION] <PNOR SquashFS Tarball>...
 
@@ -44,7 +44,7 @@ done
 
 if [ ! -f "${tarball}" ]; then
   echo "Please enter a PNOR SquashFS Tarball."
-  echo "To generate PNOR SquashFS Tarball see generate-squashfs"
+  echo "To generate PNOR SquashFS Tarball see generate-tar"
   echo "$help"
   exit 1
 fi
