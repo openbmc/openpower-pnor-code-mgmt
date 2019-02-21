@@ -80,7 +80,8 @@ class Watch
      *  @param[in] functionalCallback - The callback function for updating
      *                                  the functional associations.
      */
-    Watch(sd_event* loop, std::function<void(std::string&)> functionalCallback);
+    Watch(sd_event* loop,
+          std::function<void(const std::string&)> functionalCallback);
 
     Watch(const Watch&) = delete;
     Watch& operator=(const Watch&) = delete;

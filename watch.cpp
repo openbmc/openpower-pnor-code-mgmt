@@ -26,7 +26,7 @@ using namespace phosphor::logging;
 namespace fs = std::experimental::filesystem;
 
 Watch::Watch(sd_event* loop,
-             std::function<void(std::string&)> functionalCallback) :
+             std::function<void(const std::string&)> functionalCallback) :
     functionalCallback(functionalCallback),
     fd(inotifyInit())
 
@@ -94,9 +94,7 @@ int Watch::callback(sd_event_source* s, int fd, uint32_t revents,
         if (fs::equivalent(path, PNOR_RO_ACTIVE_PATH))
         {
             auto id = ItemUpdater::determineId(path);
-            auto objPath = std::string{SOFTWARE_OBJPATH} + '/' + id;
-
-            static_cast<Watch*>(userdata)->functionalCallback(objPath);
+            static_cast<Watch*>(userdata)->functionalCallback(id);
         }
         offset += offsetof(inotify_event, name) + event->len;
     }
