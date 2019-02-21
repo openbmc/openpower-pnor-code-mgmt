@@ -1,3 +1,4 @@
 openpower_update_manager_SOURCES += \
+	%reldir%/activation_ubi.cpp \
 	%reldir%/item_updater_ubi.cpp \
 	%reldir%/watch.cpp
