@@ -3,6 +3,8 @@
 #ifdef UBIFS_LAYOUT
 #include "ubi/item_updater_ubi.hpp"
 #include "ubi/watch.hpp"
+#else
+#include "static/item_updater_static.hpp"
 #endif
 
 #include <phosphor-logging/log.hpp>
@@ -30,6 +32,8 @@ int main(int argc, char* argv[])
 
 #ifdef UBIFS_LAYOUT
     ItemUpdaterUbi updater(bus, SOFTWARE_OBJPATH);
+#else
+    ItemUpdaterStatic updater(bus, SOFTWARE_OBJPATH);
 #endif
 
     bus.request_name(BUSNAME_UPDATER);
