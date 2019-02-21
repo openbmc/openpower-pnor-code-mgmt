@@ -147,6 +147,16 @@ class Version : public VersionInherit
                  std::map<std::string, std::string> keys);
 
     /**
+     * @brief Get version and extended version from VERSION partition string.
+     *
+     * @param[in] versionPart - The string containing the VERSION partition.
+     *
+     * @return The pair contains the version and extended version.
+     **/
+    static std::pair<std::string, std::string>
+        getVersions(const std::string& versionPart);
+
+    /**
      * @brief Calculate the version id from the version string.
      *
      * @details The version id is a unique 8 hexadecimal digit id
