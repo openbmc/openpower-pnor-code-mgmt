@@ -96,6 +96,45 @@ std::map<std::string, std::string>
     return keys;
 }
 
+std::pair<std::string, std::string>
+    Version::getVersions(const std::string& versionPart)
+{
+    // versionPart contains strings like below:
+    // open-power-romulus-v2.2-rc1-48-g268344f-dirty
+    //     buildroot-2018.11.1-7-g5d7cc8c
+    //     skiboot-v6.2
+    std::istringstream iss(versionPart);
+    std::string line;
+    std::string version;
+    std::stringstream ss;
+    std::string extendedVersion;
+
+    if (!std::getline(iss, line))
+    {
+        log<level::ERR>("Unable to read from version",
+                        entry("VERSION=%s", versionPart.c_str()));
+        return {};
+    }
+    version = line;
+
+    while (std::getline(iss, line))
+    {
+        // Each line starts with a tab, let's trim it
+        line.erase(line.begin(),
+                   std::find_if(line.begin(), line.end(),
+                                [](int c) { return !std::isspace(c); }));
+        ss << line << ',';
+    }
+    extendedVersion = ss.str();
+
+    // Erase the last ',', if there is one
+    if (!extendedVersion.empty())
+    {
+        extendedVersion.pop_back();
+    }
+    return {version, extendedVersion};
+}
+
 void Delete::delete_()
 {
     if (parent.eraseCallback)
