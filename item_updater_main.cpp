@@ -1,6 +1,8 @@
 #include "config.h"
 
-#include "item_updater.hpp"
+#ifdef UBIFS_LAYOUT
+#include "ubi/item_updater_ubi.hpp"
+#endif
 #include "watch.hpp"
 
 #include <phosphor-logging/log.hpp>
@@ -26,7 +28,9 @@ int main(int argc, char* argv[])
     // Add sdbusplus ObjectManager.
     sdbusplus::server::manager::manager objManager(bus, SOFTWARE_OBJPATH);
 
-    ItemUpdater updater(bus, SOFTWARE_OBJPATH);
+#ifdef UBIFS_LAYOUT
+    ItemUpdaterUbi updater(bus, SOFTWARE_OBJPATH);
+#endif
 
     bus.request_name(BUSNAME_UPDATER);
     try

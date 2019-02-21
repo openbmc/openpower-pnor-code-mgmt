@@ -89,13 +89,9 @@ class ItemUpdater : public ItemUpdaterInherit
                      std::bind(std::mem_fn(&ItemUpdater::createActivation),
                                this, std::placeholders::_1))
     {
-        processPNORImage();
-        gardReset = std::make_unique<GardReset>(bus, GARD_PATH);
-        volatileEnable = std::make_unique<ObjectEnable>(bus, volatilePath);
-
-        // Emit deferred signal.
-        emit_object_added();
     }
+
+    virtual ~ItemUpdater() = default;
 
     /** @brief Sets the given priority free by incrementing
      *  any existing priority with the same value by 1
@@ -105,7 +101,7 @@ class ItemUpdater : public ItemUpdaterInherit
      *                         are trying to free up the priority.
      *  @return None
      */
-    void freePriority(uint8_t value, const std::string& versionId);
+    virtual void freePriority(uint8_t value, const std::string& versionId) = 0;
 
     /** @brief Determine is the given priority is the lowest
      *
@@ -114,25 +110,25 @@ class ItemUpdater : public ItemUpdaterInherit
      *  @return boolean corresponding to whether the given
      *           priority is lowest.
      */
-    bool isLowestPriority(uint8_t value);
+    virtual bool isLowestPriority(uint8_t value) = 0;
 
     /**
      * @brief Create and populate the active PNOR Version.
      */
-    void processPNORImage();
+    virtual void processPNORImage() = 0;
 
     /** @brief Deletes version
      *
      *  @param[in] entryId - Id of the version to delete
      *
-     *  @return None
+     *  @return - Returns true if the version is deleted.
      */
-    void erase(std::string entryId);
+    virtual bool erase(std::string entryId);
 
     /**
      * @brief Erases any non-active pnor versions.
      */
-    void deleteAll();
+    virtual void deleteAll() = 0;
 
     /** @brief Brings the total number of active PNOR versions to
      *         ACTIVE_PNOR_MAX_ALLOWED -1. This function is intended to be
@@ -141,7 +137,7 @@ class ItemUpdater : public ItemUpdaterInherit
      *         version(s) with the highest priority, skipping the
      *         functional PNOR version.
      */
-    void freeSpace();
+    virtual void freeSpace() = 0;
 
     /** @brief Determine the software version id
      *         from the symlink target (e.g. /media/ro-2a1022fe).
@@ -156,20 +152,20 @@ class ItemUpdater : public ItemUpdaterInherit
      *
      * @param[in]  path - The path to create the association to.
      */
-    void createActiveAssociation(const std::string& path);
+    virtual void createActiveAssociation(const std::string& path);
 
     /** @brief Updates the functional association to the
      *  new "running" PNOR image
      *
-     * @param[in]  path - The path to update the association to.
+     * @param[in]  versionId - The id of the image to update the association to.
      */
-    void updateFunctionalAssociation(const std::string& path);
+    virtual void updateFunctionalAssociation(const std::string& versionId);
 
     /** @brief Removes the associations from the provided software image path
      *
      * @param[in]  path - The path to remove the association from.
      */
-    void removeAssociation(const std::string& path);
+    virtual void removeAssociation(const std::string& path);
 
     /** @brief Persistent GardReset dbus object */
     std::unique_ptr<GardReset> gardReset;
@@ -180,27 +176,18 @@ class ItemUpdater : public ItemUpdaterInherit
      *
      * @return - Returns true if this version is currently functional.
      */
-    static bool isVersionFunctional(const std::string& versionId);
+    virtual bool isVersionFunctional(const std::string& versionId) = 0;
 
     /** @brief Persistent ObjectEnable D-Bus object */
     std::unique_ptr<ObjectEnable> volatileEnable;
 
-  private:
+  protected:
     /** @brief Callback function for Software.Version match.
      *  @details Creates an Activation D-Bus object.
      *
      * @param[in]  msg       - Data associated with subscribed signal
      */
-    void createActivation(sdbusplus::message::message& msg);
-
-    /**
-     * @brief Validates the presence of SquashFS image in the image dir.
-     *
-     * @param[in]  filePath - The path to the SquashFS image.
-     * @param[out] result    - 0 --> if validation was successful
-     *                       - -1--> Otherwise
-     */
-    static int validateSquashFSImage(const std::string& filePath);
+    virtual void createActivation(sdbusplus::message::message& msg) = 0;
 
     /** @brief Persistent sdbusplus D-Bus bus connection. */
     sdbusplus::bus::bus& bus;
@@ -219,26 +206,9 @@ class ItemUpdater : public ItemUpdaterInherit
     /** @brief This entry's associations */
     AssociationList assocs = {};
 
-    /** @brief Clears read only PNOR partition for
-     *  given Activation D-Bus object
-     *
-     * @param[in]  versionId - The id of the ro partition to remove.
-     */
-    void removeReadOnlyPartition(std::string versionId);
-
-    /** @brief Clears read write PNOR partition for
-     *  given Activation D-Bus object
-     *
-     *  @param[in]  versionId - The id of the rw partition to remove.
-     */
-    void removeReadWritePartition(std::string versionId);
-
-    /** @brief Clears preserved PNOR partition */
-    void removePreservedPartition();
-
     /** @brief Host factory reset - clears PNOR partitions for each
      * Activation D-Bus object */
-    void reset() override;
+    void reset() override = 0;
 
     /** @brief Check whether the host is running
      *
