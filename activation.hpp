@@ -64,7 +64,7 @@ class RedundancyPriority : public RedundancyPriorityInherit
         bus.emit_interfaces_added(path.c_str(), interfaces);
     }
 
-    ~RedundancyPriority()
+    virtual ~RedundancyPriority()
     {
         std::vector<std::string> interfaces({interface});
         bus.emit_interfaces_removed(path.c_str(), interfaces);
@@ -203,20 +203,13 @@ class Activation : public ActivationInherit
         // Emit deferred signal.
         emit_object_added();
     }
+    virtual ~Activation() = default;
 
     /** @brief Activation property get function
      *
      *  @returns One of Activation::Activations
      */
     using ActivationInherit::activation;
-
-    /** @brief Overloaded Activation property setter function
-     *
-     *  @param[in] value - One of Activation::Activations
-     *
-     *  @return Success or exception thrown
-     */
-    Activations activation(Activations value) override;
 
     /** @brief Overloaded requestedActivation property setter function
      *
@@ -226,16 +219,6 @@ class Activation : public ActivationInherit
      */
     RequestedActivations
         requestedActivation(RequestedActivations value) override;
-
-    /** @brief Check if systemd state change is relevant to this object
-     *
-     * Instance specific interface to handle the detected systemd state
-     * change
-     *
-     * @param[in]  msg       - Data associated with subscribed signal
-     *
-     */
-    void unitStateChange(sdbusplus::message::message& msg);
 
     /**
      * @brief subscribe to the systemd signals
@@ -279,17 +262,23 @@ class Activation : public ActivationInherit
     /** @brief Used to subscribe to dbus systemd signals **/
     sdbusplus::bus::match_t systemdSignals;
 
-    /** @brief Tracks whether the read-only & read-write volumes have been
-     *created as part of the activation process. **/
-    bool ubiVolumesCreated = false;
-
     /** @brief activation status property get function
      *
      * @returns Activations - The activation value
      */
     using ActivationInherit::activation;
 
-  private:
+  protected:
+    /** @brief Check if systemd state change is relevant to this object
+     *
+     * Instance specific interface to handle the detected systemd state
+     * change
+     *
+     * @param[in]  msg       - Data associated with subscribed signal
+     *
+     */
+    virtual void unitStateChange(sdbusplus::message::message& msg) = 0;
+
     /**
      * @brief Deletes the version from Image Manager and the
      *        untar image from image upload dir.
@@ -297,10 +286,10 @@ class Activation : public ActivationInherit
     void deleteImageManagerObject();
 
     /** @brief Member function for clarity & brevity at activation start */
-    void startActivation();
+    virtual void startActivation() = 0;
 
     /** @brief Member function for clarity & brevity at activation end */
-    void finishActivation();
+    virtual void finishActivation() = 0;
 
 #ifdef WANT_SIGNATURE_VERIFY
     /**
