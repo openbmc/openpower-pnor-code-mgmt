@@ -47,6 +47,7 @@ let vercheck_offset=112
 do_sign=false
 private_key_path="${PRIVATE_KEY_PATH}"
 outfile=""
+static_outfile=""
 declare -a partitions=()
 tocfile="pnor.toc"
 
@@ -89,11 +90,14 @@ if [[ -z $outfile ]]; then
     else
         outfile=`pwd`/${pnorfile##*/}.pnor.squashfs.tar
     fi
+    static_outfile="${outfile/squashfs/static}.gz"
 else
     if [[ $outfile != /* ]]; then
         outfile=`pwd`/$outfile
     fi
+    static_outfile=$outfile.static.tar.gz
 fi
+
 
 scratch_dir=`mktemp -d`
 
@@ -173,6 +177,10 @@ for partition in "${partitions[@]}"; do
 done
 
 echo "Creating SquashFS image..."
+
+# Prepare pnor file in scratch_dir
+cp ${pnorfile} ${scratch_dir}
+
 cd "${scratch_dir}"
 mksquashfs ${tocfile} ${partitions[*]} pnor.xz.squashfs
 
@@ -196,6 +204,9 @@ fi
 
 echo "Generating tarball to contain the SquashFS image and its MANIFEST"
 tar -cvf $outfile $manifest_location pnor.xz.squashfs $additional_files
-
 echo "SquashFSTarball at ${outfile}"
+
+tar -czvf $static_outfile $manifest_location $(basename ${pnorfile})
+echo "Static layout tarball at $static_outfile"
+
 rm -r "${scratch_dir}"
