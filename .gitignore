@@ -45,3 +45,8 @@ Makefile
 .deps
 *-libtool
 /test/utest
+/m4
+/openpower-pnor-msl
+/org/openbmc/Associations/
+.dirstamp
+
