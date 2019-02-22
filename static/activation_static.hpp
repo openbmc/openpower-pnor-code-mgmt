@@ -36,11 +36,14 @@ class ActivationStatic : public Activation
     {
     }
     ~ActivationStatic() = default;
+    Activations activation(Activations value) override;
 
   private:
     void unitStateChange(sdbusplus::message::message& msg) override;
     void startActivation() override;
     void finishActivation() override;
+
+    std::string pnorUpdateUnit;
 };
 
 } // namespace updater
