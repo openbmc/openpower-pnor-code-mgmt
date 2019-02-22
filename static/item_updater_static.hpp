@@ -35,6 +35,8 @@ class ItemUpdaterStatic : public ItemUpdater
 
     void freeSpace() override;
 
+    void updateFunctionalAssociation(const std::string& id) override;
+
     bool isVersionFunctional(const std::string& versionId) override;
 
   private:
@@ -61,6 +63,9 @@ class ItemUpdaterStatic : public ItemUpdater
     /** @brief Host factory reset - clears PNOR partitions for each
      * Activation D-Bus object */
     void reset() override;
+
+    /** @brief The functional version ID */
+    std::string functionalVersionId;
 };
 
 } // namespace updater
