@@ -170,7 +170,27 @@ class ItemUpdater : public ItemUpdaterInherit
      *
      * @param[in]  msg       - Data associated with subscribed signal
      */
-    virtual void createActivation(sdbusplus::message::message& msg) = 0;
+    virtual void createActivation(sdbusplus::message::message& msg);
+
+    /** @brief Create Activation object */
+    virtual std::unique_ptr<Activation> createActivationObject(
+        const std::string& path, const std::string& versionId,
+        const std::string& extVersion,
+        sdbusplus::xyz::openbmc_project::Software::server::Activation::
+            Activations activationStatus,
+        AssociationList& assocs) = 0;
+
+    /** @brief Create Version object */
+    virtual std::unique_ptr<Version>
+        createVersionObject(const std::string& objPath,
+                            const std::string& versionId,
+                            const std::string& versionString,
+                            sdbusplus::xyz::openbmc_project::Software::server::
+                                Version::VersionPurpose versionPurpose,
+                            const std::string& filePath) = 0;
+
+    /** @brief Validate if image is valid or not */
+    virtual bool validateImage(const std::string& path) = 0;
 
     /** @brief Persistent sdbusplus D-Bus bus connection. */
     sdbusplus::bus::bus& bus;
