@@ -54,8 +54,8 @@ class ActivationUbi : public Activation
      * @param[in] assocs - Association objects
      */
     ActivationUbi(sdbusplus::bus::bus& bus, const std::string& path,
-                  ItemUpdater& parent, std::string& versionId,
-                  std::string& extVersion,
+                  ItemUpdater& parent, const std::string& versionId,
+                  const std::string& extVersion,
                   sdbusplus::xyz::openbmc_project::Software::server::
                       Activation::Activations activationStatus,
                   AssociationList& assocs) :

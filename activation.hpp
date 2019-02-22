@@ -180,8 +180,8 @@ class Activation : public ActivationInherit
      * @param[in] assocs - Association objects
      */
     Activation(sdbusplus::bus::bus& bus, const std::string& path,
-               ItemUpdater& parent, std::string& versionId,
-               std::string& extVersion,
+               ItemUpdater& parent, const std::string& versionId,
+               const std::string& extVersion,
                sdbusplus::xyz::openbmc_project::Software::server::Activation::
                    Activations activationStatus,
                AssociationList& assocs) :
