@@ -10,6 +10,7 @@
 #include <fstream>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+#include <sstream>
 #include <string>
 
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
@@ -210,7 +211,7 @@ void ItemUpdaterStatic::reset()
 
 bool ItemUpdaterStatic::isVersionFunctional(const std::string& versionId)
 {
-    return true;
+    return versionId == functionalVersionId;
 }
 
 void ItemUpdaterStatic::freePriority(uint8_t value,
@@ -220,10 +221,30 @@ void ItemUpdaterStatic::freePriority(uint8_t value,
 
 void ItemUpdaterStatic::deleteAll()
 {
+    // Static layout has only one active and function pnor
+    // There is no implementation for this interface
 }
 
 void ItemUpdaterStatic::freeSpace()
 {
+    // For now assume static layout only has 1 active PNOR,
+    // so erase the active PNOR
+    for (const auto& iter : activations)
+    {
+        if (iter.second.get()->activation() ==
+            server::Activation::Activations::Active)
+        {
+            erase(iter.second->versionId);
+            break;
+        }
+    }
+}
+
+void ItemUpdaterStatic::updateFunctionalAssociation(
+    const std::string& versionId)
+{
+    functionalVersionId = versionId;
+    ItemUpdater::updateFunctionalAssociation(versionId);
 }
 
 void GardReset::reset()
