@@ -10,7 +10,6 @@ openpower_update_manager_SOURCES = \
 	activation.cpp \
 	version.cpp \
 	serialize.cpp \
-	watch.cpp \
 	item_updater.cpp \
 	item_updater_main.cpp
 
