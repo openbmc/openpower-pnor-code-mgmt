@@ -89,8 +89,7 @@ auto Activation::requestedActivation(RequestedActivations value)
             (softwareServer::Activation::activation() ==
              softwareServer::Activation::Activations::Failed))
         {
-            Activation::activation(
-                softwareServer::Activation::Activations::Activating);
+            activation(softwareServer::Activation::Activations::Activating);
         }
     }
     return softwareServer::Activation::requestedActivation(value);
