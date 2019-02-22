@@ -2,7 +2,7 @@
 
 #include "item_updater_static.hpp"
 
-#include "activation.hpp"
+#include "activation_static.hpp"
 #include "version.hpp"
 
 #include <cstring>
@@ -115,7 +115,8 @@ std::unique_ptr<Activation> ItemUpdaterStatic::createActivationObject(
         activationStatus,
     AssociationList& assocs)
 {
-    return {};
+    return std::make_unique<ActivationStatic>(
+        bus, path, *this, versionId, extVersion, activationStatus, assocs);
 }
 
 std::unique_ptr<Version> ItemUpdaterStatic::createVersionObject(
@@ -125,11 +126,16 @@ std::unique_ptr<Version> ItemUpdaterStatic::createVersionObject(
         versionPurpose,
     const std::string& filePath)
 {
-    return {};
+    auto version = std::make_unique<Version>(
+        bus, objPath, *this, versionId, versionString, versionPurpose, filePath,
+        std::bind(&ItemUpdaterStatic::erase, this, std::placeholders::_1));
+    version->deleteObject = std::make_unique<Delete>(bus, objPath, *version);
+    return version;
 }
 
 bool ItemUpdaterStatic::validateImage(const std::string& path)
 {
+    // There is no need to validate static layout pnor
     return true;
 }
 
@@ -168,6 +174,21 @@ void ItemUpdaterStatic::processPNORImage()
 
         // Create an active association since this image is active
         createActiveAssociation(path);
+    }
+
+    // Create Activation instance for this version.
+    activations.insert(std::make_pair(
+        id, std::make_unique<ActivationStatic>(bus, path, *this, id,
+                                               extendedVersion, activationState,
+                                               associations)));
+
+    // If Active, create RedundancyPriority instance for this version.
+    if (activationState == server::Activation::Activations::Active)
+    {
+        // For now only one PNOR is supported with static layout
+        activations.find(id)->second->redundancyPriority =
+            std::make_unique<RedundancyPriority>(
+                bus, path, *(activations.find(id)->second), 0);
     }
 
     // Create Version instance for this version.
