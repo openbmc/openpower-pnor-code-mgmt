@@ -1,2 +1,3 @@
 openpower_update_manager_SOURCES += \
-	%reldir%/item_updater_static.cpp
+	%reldir%/item_updater_static.cpp \
+	%reldir%/activation_static.cpp
