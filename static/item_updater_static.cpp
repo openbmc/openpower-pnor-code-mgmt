@@ -10,6 +10,8 @@
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
 #include <string>
+#include <tuple>
+#include <xyz/openbmc_project/Common/error.hpp>
 
 namespace openpower
 {
@@ -23,6 +25,11 @@ namespace fs = std::filesystem;
 
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace phosphor::logging;
+using sdbusplus::exception::SdBusError;
+
+// TODO: Change paths once openbmc/openbmc#1663 is completed.
+constexpr auto MBOXD_INTERFACE = "org.openbmc.mboxd";
+constexpr auto MBOXD_PATH = "/org/openbmc/mboxd";
 
 std::unique_ptr<Activation> ItemUpdaterStatic::createActivationObject(
     const std::string& path, const std::string& versionId,
@@ -163,6 +170,53 @@ void ItemUpdaterStatic::updateFunctionalAssociation(const std::string& id)
 
 void GardReset::reset()
 {
+    // Clear gard partition
+    std::vector<uint8_t> mboxdArgs;
+    int rc;
+
+    auto dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH,
+                                        MBOXD_INTERFACE, "cmd");
+    // Suspend mboxd - no args required.
+    dbusCall.append(static_cast<uint8_t>(3), mboxdArgs);
+
+    try
+    {
+        bus.call_noreply(dbusCall);
+    }
+    catch (const SdBusError& e)
+    {
+        log<level::ERR>("Error in mboxd suspend call",
+                        entry("ERROR=%s", e.what()));
+        elog<InternalFailure>();
+    }
+
+    // Clear guard partition
+    std::tie(rc, std::ignore) = utils::pflash("-P GUARD -c -f >/dev/null");
+    if (rc != 0)
+    {
+        log<level::ERR>("Failed to clear GUARD", entry("RETURNCODE=%d", rc));
+    }
+    else
+    {
+        log<level::INFO>("Clear GUARD successfully");
+    }
+
+    dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH, MBOXD_INTERFACE,
+                                   "cmd");
+    // Resume mboxd with arg 1, indicating that the flash is modified.
+    mboxdArgs.push_back(1);
+    dbusCall.append(static_cast<uint8_t>(4), mboxdArgs);
+
+    try
+    {
+        bus.call_noreply(dbusCall);
+    }
+    catch (const SdBusError& e)
+    {
+        log<level::ERR>("Error in mboxd resume call",
+                        entry("ERROR=%s", e.what()));
+        elog<InternalFailure>();
+    }
 }
 
 } // namespace updater
