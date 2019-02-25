@@ -1,11 +1,15 @@
 #pragma once
 
+#include <phosphor-logging/log.hpp>
 #include <sstream>
 #include <string>
+#include <tuple>
 #include <utility>
 
 namespace utils
 {
+
+using namespace phosphor::logging;
 
 template <typename... Ts>
 std::string concat_string(Ts const&... ts)
@@ -43,6 +47,24 @@ inline std::string getPNORVersion()
     auto r = pflash("-P", "VERSION", "-r", "/dev/stderr", "--skip=4096",
                     "2>&1 > /dev/null");
     return r.second;
+}
+
+inline void pnorClear(const std::string& part, bool shouldEcc = true)
+{
+    int rc;
+    std::tie(rc, std::ignore) =
+        utils::pflash("-P", part, shouldEcc ? "-c" : "-e", "-f >/dev/null");
+    if (rc != 0)
+    {
+        log<level::ERR>("Failed to clear partition",
+                        entry("PART=%s", part.c_str()),
+                        entry("RETURNCODE=%d", rc));
+    }
+    else
+    {
+        log<level::INFO>("Clear partition successfully",
+                         entry("PART=%s", part.c_str()));
+    }
 }
 
 } // namespace utils
