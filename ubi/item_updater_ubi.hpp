@@ -29,8 +29,6 @@ class ItemUpdaterUbi : public ItemUpdater
 
     void freePriority(uint8_t value, const std::string& versionId) override;
 
-    bool isLowestPriority(uint8_t value) override;
-
     void processPNORImage() override;
 
     bool erase(std::string entryId) override;
