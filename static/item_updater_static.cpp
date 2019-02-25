@@ -12,9 +12,12 @@
 #include <phosphor-logging/log.hpp>
 #include <sstream>
 #include <string>
+#include <tuple>
+#include <xyz/openbmc_project/Common/error.hpp>
 
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace phosphor::logging;
+using sdbusplus::exception::SdBusError;
 
 // When you see server:: you know we're referencing our base class
 namespace server = sdbusplus::xyz::openbmc_project::Software::server;
@@ -32,23 +35,25 @@ std::string concat_string(Ts const&... ts)
 }
 
 // Helper function to run pflash command
+// Returns return code and the stdout
 template <typename... Ts>
-std::string pflash(Ts const&... ts)
+std::pair<int, std::string> pflash(Ts const&... ts)
 {
     std::array<char, 512> buffer;
     std::string cmd = concat_string("pflash", ts...);
     std::stringstream result;
-    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.c_str(), "r"),
-                                                  pclose);
+    int rc;
+    FILE* pipe = popen(cmd.c_str(), "r");
     if (!pipe)
     {
         throw std::runtime_error("popen() failed!");
     }
-    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
+    while (fgets(buffer.data(), buffer.size(), pipe) != nullptr)
     {
         result << buffer.data();
     }
-    return result.str();
+    rc = pclose(pipe);
+    return {rc, result.str()};
 }
 
 std::string getPNORVersion()
@@ -72,7 +77,14 @@ std::string getPNORVersion()
     fs::path versionFile = tmpDir;
     versionFile /= "version";
 
-    pflash("-P VERSION -r", versionFile.string(), "2>&1 > /dev/null");
+    auto [rc, r] =
+        pflash("-P VERSION -r", versionFile.string(), "2>&1 > /dev/null");
+    if (rc != 0)
+    {
+        log<level::ERR>("Failed to read VERSION", entry("RETURNCODE=%d", rc));
+        return {};
+    }
+
     std::ifstream f(versionFile.c_str(), std::ios::in | std::ios::binary);
     uint8_t magic[MAGIC_SIZE];
     std::string version;
@@ -109,6 +121,10 @@ namespace software
 {
 namespace updater
 {
+// TODO: Change paths once openbmc/openbmc#1663 is completed.
+constexpr auto MBOXD_INTERFACE = "org.openbmc.mboxd";
+constexpr auto MBOXD_PATH = "/org/openbmc/mboxd";
+
 std::unique_ptr<Activation> ItemUpdaterStatic::createActivationObject(
     const std::string& path, const std::string& versionId,
     const std::string& extVersion,
@@ -249,6 +265,53 @@ void ItemUpdaterStatic::updateFunctionalAssociation(
 
 void GardReset::reset()
 {
+    // Clear gard partition
+    std::vector<uint8_t> mboxdArgs;
+    int rc;
+
+    auto dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH,
+                                        MBOXD_INTERFACE, "cmd");
+    // Suspend mboxd - no args required.
+    dbusCall.append(static_cast<uint8_t>(3), mboxdArgs);
+
+    try
+    {
+        bus.call_noreply(dbusCall);
+    }
+    catch (const SdBusError& e)
+    {
+        log<level::ERR>("Error in mboxd suspend call",
+                        entry("ERROR=%s", e.what()));
+        elog<InternalFailure>();
+    }
+
+    // Clear guard partition
+    std::tie(rc, std::ignore) = utils::pflash("-P GUARD -c -f >/dev/null");
+    if (rc != 0)
+    {
+        log<level::ERR>("Failed to clear GUARD", entry("RETURNCODE=%d", rc));
+    }
+    else
+    {
+        log<level::INFO>("Clear GUARD successfully");
+    }
+
+    dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH, MBOXD_INTERFACE,
+                                   "cmd");
+    // Resume mboxd with arg 1, indicating that the flash is modified.
+    mboxdArgs.push_back(1);
+    dbusCall.append(static_cast<uint8_t>(4), mboxdArgs);
+
+    try
+    {
+        bus.call_noreply(dbusCall);
+    }
+    catch (const SdBusError& e)
+    {
+        log<level::ERR>("Error in mboxd resume call",
+                        entry("ERROR=%s", e.what()));
+        elog<InternalFailure>();
+    }
 }
 
 } // namespace updater
