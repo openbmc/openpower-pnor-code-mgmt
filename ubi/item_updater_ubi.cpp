@@ -391,20 +391,6 @@ void ItemUpdaterUbi::freePriority(uint8_t value, const std::string& versionId)
     }
 }
 
-bool ItemUpdaterUbi::isLowestPriority(uint8_t value)
-{
-    for (const auto& intf : activations)
-    {
-        if (intf.second->redundancyPriority)
-        {
-            if (intf.second->redundancyPriority.get()->priority() < value)
-            {
-                return false;
-            }
-        }
-    }
-    return true;
-}
 
 bool ItemUpdaterUbi::erase(std::string entryId)
 {
