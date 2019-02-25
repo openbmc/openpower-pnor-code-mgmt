@@ -103,15 +103,6 @@ class ItemUpdater : public ItemUpdaterInherit
      */
     virtual void freePriority(uint8_t value, const std::string& versionId) = 0;
 
-    /** @brief Determine is the given priority is the lowest
-     *
-     *  @param[in] value - The priority that needs to be checked.
-     *
-     *  @return boolean corresponding to whether the given
-     *           priority is lowest.
-     */
-    virtual bool isLowestPriority(uint8_t value) = 0;
-
     /**
      * @brief Create and populate the active PNOR Version.
      */
