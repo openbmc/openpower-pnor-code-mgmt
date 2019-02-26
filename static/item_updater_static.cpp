@@ -130,22 +130,7 @@ void ItemUpdaterStatic::processPNORImage()
 
 void ItemUpdaterStatic::reset()
 {
-    // The pair contains the partition name and if it should use ECC clear
-    using PartClear = std::pair<const char*, bool>;
-    constexpr std::array<PartClear, 11> partitions = {{
-        {"HBEL", true},
-        {"GUARD", true},
-        {"NVRAM", false},
-        {"DJVPD", true},
-        {"MVPD", true},
-        {"CVPD", true},
-        {"FIRDATA", true},
-        {"BMC_INV", false},
-        {"ATTR_TMP", false},
-        {"ATTR_PERM", true},
-        {"HB_VOLATILE", true},
-    }};
-
+    auto partitions = utils::getPartsToClear();
     std::vector<uint8_t> mboxdArgs;
 
     // Suspend mboxd - no args required.
