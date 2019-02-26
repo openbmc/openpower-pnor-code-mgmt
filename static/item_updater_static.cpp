@@ -113,11 +113,11 @@ std::string getPNORVersion()
     return version;
 }
 
-inline void pnorClear(const std::string& part, bool shouldEcc = true)
+void pnorClear(const std::string& part, bool shouldEcc = true)
 {
     int rc;
     std::tie(rc, std::ignore) =
-        pflash("-P", part, shouldEcc ? "-c" : "-e", "-f >/dev/null");
+        utils::pflash("-P", part, shouldEcc ? "-c" : "-e", "-f >/dev/null");
     if (rc != 0)
     {
         log<level::ERR>("Failed to clear partition",
@@ -129,6 +129,42 @@ inline void pnorClear(const std::string& part, bool shouldEcc = true)
         log<level::INFO>("Clear partition successfully",
                          entry("PART=%s", part.c_str()));
     }
+}
+
+// The pair contains the partition name and if it should use ECC clear
+using PartClear = std::pair<std::string, bool>;
+
+std::vector<PartClear> getPartsToClear(const std::string& info)
+{
+    std::vector<PartClear> ret;
+    std::istringstream iss(info);
+    std::string line;
+
+    while (std::getline(iss, line))
+    {
+        // Each line looks like
+        // ID=06 MVPD 0x0012d000..0x001bd000 (actual=0x00090000) [E--P--F-C-]
+        // Flag 'F' means REPROVISION
+        // Flag 'C' means CLEARECC
+        auto flags = line.substr(line.find('['));
+        if (flags.find('F') != std::string::npos)
+        {
+            // This is a partition to be cleared
+            line = line.substr(line.find_first_of(' '));     // Skiping "ID=xx"
+            line = line.substr(line.find_first_not_of(' ')); // Skipping spaces
+            line = line.substr(0, line.find_first_of(' '));  // The part name
+            bool ecc = flags.find('C') != std::string::npos;
+            ret.emplace_back(line, ecc);
+        }
+    }
+    return ret;
+}
+
+// Get partitions that should be cleared
+std::vector<PartClear> getPartsToClear()
+{
+    const auto& [rc, pflashInfo] = pflash("-i | grep ^ID | grep 'F'");
+    return getPartsToClear(pflashInfo);
 }
 
 } // namespace utils
@@ -241,22 +277,7 @@ void ItemUpdaterStatic::processPNORImage()
 
 void ItemUpdaterStatic::reset()
 {
-    // The pair contains the partition name and if it should use ECC clear
-    using PartClear = std::pair<const char*, bool>;
-    constexpr std::array<PartClear, 11> partitions = {{
-        {"HBEL", true},
-        {"GUARD", true},
-        {"NVRAM", false},
-        {"DJVPD", true},
-        {"MVPD", true},
-        {"CVPD", true},
-        {"FIRDATA", true},
-        {"BMC_INV", false},
-        {"ATTR_TMP", false},
-        {"ATTR_PERM", true},
-        {"HB_VOLATILE", true},
-    }};
-
+    auto partitions = utils::getPartsToClear();
     std::vector<uint8_t> mboxdArgs;
 
     // Suspend mboxd - no args required.
