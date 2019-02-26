@@ -41,6 +41,14 @@ class ItemUpdaterUbi : public ItemUpdater
 
     bool isVersionFunctional(const std::string& versionId) override;
 
+    /** @brief Determine the software version id
+     *         from the symlink target (e.g. /media/ro-2a1022fe).
+     *
+     * @param[in] symlinkPath - The path of the symlink.
+     * @param[out] id - The version id as a string.
+     */
+    static std::string determineId(const std::string& symlinkPath);
+
   private:
     /** @brief Callback function for Software.Version match.
      *  @details Creates an Activation D-Bus object.
