@@ -2,7 +2,7 @@
 
 #include "watch.hpp"
 
-#include "item_updater.hpp"
+#include "item_updater_ubi.hpp"
 
 #include <sys/inotify.h>
 #include <unistd.h>
@@ -93,7 +93,7 @@ int Watch::callback(sd_event_source* s, int fd, uint32_t revents,
         path /= event->name;
         if (fs::equivalent(path, PNOR_RO_ACTIVE_PATH))
         {
-            auto id = ItemUpdater::determineId(path);
+            auto id = ItemUpdaterUbi::determineId(path);
             static_cast<Watch*>(userdata)->functionalCallback(id);
         }
         offset += offsetof(inotify_event, name) + event->len;
