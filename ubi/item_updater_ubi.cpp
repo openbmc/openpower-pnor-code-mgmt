@@ -357,8 +357,9 @@ void ItemUpdaterUbi::deleteAll()
 }
 
 // TODO: openbmc/openbmc#1402 Monitor flash usage
-void ItemUpdaterUbi::freeSpace()
+bool ItemUpdaterUbi::freeSpace()
 {
+    bool isSpaceFreed = false;
     //  Versions with the highest priority in front
     std::priority_queue<std::pair<int, std::string>,
                         std::vector<std::pair<int, std::string>>,
@@ -393,7 +394,9 @@ void ItemUpdaterUbi::freeSpace()
         erase(versionsPQ.top().second);
         versionsPQ.pop();
         count--;
+        isSpaceFreed = true;
     }
+    return isSpaceFreed;
 }
 
 std::string ItemUpdaterUbi::determineId(const std::string& symlinkPath)

@@ -35,7 +35,7 @@ class ItemUpdaterUbi : public ItemUpdater
 
     void deleteAll() override;
 
-    void freeSpace() override;
+    bool freeSpace() override;
 
     bool isVersionFunctional(const std::string& versionId) override;
 
