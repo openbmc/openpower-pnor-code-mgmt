@@ -127,8 +127,10 @@ class ItemUpdater : public ItemUpdaterInherit
      *         needs to delete any PNOR version(s) it will delete the
      *         version(s) with the highest priority, skipping the
      *         functional PNOR version.
+     *
+     *  @return - Return if space is freed or not
      */
-    virtual void freeSpace() = 0;
+    virtual bool freeSpace() = 0;
 
     /** @brief Creates an active association to the
      *  newly active software image

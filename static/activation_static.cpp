@@ -20,6 +20,7 @@ using namespace phosphor::logging;
 auto ActivationStatic::activation(Activations value) -> Activations
 {
 
+    auto ret = value;
     if (value != softwareServer::Activation::Activations::Active)
     {
         redundancyPriority.reset(nullptr);
@@ -27,9 +28,14 @@ auto ActivationStatic::activation(Activations value) -> Activations
 
     if (value == softwareServer::Activation::Activations::Activating)
     {
-        parent.freeSpace();
-        startActivation();
-        return softwareServer::Activation::activation(value);
+        if (parent.freeSpace())
+        {
+            startActivation();
+        }
+        else
+        {
+            ret = softwareServer::Activation::Activations::Failed;
+        }
     }
     else
     {
@@ -37,7 +43,7 @@ auto ActivationStatic::activation(Activations value) -> Activations
         activationProgress.reset(nullptr);
     }
 
-    return softwareServer::Activation::activation(value);
+    return softwareServer::Activation::activation(ret);
 }
 
 void ActivationStatic::startActivation()
