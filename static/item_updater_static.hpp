@@ -33,7 +33,7 @@ class ItemUpdaterStatic : public ItemUpdater
 
     void deleteAll() override;
 
-    void freeSpace() override;
+    bool freeSpace() override;
 
     void updateFunctionalAssociation(const std::string& id) override;
 
