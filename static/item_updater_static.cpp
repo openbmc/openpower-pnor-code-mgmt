@@ -335,7 +335,7 @@ void ItemUpdaterStatic::deleteAll()
     // There is no implementation for this interface
 }
 
-void ItemUpdaterStatic::freeSpace()
+bool ItemUpdaterStatic::freeSpace()
 {
     // For now assume static layout only has 1 active PNOR,
     // so erase the active PNOR
@@ -344,10 +344,10 @@ void ItemUpdaterStatic::freeSpace()
         if (iter.second.get()->activation() ==
             server::Activation::Activations::Active)
         {
-            erase(iter.second->versionId);
-            break;
+            return erase(iter.second->versionId);
         }
     }
+    return false;
 }
 
 void ItemUpdaterStatic::updateFunctionalAssociation(
