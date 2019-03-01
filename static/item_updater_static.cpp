@@ -146,13 +146,36 @@ std::vector<PartClear> getPartsToClear(const std::string& info)
         // ID=06 MVPD 0x0012d000..0x001bd000 (actual=0x00090000) [E--P--F-C-]
         // Flag 'F' means REPROVISION
         // Flag 'C' means CLEARECC
-        auto flags = line.substr(line.find('['));
+        auto pos = line.find('[');
+        if (pos == std::string::npos)
+        {
+            continue;
+        }
+        auto flags = line.substr(pos);
         if (flags.find('F') != std::string::npos)
         {
             // This is a partition to be cleared
-            line = line.substr(line.find_first_of(' '));     // Skiping "ID=xx"
-            line = line.substr(line.find_first_not_of(' ')); // Skipping spaces
-            line = line.substr(0, line.find_first_of(' '));  // The part name
+            pos = line.find_first_of(' '); // After "ID=xx"
+            if (pos == std::string::npos)
+            {
+                continue;
+            }
+            line = line.substr(pos);     // Skiping "ID=xx"
+
+            pos = line.find_first_not_of(' '); // After spaces
+            if (pos == std::string::npos)
+            {
+                continue;
+            }
+            line = line.substr(pos); // Skipping spaces
+
+            pos = line.find_first_of(' '); // The end of part name
+            if (pos == std::string::npos)
+            {
+                continue;
+            }
+            line = line.substr(0, pos); // The part name
+
             bool ecc = flags.find('C') != std::string::npos;
             ret.emplace_back(line, ecc);
         }

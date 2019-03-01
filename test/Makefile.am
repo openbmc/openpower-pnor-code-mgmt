@@ -42,6 +42,7 @@ utest_SOURCES = \
 	$(top_builddir)/static/activation_static.cpp \
 	test_signature.cpp \
 	test_version.cpp \
+	test_item_updater_static.cpp \
 	msl_verify.cpp
 
 utest_LDADD = -lstdc++fs
