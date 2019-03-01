@@ -52,13 +52,13 @@ class GardReset : public GardResetInherit
         bus.emit_interfaces_added(path.c_str(), interfaces);
     }
 
-    ~GardReset()
+    virtual ~GardReset()
     {
         std::vector<std::string> interfaces({interface});
         bus.emit_interfaces_removed(path.c_str(), interfaces);
     }
 
-  private:
+  protected:
     // TODO Remove once openbmc/openbmc#1975 is resolved
     static constexpr auto interface = "xyz.openbmc_project.Common.FactoryReset";
     sdbusplus::bus::bus& bus;
@@ -67,7 +67,7 @@ class GardReset : public GardResetInherit
     /**
      * @brief GARD factory reset - clears the PNOR GARD partition.
      */
-    void reset() override;
+    virtual void reset() = 0;
 };
 
 /** @class ItemUpdater

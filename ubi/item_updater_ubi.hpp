@@ -9,6 +9,23 @@ namespace software
 namespace updater
 {
 
+class GardResetUbi : public GardReset
+{
+  public:
+    GardResetUbi(sdbusplus::bus::bus& bus, const std::string& path) :
+        GardReset(bus, path)
+    {
+    }
+
+    virtual ~GardResetUbi() = default;
+
+  protected:
+    /**
+     * @brief GARD factory reset - clears the PNOR GARD partition.
+     */
+    void reset() override;
+};
+
 /** @class ItemUpdaterUbi
  *  @brief Manages the activation of the host version items for ubi layout
  */
@@ -19,7 +36,7 @@ class ItemUpdaterUbi : public ItemUpdater
         ItemUpdater(bus, path)
     {
         processPNORImage();
-        gardReset = std::make_unique<GardReset>(bus, GARD_PATH);
+        gardReset = std::make_unique<GardResetUbi>(bus, GARD_PATH);
         volatileEnable = std::make_unique<ObjectEnable>(bus, volatilePath);
 
         // Emit deferred signal.

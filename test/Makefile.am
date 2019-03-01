@@ -38,8 +38,9 @@ utest_SOURCES = \
 	../ubi/item_updater_ubi.cpp \
 	../ubi/serialize.cpp \
 	../ubi/watch.cpp \
+	../static/item_updater_static.cpp \
+	../static/activation_static.cpp \
 	utest.cpp \
 	msl_verify.cpp
 
-utest_LDADD = \
-	-lstdc++fs
+utest_LDADD = -lstdc++fs

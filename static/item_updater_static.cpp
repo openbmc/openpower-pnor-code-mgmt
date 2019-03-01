@@ -364,7 +364,7 @@ void ItemUpdaterStatic::updateFunctionalAssociation(
     ItemUpdater::updateFunctionalAssociation(versionId);
 }
 
-void GardReset::reset()
+void GardResetStatic::reset()
 {
     // Clear gard partition
     std::vector<uint8_t> mboxdArgs;
