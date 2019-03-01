@@ -28,15 +28,18 @@ utest_LDFLAGS = \
 	-lcrypto
 
 utest_SOURCES = \
-	utest.cpp \
-	msl_verify.cpp
-utest_LDADD = \
-	$(top_builddir)/openpower_update_manager-activation.o \
-	$(top_builddir)/openpower_update_manager-version.o \
-	$(top_builddir)/openpower_update_manager-serialize.o \
-	$(top_builddir)/ubi/openpower_update_manager-watch.o \
-	$(top_builddir)/openpower_update_manager-item_updater.o \
-	$(top_builddir)/org/openbmc/Associations/openpower_update_manager-server.o \
+	$(top_builddir)/activation.cpp \
+	$(top_builddir)/version.cpp \
+	$(top_builddir)/serialize.cpp \
+	$(top_builddir)/item_updater.cpp \
+	$(top_builddir)/org/openbmc/Associations/server.cpp \
 	$(top_builddir)/image_verify.cpp \
 	$(top_builddir)/msl_verify.cpp \
+	$(top_builddir)/ubi/activation_ubi.cpp \
+	$(top_builddir)/ubi/item_updater_ubi.cpp \
+	$(top_builddir)/ubi/watch.cpp \
+	utest.cpp \
+	msl_verify.cpp
+
+utest_LDADD = \
 	-lstdc++fs
