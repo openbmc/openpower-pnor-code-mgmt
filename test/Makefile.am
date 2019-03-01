@@ -38,8 +38,9 @@ utest_SOURCES = \
 	$(top_builddir)/ubi/activation_ubi.cpp \
 	$(top_builddir)/ubi/item_updater_ubi.cpp \
 	$(top_builddir)/ubi/watch.cpp \
+	$(top_builddir)/static/item_updater_static.cpp \
+	$(top_builddir)/static/activation_static.cpp \
 	utest.cpp \
 	msl_verify.cpp
 
-utest_LDADD = \
-	-lstdc++fs
+utest_LDADD = -lstdc++fs
