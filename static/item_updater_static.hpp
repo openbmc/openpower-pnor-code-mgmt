@@ -9,6 +9,19 @@ namespace software
 namespace updater
 {
 
+class GardResetStatic : public GardReset
+{
+  public:
+    using GardReset::GardReset;
+    virtual ~GardResetStatic() = default;
+
+  protected:
+    /**
+     * @brief GARD factory reset - clears the PNOR GARD partition.
+     */
+    void reset() override;
+};
+
 /** @class ItemUpdaterStatic
  *  @brief Manages the activation of the host version items for static layout
  */
@@ -19,7 +32,7 @@ class ItemUpdaterStatic : public ItemUpdater
         ItemUpdater(bus, path)
     {
         processPNORImage();
-        gardReset = std::make_unique<GardReset>(bus, GARD_PATH);
+        gardReset = std::make_unique<GardResetStatic>(bus, GARD_PATH);
         volatileEnable = std::make_unique<ObjectEnable>(bus, volatilePath);
 
         // Emit deferred signal.
