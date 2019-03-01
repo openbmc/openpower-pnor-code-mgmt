@@ -217,6 +217,12 @@ void ItemUpdaterStatic::processPNORImage()
     const auto& [version, extendedVersion] = Version::getVersions(fullVersion);
     auto id = Version::getId(version);
 
+    if (id.empty())
+    {
+        // Possibly a corrupted PNOR
+        return;
+    }
+
     auto activationState = server::Activation::Activations::Active;
     if (version.empty())
     {
@@ -346,7 +352,8 @@ bool ItemUpdaterStatic::freeSpace()
             return erase(iter.second->versionId);
         }
     }
-    return false;
+    // No active PNOR means PNOR is empty or corrupted
+    return true;
 }
 
 void ItemUpdaterStatic::updateFunctionalAssociation(const std::string& id)
