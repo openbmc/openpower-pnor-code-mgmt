@@ -30,8 +30,7 @@ std::string Version::getId(const std::string& version)
     if (version.empty())
     {
         log<level::ERR>("Error version is empty");
-        elog<InvalidArgument>(Argument::ARGUMENT_NAME("Version"),
-                              Argument::ARGUMENT_VALUE(version.c_str()));
+        return {};
     }
 
     unsigned char digest[SHA512_DIGEST_LENGTH];
