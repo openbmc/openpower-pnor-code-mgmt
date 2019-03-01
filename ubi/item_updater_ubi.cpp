@@ -419,7 +419,7 @@ std::string ItemUpdaterUbi::determineId(const std::string& symlinkPath)
     return target.substr(PNOR_RO_PREFIX_LEN);
 }
 
-void GardReset::reset()
+void GardResetUbi::reset()
 {
     // The GARD partition is currently misspelled "GUARD." This file path will
     // need to be updated in the future.
