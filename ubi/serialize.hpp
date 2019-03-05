@@ -13,19 +13,19 @@ namespace updater
  *  @param[in] versionId - The version for which to store information.
  *  @param[in] priority - RedundancyPriority value for that version.
  */
-void storeToFile(std::string versionId, uint8_t priority);
+void storeToFile(const std::string& versionId, uint8_t priority);
 
 /** @brief Serialization function - restores activation information from file
  *  @param[in] versionId - The version for which to retrieve information.
  *  @param[in] priority - RedundancyPriority pointer for that version.
  *  @return true if restore was successful, false if not
  */
-bool restoreFromFile(std::string versionId, uint8_t& priority);
+bool restoreFromFile(const std::string& versionId, uint8_t& priority);
 
 /** @brief Removes the serial file for a given version.
  *  @param[in] versionId - The version for which to remove a file, if it exists.
  */
-void removeFile(std::string versionId);
+void removeFile(const std::string& versionId);
 
 } // namespace updater
 } // namespace software
