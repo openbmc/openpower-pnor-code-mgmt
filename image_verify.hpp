@@ -50,7 +50,7 @@ struct CustomFd
      *
      *  @param[in] fd - File descriptor
      */
-    CustomFd(int fd) : fd(fd)
+    explicit CustomFd(int fd) : fd(fd)
     {
     }
 
