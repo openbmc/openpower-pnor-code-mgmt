@@ -189,7 +189,7 @@ int ItemUpdaterUbi::validateSquashFSImage(const std::string& filePath)
     }
 }
 
-void ItemUpdaterUbi::removeReadOnlyPartition(std::string versionId)
+void ItemUpdaterUbi::removeReadOnlyPartition(const std::string& versionId)
 {
     auto serviceFile = "obmc-flash-bios-ubiumount-ro@" + versionId + ".service";
 
@@ -200,7 +200,7 @@ void ItemUpdaterUbi::removeReadOnlyPartition(std::string versionId)
     bus.call_noreply(method);
 }
 
-void ItemUpdaterUbi::removeReadWritePartition(std::string versionId)
+void ItemUpdaterUbi::removeReadWritePartition(const std::string& versionId)
 {
     auto serviceFile = "obmc-flash-bios-ubiumount-rw@" + versionId + ".service";
 

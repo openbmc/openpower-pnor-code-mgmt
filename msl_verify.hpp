@@ -25,7 +25,7 @@ class MinimumShipLevel
     /** @brief Constructs MinimumShipLevel.
      *  @param[in] minShipLevel - Minimum Ship Level string
      */
-    MinimumShipLevel(const std::string& minShipLevel) :
+    explicit MinimumShipLevel(const std::string& minShipLevel) :
         minShipLevel(minShipLevel){};
 
     /** @brief Verify if the current PNOR version meets the min ship level

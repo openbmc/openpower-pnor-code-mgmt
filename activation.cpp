@@ -143,7 +143,7 @@ void Activation::deleteImageManagerObject()
                                        deleteInterface, "Delete");
     try
     {
-        auto mapperResponseMsg = bus.call(method);
+        mapperResponseMsg = bus.call(method);
 
         // Check that the bus call didn't result in an error
         if (mapperResponseMsg.is_method_error())
