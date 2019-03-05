@@ -9,7 +9,6 @@ sbin_PROGRAMS = \
 openpower_update_manager_SOURCES = \
 	activation.cpp \
 	version.cpp \
-	serialize.cpp \
 	item_updater.cpp \
 	item_updater_main.cpp
 
