@@ -3,7 +3,6 @@
 #include "activation.hpp"
 
 #include "item_updater.hpp"
-#include "serialize.hpp"
 
 #include <experimental/filesystem>
 #include <phosphor-logging/log.hpp>
