@@ -33,7 +33,7 @@ utest_SOURCES = \
 utest_LDADD = \
 	$(top_builddir)/openpower_update_manager-activation.o \
 	$(top_builddir)/openpower_update_manager-version.o \
-	$(top_builddir)/openpower_update_manager-serialize.o \
+	$(top_builddir)/ubi/openpower_update_manager-serialize.o \
 	$(top_builddir)/ubi/openpower_update_manager-watch.o \
 	$(top_builddir)/openpower_update_manager-item_updater.o \
 	$(top_builddir)/org/openbmc/Associations/openpower_update_manager-server.o \
