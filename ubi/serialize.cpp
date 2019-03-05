@@ -16,7 +16,7 @@ namespace updater
 
 namespace fs = std::experimental::filesystem;
 
-void storeToFile(std::string versionId, uint8_t priority)
+void storeToFile(const std::string& versionId, uint8_t priority)
 {
     auto bus = sdbusplus::bus::new_default();
 
@@ -49,7 +49,7 @@ void storeToFile(std::string versionId, uint8_t priority)
     bus.call_noreply(method);
 }
 
-bool restoreFromFile(std::string versionId, uint8_t& priority)
+bool restoreFromFile(const std::string& versionId, uint8_t& priority)
 {
     auto varPath = PERSIST_DIR + versionId;
     if (fs::exists(varPath))
@@ -113,7 +113,7 @@ bool restoreFromFile(std::string versionId, uint8_t& priority)
     return false;
 }
 
-void removeFile(std::string versionId)
+void removeFile(const std::string& versionId)
 {
     auto bus = sdbusplus::bus::new_default();
 

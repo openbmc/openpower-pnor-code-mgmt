@@ -18,7 +18,7 @@ struct EventSourceDeleter
 {
     void operator()(sd_event_source* eventSource) const
     {
-        eventSource = sd_event_source_unref(eventSource);
+        sd_event_source_unref(eventSource);
     }
 };
 using EventSourcePtr = std::unique_ptr<sd_event_source, EventSourceDeleter>;
@@ -40,7 +40,7 @@ struct CustomFd
      *
      *  @param[in] fd - File descriptor
      */
-    CustomFd(int fd) : fd(fd)
+    explicit CustomFd(int fd) : fd(fd)
     {
     }
 
