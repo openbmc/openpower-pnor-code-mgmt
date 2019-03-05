@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
                       &updater, std::placeholders::_1));
 #endif
         bus.attach_event(loop, SD_EVENT_PRIORITY_NORMAL);
-        auto rc = sd_event_loop(loop);
+        rc = sd_event_loop(loop);
         if (rc < 0)
         {
             log<level::ERR>("Error occurred during the sd_event_loop",
