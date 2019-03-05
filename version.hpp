@@ -99,8 +99,8 @@ class Version : public VersionInherit
             const std::string& versionString, VersionPurpose versionPurpose,
             const std::string& filePath, eraseFunc callback) :
         VersionInherit(bus, (objPath).c_str(), true),
-        bus(bus), objPath(objPath), parent(parent), versionId(versionId),
-        versionStr(versionString),
+        eraseCallback(callback), bus(bus), objPath(objPath), parent(parent),
+        versionId(versionId), versionStr(versionString),
         chassisStateSignals(
             bus,
             sdbusRule::type::signal() + sdbusRule::member("PropertiesChanged") +
@@ -110,8 +110,6 @@ class Version : public VersionInherit
             std::bind(std::mem_fn(&Version::updateDeleteInterface), this,
                       std::placeholders::_1))
     {
-        // Bind erase method
-        eraseCallback = callback;
         // Set properties.
         purpose(versionPurpose);
         version(versionString);
