@@ -1,18 +1,21 @@
 #!/bin/bash
 set -eo pipefail
 
-help=$'Generate Tarball with PNOR SquashFS image and MANIFEST Script
+help=$'Generate Tarball with PNOR image and MANIFEST Script
 
-Generates a PNOR SquashFS image from the PNOR image
+Generates a PNOR SquashFS image from the PNOR image for VPNOR,
+Or use a static layout raw PNOR image,
 Creates a MANIFEST for image verification and recreation
-Packages the SquashFS image and MANIFEST together in a tarball
+Packages the image and MANIFEST together in a tarball
 
-usage: generate-squashfs [OPTION] <PNOR FILE>...
+usage: generate-tar [OPTION] <PNOR FILE>...
 
 Options:
+   -i, --image <squashfs|static>
+                          Generate SquashFS image or use static PNOR
    -f, --file <file>      Specify destination file. Defaults to
-                          `pwd`/<PNOR FILE>.pnor.squashfs.tar if unspecified.
-                          (For example, "generate-squashfs my.pnor" would
+                          `pwd`/<PNOR FILE>.pnor.<image_type>.tar if unspecified.
+                          (For example, "generate-tar -i squashfs my.pnor" would
                           generate `pwd`/my.pnor.squashfs.tar output.)
    -s, --sign <path>      Sign the image. The optional path argument specifies
                           the private key file. Defaults to the bash variable
@@ -46,14 +49,18 @@ let ffs_entry_size=128
 let vercheck_offset=112
 do_sign=false
 private_key_path="${PRIVATE_KEY_PATH}"
+image_type=""
 outfile=""
-static_outfile=""
 declare -a partitions=()
 tocfile="pnor.toc"
 
 while [[ $# -gt 0 ]]; do
   key="$1"
   case $key in
+    -i|--image)
+      image_type="$2"
+      shift 2
+      ;;
     -f|--file)
       outfile="$2"
       shift 2
@@ -84,18 +91,31 @@ if [ ! -f "${pnorfile}" ]; then
   exit 1
 fi
 
+if [[ "${image_type}" == "squashfs" ]]; then
+  echo "Will generate squashfs image for VPNOR"
+elif [[ "${image_type}" == "static" ]]; then
+  echo "Will use static image for PNOR"
+else
+  echo "Please specify the image type, \"squashfs\" or \"static\""
+  echo
+  echo "$help"
+  exit 1
+fi
+
 if [[ -z $outfile ]]; then
     if [[ ${pnorfile##*.} == "pnor" ]]; then
-        outfile=`pwd`/${pnorfile##*/}.squashfs.tar
+        outfile=`pwd`/${pnorfile##*/}.$image_type.tar
     else
-        outfile=`pwd`/${pnorfile##*/}.pnor.squashfs.tar
+        outfile=`pwd`/${pnorfile##*/}.pnor.$image_type.tar
     fi
-    static_outfile="${outfile/squashfs/static}.gz"
+    if [[ "${image_type}" == "static" ]]; then
+        # Append .gz so the tarball is compressed
+        outfile=$outfile.gz
+    fi
 else
     if [[ $outfile != /* ]]; then
         outfile=`pwd`/$outfile
     fi
-    static_outfile=$outfile.static.tar.gz
 fi
 
 
@@ -176,16 +196,24 @@ for partition in "${partitions[@]}"; do
     -F ${pnorfile}
 done
 
-echo "Creating SquashFS image..."
+manifest_location="MANIFEST"
+files_to_sign="$manifest_location $public_key_file"
 
-# Prepare pnor file in scratch_dir
-cp ${pnorfile} ${scratch_dir}
+# Go to scratch_dir
 
-cd "${scratch_dir}"
-mksquashfs ${tocfile} ${partitions[*]} pnor.xz.squashfs
+if [[ "${image_type}" == "squashfs" ]]; then
+  echo "Creating SquashFS image..."
+  # Prepare pnor file in scratch_dir
+  cd "${scratch_dir}"
+  mksquashfs ${tocfile} ${partitions[*]} pnor.xz.squashfs
+  files_to_sign+=" pnor.xz.squashfs"
+else
+  cp ${pnorfile} ${scratch_dir}
+  cd "${scratch_dir}"
+  files_to_sign+=" $(basename ${pnorfile})"
+fi
 
 echo "Creating MANIFEST for the image"
-manifest_location="MANIFEST"
 echo -e "purpose=xyz.openbmc_project.Software.Version.VersionPurpose.Host\nversion=$version\n\
 extended_version=$extended_version" >> $manifest_location
 
@@ -195,18 +223,20 @@ if [[ "${do_sign}" == true ]]; then
   echo KeyType="${key_type}" >> $manifest_location
   echo HashType="RSA-SHA256" >> $manifest_location
 
-  for file in pnor.xz.squashfs $manifest_location $public_key_file; do
+  for file in $files_to_sign; do
     openssl dgst -sha256 -sign ${private_key_path} -out "${file}.sig" $file
   done
 
-  additional_files="${public_key_file} *.sig"
+  additional_files="*.sig"
 fi
 
-echo "Generating tarball to contain the SquashFS image and its MANIFEST"
-tar -cvf $outfile $manifest_location pnor.xz.squashfs $additional_files
-echo "SquashFSTarball at ${outfile}"
-
-tar -czvf $static_outfile $manifest_location $(basename ${pnorfile})
-echo "Static layout tarball at $static_outfile"
+if [[ "${image_type}" == "squashfs" ]]; then
+  echo "Generating tarball to contain the SquashFS image and its MANIFEST"
+  tar -cvf $outfile $files_to_sign $additional_files
+  echo "SquashFSTarball at ${outfile}"
+else
+  tar -czvf $outfile $files_to_sign $additional_files
+  echo "Static layout tarball at $outfile"
+fi
 
 rm -r "${scratch_dir}"
