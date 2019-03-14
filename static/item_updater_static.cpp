@@ -3,6 +3,7 @@
 #include "item_updater_static.hpp"
 
 #include "activation_static.hpp"
+#include "utils.hpp"
 #include "version.hpp"
 
 #include <array>
@@ -199,9 +200,6 @@ namespace software
 {
 namespace updater
 {
-// TODO: Change paths once openbmc/openbmc#1663 is completed.
-constexpr auto MBOXD_INTERFACE = "org.openbmc.mboxd";
-constexpr auto MBOXD_PATH = "/org/openbmc/mboxd";
 
 std::unique_ptr<Activation> ItemUpdaterStatic::createActivationObject(
     const std::string& path, const std::string& versionId,
@@ -308,44 +306,15 @@ void ItemUpdaterStatic::processPNORImage()
 void ItemUpdaterStatic::reset()
 {
     auto partitions = utils::getPartsToClear();
-    std::vector<uint8_t> mboxdArgs;
 
-    // Suspend mboxd - no args required.
-    auto dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH,
-                                        MBOXD_INTERFACE, "cmd");
-    dbusCall.append(static_cast<uint8_t>(3), mboxdArgs);
+    utils::hiomapdSuspend(bus);
 
-    try
-    {
-        bus.call_noreply(dbusCall);
-    }
-    catch (const SdBusError& e)
-    {
-        log<level::ERR>("Error in mboxd suspend call",
-                        entry("ERROR=%s", e.what()));
-        elog<InternalFailure>();
-    }
     for (auto p : partitions)
     {
         utils::pnorClear(p.first, p.second);
     }
 
-    // Resume mboxd with arg 1, indicating that the flash was modified.
-    dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH, MBOXD_INTERFACE,
-                                   "cmd");
-    mboxdArgs.push_back(1);
-    dbusCall.append(static_cast<uint8_t>(4), mboxdArgs);
-
-    try
-    {
-        bus.call_noreply(dbusCall);
-    }
-    catch (const SdBusError& e)
-    {
-        log<level::ERR>("Error in mboxd resume call",
-                        entry("ERROR=%s", e.what()));
-        elog<InternalFailure>();
-    }
+    utils::hiomapdResume(bus);
 }
 
 bool ItemUpdaterStatic::isVersionFunctional(const std::string& versionId)
@@ -390,43 +359,11 @@ void ItemUpdaterStatic::updateFunctionalAssociation(
 void GardResetStatic::reset()
 {
     // Clear gard partition
-    std::vector<uint8_t> mboxdArgs;
+    utils::hiomapdSuspend(bus);
 
-    auto dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH,
-                                        MBOXD_INTERFACE, "cmd");
-    // Suspend mboxd - no args required.
-    dbusCall.append(static_cast<uint8_t>(3), mboxdArgs);
-
-    try
-    {
-        bus.call_noreply(dbusCall);
-    }
-    catch (const SdBusError& e)
-    {
-        log<level::ERR>("Error in mboxd suspend call",
-                        entry("ERROR=%s", e.what()));
-        elog<InternalFailure>();
-    }
-
-    // Clear guard partition
     utils::pnorClear("GUARD");
 
-    dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH, MBOXD_INTERFACE,
-                                   "cmd");
-    // Resume mboxd with arg 1, indicating that the flash is modified.
-    mboxdArgs.push_back(1);
-    dbusCall.append(static_cast<uint8_t>(4), mboxdArgs);
-
-    try
-    {
-        bus.call_noreply(dbusCall);
-    }
-    catch (const SdBusError& e)
-    {
-        log<level::ERR>("Error in mboxd resume call",
-                        entry("ERROR=%s", e.what()));
-        elog<InternalFailure>();
-    }
+    utils::hiomapdResume(bus);
 }
 
 } // namespace updater

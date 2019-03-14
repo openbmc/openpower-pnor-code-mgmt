@@ -33,6 +33,7 @@ utest_SOURCES = \
 	../item_updater.cpp \
 	../org/openbmc/Associations/server.cpp \
 	../image_verify.cpp \
+	../utils.cpp \
 	../msl_verify.cpp \
 	../ubi/activation_ubi.cpp \
 	../ubi/item_updater_ubi.cpp \

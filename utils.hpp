@@ -7,9 +7,28 @@
 
 #include <openssl/evp.h>
 
+#include <sdbusplus/bus.hpp>
+
 extern "C" {
 EVP_MD_CTX* EVP_MD_CTX_new(void);
 void EVP_MD_CTX_free(EVP_MD_CTX* ctx);
 }
+
+namespace utils
+{
+
+/** @brief Suspend hiomapd.
+ *
+ * @param[in] bus - The D-Bus bus object.
+ */
+void hiomapdSuspend(sdbusplus::bus::bus& bus);
+
+/** @brief Resume hiomapd.
+ *
+ * @param[in] bus - The D-Bus bus object.
+ */
+void hiomapdResume(sdbusplus::bus::bus& bus);
+
+} // namespace utils
 
 #endif // OPENSSL_VERSION_NUMBER < 0x10100000L

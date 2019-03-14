@@ -10,7 +10,8 @@ openpower_update_manager_SOURCES = \
 	activation.cpp \
 	version.cpp \
 	item_updater.cpp \
-	item_updater_main.cpp
+	item_updater_main.cpp \
+	utils.cpp
 
 if UBIFS_LAYOUT
 include ubi/Makefile.am.include
@@ -24,8 +25,7 @@ endif
 
 if WANT_SIGNATURE_VERIFY_BUILD
 openpower_update_manager_SOURCES += \
-	image_verify.cpp \
-	utils.cpp
+	image_verify.cpp
 endif
 
 nodist_openpower_update_manager_SOURCES = \
