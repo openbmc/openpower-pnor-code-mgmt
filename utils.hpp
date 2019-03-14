@@ -7,9 +7,41 @@
 
 #include <openssl/evp.h>
 
+#include <sdbusplus/bus.hpp>
+
 extern "C" {
 EVP_MD_CTX* EVP_MD_CTX_new(void);
 void EVP_MD_CTX_free(EVP_MD_CTX* ctx);
 }
+
+namespace utils
+{
+
+/**
+ * @brief Gets the D-Bus Service name for the input D-Bus path
+ *
+ * @param[in] bus  -  Bus handler
+ * @param[in] path -  Object Path
+ * @param[in] intf -  Interface
+ *
+ * @return  Service name
+ * @error   InternalFailure exception thrown
+ */
+std::string getService(sdbusplus::bus::bus& bus, const std::string& path,
+                       const std::string& intf);
+
+/** @brief Suspend hiomapd.
+ *
+ * @param[in] bus - The D-Bus bus object.
+ */
+void hiomapdSuspend(sdbusplus::bus::bus& bus);
+
+/** @brief Resume hiomapd.
+ *
+ * @param[in] bus - The D-Bus bus object.
+ */
+void hiomapdResume(sdbusplus::bus::bus& bus);
+
+} // namespace utils
 
 #endif // OPENSSL_VERSION_NUMBER < 0x10100000L

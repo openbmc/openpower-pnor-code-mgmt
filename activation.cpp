@@ -208,7 +208,8 @@ bool Activation::validateSignature()
 
 bool Activation::fieldModeEnabled()
 {
-    auto fieldModeSvc = getService(bus, FIELDMODE_PATH, FIELDMODE_INTERFACE);
+    auto fieldModeSvc =
+        utils::getService(bus, FIELDMODE_PATH, FIELDMODE_INTERFACE);
 
     auto method = bus.new_method_call(fieldModeSvc.c_str(), FIELDMODE_PATH,
                                       "org.freedesktop.DBus.Properties", "Get");
@@ -226,40 +227,6 @@ bool Activation::fieldModeEnabled()
     return sdbusplus::message::variant_ns::get<bool>(fieldMode);
 }
 
-std::string Activation::getService(sdbusplus::bus::bus& bus,
-                                   const std::string& path,
-                                   const std::string& intf)
-{
-    auto mapperCall = bus.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
-                                          MAPPER_INTERFACE, "GetObject");
-
-    mapperCall.append(path);
-    mapperCall.append(std::vector<std::string>({intf}));
-
-    auto mapperResponseMsg = bus.call(mapperCall);
-
-    if (mapperResponseMsg.is_method_error())
-    {
-        log<level::ERR>("ERROR in getting service",
-                        entry("PATH=%s", path.c_str()),
-                        entry("INTERFACE=%s", intf.c_str()));
-
-        elog<InternalFailure>();
-    }
-
-    std::map<std::string, std::vector<std::string>> mapperResponse;
-    mapperResponseMsg.read(mapperResponse);
-
-    if (mapperResponse.begin() == mapperResponse.end())
-    {
-        log<level::ERR>("ERROR reading mapper response",
-                        entry("PATH=%s", path.c_str()),
-                        entry("INTERFACE=%s", intf.c_str()));
-
-        elog<InternalFailure>();
-    }
-    return mapperResponse.begin()->first;
-}
 #endif
 
 } // namespace updater

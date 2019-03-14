@@ -4,6 +4,7 @@
 
 #include "activation_ubi.hpp"
 #include "serialize.hpp"
+#include "utils.hpp"
 #include "version.hpp"
 #include "xyz/openbmc_project/Common/error.hpp"
 
@@ -30,10 +31,6 @@ using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace phosphor::logging;
 
 constexpr auto squashFSImage = "pnor.xz.squashfs";
-
-// TODO: Change paths once openbmc/openbmc#1663 is completed.
-constexpr auto MBOXD_INTERFACE = "org.openbmc.mboxd";
-constexpr auto MBOXD_PATH = "/org/openbmc/mboxd";
 
 std::unique_ptr<Activation> ItemUpdaterUbi::createActivationObject(
     const std::string& path, const std::string& versionId,
@@ -213,20 +210,7 @@ void ItemUpdaterUbi::removeReadWritePartition(const std::string& versionId)
 
 void ItemUpdaterUbi::reset()
 {
-    std::vector<uint8_t> mboxdArgs;
-
-    // Suspend mboxd - no args required.
-    auto dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH,
-                                        MBOXD_INTERFACE, "cmd");
-
-    dbusCall.append(static_cast<uint8_t>(3), mboxdArgs);
-
-    auto responseMsg = bus.call(dbusCall);
-    if (responseMsg.is_method_error())
-    {
-        log<level::ERR>("Error in mboxd suspend call");
-        elog<InternalFailure>();
-    }
+    utils::hiomapdSuspend(bus);
 
     constexpr static auto patchDir = "/usr/local/share/pnor";
     if (fs::is_directory(patchDir))
@@ -259,21 +243,7 @@ void ItemUpdaterUbi::reset()
         }
     }
 
-    // Resume mboxd with arg 1, indicating that the flash was modified.
-    dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH, MBOXD_INTERFACE,
-                                   "cmd");
-
-    mboxdArgs.push_back(1);
-    dbusCall.append(static_cast<uint8_t>(4), mboxdArgs);
-
-    responseMsg = bus.call(dbusCall);
-    if (responseMsg.is_method_error())
-    {
-        log<level::ERR>("Error in mboxd resume call");
-        elog<InternalFailure>();
-    }
-
-    return;
+    utils::hiomapdResume(bus);
 }
 
 bool ItemUpdaterUbi::isVersionFunctional(const std::string& versionId)
@@ -425,39 +395,15 @@ void GardResetUbi::reset()
     // need to be updated in the future.
     auto path = fs::path(PNOR_PRSV_ACTIVE_PATH);
     path /= "GUARD";
-    std::vector<uint8_t> mboxdArgs;
 
-    auto dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH,
-                                        MBOXD_INTERFACE, "cmd");
-
-    // Suspend mboxd - no args required.
-    dbusCall.append(static_cast<uint8_t>(3), mboxdArgs);
-
-    auto responseMsg = bus.call(dbusCall);
-    if (responseMsg.is_method_error())
-    {
-        log<level::ERR>("Error in mboxd suspend call");
-        elog<InternalFailure>();
-    }
+    utils::hiomapdSuspend(bus);
 
     if (fs::is_regular_file(path))
     {
         fs::remove(path);
     }
 
-    dbusCall = bus.new_method_call(MBOXD_INTERFACE, MBOXD_PATH, MBOXD_INTERFACE,
-                                   "cmd");
-
-    // Resume mboxd with arg 1, indicating that the flash is modified.
-    mboxdArgs.push_back(1);
-    dbusCall.append(static_cast<uint8_t>(4), mboxdArgs);
-
-    responseMsg = bus.call(dbusCall);
-    if (responseMsg.is_method_error())
-    {
-        log<level::ERR>("Error in mboxd resume call");
-        elog<InternalFailure>();
-    }
+    utils::hiomapdResume(bus);
 }
 
 } // namespace updater
