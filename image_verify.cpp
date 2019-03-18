@@ -31,9 +31,10 @@ constexpr auto keyTypeTag = "KeyType";
 constexpr auto hashFunctionTag = "HashType";
 
 Signature::Signature(const fs::path& imageDirPath,
+                     const std::string& pnorFileName,
                      const fs::path& signedConfPath) :
     imageDirPath(imageDirPath),
-    signedConfPath(signedConfPath)
+    pnorFileName(pnorFileName), signedConfPath(signedConfPath)
 {
     fs::path file(imageDirPath / MANIFEST_FILE);
 
@@ -103,7 +104,7 @@ bool Signature::verify()
         // Validate the PNOR image file.
         // Build Image File name
         fs::path file(imageDirPath);
-        file /= squashFSImage;
+        file /= pnorFileName;
 
         // Build Signature File name
         std::string fileName = file.filename();
@@ -115,7 +116,7 @@ bool Signature::verify()
         if (valid == false)
         {
             log<level::ERR>("Image file Signature Validation failed",
-                            entry("IMAGE=%s", squashFSImage));
+                            entry("IMAGE=%s", pnorFileName.c_str()));
             return false;
         }
 

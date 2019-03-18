@@ -2,12 +2,16 @@
 
 #include "activation.hpp"
 
+#include <filesystem>
+
 namespace openpower
 {
 namespace software
 {
 namespace updater
 {
+
+namespace fs = std::filesystem;
 
 /** @class ActivationStatic
  *  @brief Implementation for static PNOR layout
@@ -25,6 +29,8 @@ class ActivationStatic : public Activation
     void finishActivation() override;
 
     std::string pnorUpdateUnit;
+
+    fs::path pnorFilePath;
 };
 
 } // namespace updater
