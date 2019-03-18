@@ -30,8 +30,6 @@ namespace fs = std::experimental::filesystem;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace phosphor::logging;
 
-constexpr auto squashFSImage = "pnor.xz.squashfs";
-
 std::unique_ptr<Activation> ItemUpdaterUbi::createActivationObject(
     const std::string& path, const std::string& versionId,
     const std::string& extVersion,

@@ -176,12 +176,13 @@ uint8_t RedundancyPriority::priority(uint8_t value)
 }
 
 #ifdef WANT_SIGNATURE_VERIFY
-bool Activation::validateSignature()
+bool Activation::validateSignature(const std::string& pnorFileName)
 {
     using Signature = openpower::software::image::Signature;
     fs::path imageDir(IMG_DIR);
 
-    Signature signature(imageDir / versionId, PNOR_SIGNED_IMAGE_CONF_PATH);
+    Signature signature(imageDir / versionId, pnorFileName,
+                        PNOR_SIGNED_IMAGE_CONF_PATH);
 
     // Validate the signed image.
     if (signature.verify())

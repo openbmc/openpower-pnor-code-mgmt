@@ -2,7 +2,6 @@
 
 #include "item_updater.hpp"
 
-#include <filesystem>
 #include <phosphor-logging/log.hpp>
 
 namespace openpower
@@ -11,7 +10,6 @@ namespace software
 {
 namespace updater
 {
-namespace fs = std::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
 
 using namespace phosphor::logging;
@@ -27,6 +25,36 @@ auto ActivationStatic::activation(Activations value) -> Activations
 
     if (value == softwareServer::Activation::Activations::Activating)
     {
+        fs::path imagePath(IMG_DIR);
+        imagePath /= versionId;
+
+        for (const auto& entry : fs::directory_iterator(imagePath))
+        {
+            if (entry.path().extension() == ".pnor")
+            {
+                pnorFilePath = entry;
+                break;
+            }
+        }
+        if (pnorFilePath.empty())
+        {
+            log<level::ERR>("Unable to find pnor file",
+                            entry("DIR=%s", imagePath.c_str()));
+            ret = softwareServer::Activation::Activations::Failed;
+            goto out;
+        }
+#ifdef WANT_SIGNATURE_VERIFY
+        // Validate the signed image.
+        if (!validateSignature(pnorFilePath.filename()))
+        {
+            // Cleanup
+            activationBlocksTransition.reset(nullptr);
+            activationProgress.reset(nullptr);
+
+            ret = softwareServer::Activation::Activations::Failed;
+            goto out;
+        }
+#endif
         if (parent.freeSpace())
         {
             startActivation();
@@ -42,30 +70,12 @@ auto ActivationStatic::activation(Activations value) -> Activations
         activationProgress.reset(nullptr);
     }
 
+out:
     return softwareServer::Activation::activation(ret);
 }
 
 void ActivationStatic::startActivation()
 {
-    fs::path pnorFile;
-    fs::path imagePath(IMG_DIR);
-    imagePath /= versionId;
-
-    for (const auto& entry : fs::directory_iterator(imagePath))
-    {
-        if (entry.path().extension() == ".pnor")
-        {
-            pnorFile = entry;
-            break;
-        }
-    }
-    if (pnorFile.empty())
-    {
-        log<level::ERR>("Unable to find pnor file",
-                        entry("DIR=%s", imagePath.c_str()));
-        return;
-    }
-
     if (!activationProgress)
     {
         activationProgress = std::make_unique<ActivationProgress>(bus, path);
@@ -82,9 +92,9 @@ void ActivationStatic::startActivation()
     subscribeToSystemdSignals();
 
     log<level::INFO>("Start programming...",
-                     entry("PNOR=%s", pnorFile.c_str()));
+                     entry("PNOR=%s", pnorFilePath.c_str()));
 
-    std::string pnorFileEscaped = pnorFile.string();
+    std::string pnorFileEscaped = pnorFilePath.string();
     // Escape all '/' to '-'
     std::replace(pnorFileEscaped.begin(), pnorFileEscaped.end(), '/', '-');
 

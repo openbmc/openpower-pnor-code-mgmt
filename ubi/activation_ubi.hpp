@@ -9,6 +9,8 @@ namespace software
 namespace updater
 {
 
+constexpr auto squashFSImage = "pnor.xz.squashfs";
+
 class RedundancyPriorityUbi : public RedundancyPriority
 {
   public:

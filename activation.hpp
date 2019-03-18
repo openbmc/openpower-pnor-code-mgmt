@@ -299,12 +299,14 @@ class Activation : public ActivationInherit
      *        update process in lab environment by checking the
      *        fieldModeEnabled property.
      *
+     * @param[in] pnorFileName - The PNOR filename in image dir
+     *
      * @return  true if successful signature validation or field
      *          mode is disabled.
      *          false for unsuccessful signature validation or
      *          any internal failure during the mapper call.
      */
-    bool validateSignature();
+    bool validateSignature(const std::string& pnorFileName);
 
     /**
      * @brief Gets the fieldModeEnabled property value.
