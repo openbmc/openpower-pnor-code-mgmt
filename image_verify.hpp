@@ -31,9 +31,6 @@ using EVP_PKEY_Ptr = std::unique_ptr<EVP_PKEY, decltype(&::EVP_PKEY_free)>;
 using EVP_MD_CTX_Ptr =
     std::unique_ptr<EVP_MD_CTX, decltype(&::EVP_MD_CTX_free)>;
 
-// PNOR flash image file name.
-constexpr auto squashFSImage = "pnor.xz.squashfs";
-
 /** @struct CustomFd
  *
  *  RAII wrapper for file descriptor.
@@ -133,7 +130,9 @@ class Signature
      * @param[in]  signedConfPath - Path of public key
      *                              hash function files
      */
-    Signature(const fs::path& imageDirPath, const fs::path& signedConfPath);
+    explicit Signature(const fs::path& imageDirPath,
+                       const std::string& pnorFileName,
+                       const fs::path& signedConfPath);
 
     /**
      * @brief Image signature verification function.
@@ -204,6 +203,9 @@ class Signature
 
     /** @brief Directory where software images are placed*/
     fs::path imageDirPath;
+
+    /** @brief The PNOR file name in imageDirPath */
+    std::string pnorFileName;
 
     /** @brief Path of public key and hash function files */
     fs::path signedConfPath;

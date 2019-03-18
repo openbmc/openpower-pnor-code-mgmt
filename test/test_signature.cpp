@@ -82,7 +82,8 @@ class SignatureTest : public testing::Test
         command(opensslCmd + pkeyFile + " -out " + pubkeyFile + ".sig " +
                 pubkeyFile);
 
-        signature = std::make_unique<Signature>(extractPath, signedConfPath);
+        signature = std::make_unique<Signature>(extractPath, "pnor.xz.squashfs",
+                                                signedConfPath);
     }
     virtual void TearDown()
     {
