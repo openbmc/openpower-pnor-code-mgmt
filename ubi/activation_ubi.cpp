@@ -40,7 +40,7 @@ auto ActivationUbi::activation(Activations value) -> Activations
 
 #ifdef WANT_SIGNATURE_VERIFY
             // Validate the signed image.
-            if (!validateSignature())
+            if (!validateSignature(squashFSImage))
             {
                 // Cleanup
                 activationBlocksTransition.reset(nullptr);
