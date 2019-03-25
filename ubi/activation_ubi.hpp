@@ -12,7 +12,12 @@ namespace updater
 class RedundancyPriorityUbi : public RedundancyPriority
 {
   public:
-    using RedundancyPriority::RedundancyPriority;
+    RedundancyPriorityUbi(sdbusplus::bus::bus& bus, const std::string& path,
+                          Activation& parent, uint8_t value) :
+        RedundancyPriority(bus, path, parent, value)
+    {
+        priority(value);
+    }
     virtual ~RedundancyPriorityUbi() = default;
 
     /** @brief Overloaded Priority property set function
