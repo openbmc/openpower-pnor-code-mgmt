@@ -2,7 +2,7 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 
 ACLOCAL_AMFLAGS = -Im4
 
-sbin_PROGRAMS = \
+bin_PROGRAMS = \
 	openpower-update-manager \
 	openpower-pnor-msl
 
