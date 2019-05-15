@@ -3,7 +3,7 @@ set -eo pipefail
 
 help=$'Generate Tarball with PNOR image and MANIFEST Script
 
-Generates a PNOR SquashFS image from the PNOR image for VPNOR,
+Generates a PNOR filesystem image from the PNOR image for VPNOR,
 Or use a static layout raw PNOR image,
 Creates a MANIFEST for image verification and recreation
 Packages the image and MANIFEST together in a tarball
@@ -11,8 +11,8 @@ Packages the image and MANIFEST together in a tarball
 usage: generate-tar [OPTION] <PNOR FILE>...
 
 Options:
-   -i, --image <squashfs|static>
-                          Generate SquashFS image or use static PNOR
+   -i, --image <ext4|squashfs|static>
+                          Generate filesystem image or use static PNOR
    -f, --file <file>      Specify destination file. Defaults to
                           `pwd`/<PNOR FILE>.pnor.<image_type>.tar[.gz] if
                           unspecified.
@@ -95,12 +95,16 @@ if [ ! -f "${pnorfile}" ]; then
   exit 1
 fi
 
-if [[ "${image_type}" == "squashfs" ]]; then
+if [[ "${image_type}" == "ext4" ]]; then
+  echo "Will generate ext4 image for VPNOR"
+  ext4_image="pnor.ext4"
+  ext4_image_size="$(stat -c '%s' ${pnorfile})"
+elif [[ "${image_type}" == "squashfs" ]]; then
   echo "Will generate squashfs image for VPNOR"
 elif [[ "${image_type}" == "static" ]]; then
   echo "Will use static image for PNOR"
 else
-  echo "Please specify the image type, \"squashfs\" or \"static\""
+  echo "Please specify the image type (-i <option>)"
   echo
   echo "$help"
   exit 1
@@ -209,7 +213,13 @@ files_to_sign="$manifest_location $public_key_file"
 
 # Go to scratch_dir
 
-if [[ "${image_type}" == "squashfs" ]]; then
+if [[ "${image_type}" == "ext4" ]]; then
+  echo "Creating ext4 image..."
+  cd "${scratch_dir}"
+  dd if=/dev/zero bs=$ext4_image_size count=1 | tr '\000' '\377' > ${ext4_image}
+  mkfs.ext4 -d ${pnor_dir} -F ${ext4_image}
+  files_to_sign+=" ${ext4_image}"
+elif [[ "${image_type}" == "squashfs" ]]; then
   echo "Creating SquashFS image..."
   # Prepare pnor file in ${pnor_dir}
   cd "${pnor_dir}"
@@ -239,7 +249,11 @@ if [[ "${do_sign}" == true ]]; then
   additional_files="*.sig"
 fi
 
-if [[ "${image_type}" == "squashfs" ]]; then
+if [[ "${image_type}" == "ext4" ]]; then
+  echo "Generating tarball to contain the ext4 image and its MANIFEST"
+  tar -cvf $outfile $files_to_sign $additional_files
+  echo "ext4 tarball at ${outfile}"
+elif [[ "${image_type}" == "squashfs" ]]; then
   echo "Generating tarball to contain the SquashFS image and its MANIFEST"
   tar -cvf $outfile $files_to_sign $additional_files
   echo "SquashFSTarball at ${outfile}"
