@@ -1,0 +1,116 @@
+#!/bin/bash
+set -eo pipefail
+
+help=$'Generate PNOR ext4 image from a PNOR SquashFS Tarball
+
+Generates a ext4 PNOR image from a PNOR SquashFS Tarball.
+The PNOR SquashFS Tarball is generated from the generate-tar script.
+
+usage: generate-ext4 [OPTION] <PNOR SquashFS Tarball>...
+
+Options:
+   -f, --file <file>      Specify destination file. Defaults to
+                          `pwd`/<PNOR Tarball FILE, removing .squashfs.tar>.ext4.mtd
+                          (For example, "generate-ubi my.pnor.squashfs.tar"
+                          would generate `pwd`/my.pnor.ext4.mtd output.)
+   -s, --size <MiB>       Specify the size of the PNOR UBI image in MiBs.
+                          Defaults to 128.
+   -h, --help             Display this help text and exit.
+'
+# 128MiB is the default image size
+image_size="128"
+
+while [[ $# -gt 0 ]]; do
+  key="$1"
+  case $key in
+    -f|--file)
+      outfile="$2"
+      shift 2
+      ;;
+    -s|--size)
+      image_size="$2"
+      shift 2
+      ;;
+    -h|--help)
+      echo "$help"
+      exit
+      ;;
+    *)
+      tarball="$1"
+      shift 1
+      ;;
+  esac
+done
+
+if [ ! -f "${tarball}" ]; then
+  echo "Please enter a PNOR SquashFS Tarball."
+  echo "To generate PNOR SquashFS Tarball see generate-tar"
+  echo "$help"
+  exit 1
+fi
+
+if [[ -z $outfile ]]; then
+    # Remove .squashfs.tar from end if present and add .ext4.mtd
+    outfile=`pwd`/${tarball%".squashfs.tar"}.ext4.mtd
+else
+  if [[ $outfile != /* ]]; then
+    outfile=`pwd`/$outfile
+  fi
+fi
+
+echo "Generating PNOR ext4 image."
+
+squashfs_file_name="pnor.xz.squashfs"
+manifest_file_name="MANIFEST"
+
+# Scratch directory for untarring and config file
+scratch_dir=`mktemp -d`
+
+# Make sure scratch directory always gets cleaned up
+trap "{ rm -r ${scratch_dir}; }" EXIT
+
+squashfs_file=${scratch_dir}/${squashfs_file_name}
+manifest_file=${scratch_dir}/${manifest_file_name}
+# Untar tarball
+tar -xvf ${tarball} -C ${scratch_dir} ${squashfs_file_name} ${manifest_file_name}
+
+# All valid PNOR SquashFS Tarballs have a file named "pnor.xz.squashfs"
+if [ ! -f "${squashfs_file}" ]; then
+  echo "No \"${squashfs_file_name}\" file in the tarball!"
+  exit 1
+fi
+
+# Need the manifest file for calculating the version id
+if [ ! -f "${manifest_file}" ]; then
+  echo "No \"${manifest_file_name}\" file in the tarball!"
+  exit 1
+fi
+
+# Convert image size from MiB to KiB
+image_size=$((${image_size} * 1024))
+
+# Create an image with all 1's
+mk_nor_image()
+{
+  image_dst=$1
+  image_size_kb=$2
+  dd if=/dev/zero bs=1k count=$image_size_kb | tr '\000' '\377' > $image_dst
+}
+
+# The version is listed in the MANIFEST file as "version=v1.99.10-19"
+# Use the version to calculate the version id, a unique 8 hexadecimal digit id
+version_id=$(sed -ne '/version=/ {s/version=//;p}' ${manifest_file} | head -n1 | \
+  tr -d '\n' | sha512sum | cut -b 1-8)
+
+# Root directory to be used to populate the ext4 image
+ext4_root="${scratch_dir}/ext4_root"
+mkdir ${ext4_root}
+mkdir ${ext4_root}/pnor-rw-${version_id}
+mkdir ${ext4_root}/pnor-prsv
+unsquashfs -d ${ext4_root}/pnor-ro-${version_id} ${squashfs_file}
+
+# Build the ext4 image
+mk_nor_image ${outfile} ${image_size}
+mkfs.ext4 -d ${ext4_root} -F ${outfile}
+
+echo "PNOR ext4 image at ${outfile}"
