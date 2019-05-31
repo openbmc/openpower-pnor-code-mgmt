@@ -1,0 +1,13 @@
+[Unit]
+Description=Clear the Volatile PNOR partitions in host%I if Enabled
+After=obmc-flash-bios-enable-clearvolatile@%i.service
+Before=obmc-host-start-pre@%i.target
+ConditionPathExists=!/run/openbmc/host@%i-on
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/usr/bin/obmc-flash-bios clearvolatile
+
+[Install]
+RequiredBy=obmc-host-startmin@%i.target
