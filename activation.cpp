@@ -106,18 +106,23 @@ void Activation::deleteImageManagerObject()
 
     method.append(path);
     method.append(std::vector<std::string>({deleteInterface}));
-    auto mapperResponseMsg = bus.call(method);
-    if (mapperResponseMsg.is_method_error())
+
+    std::map<std::string, std::vector<std::string>> mapperResponse;
+
+    try
+    {
+        auto mapperResponseMsg = bus.call(method);
+        mapperResponseMsg.read(mapperResponse);
+        if (mapperResponse.begin() == mapperResponse.end())
+        {
+            log<level::ERR>("ERROR in reading the mapper response",
+                            entry("VERSIONPATH=%s", path.c_str()));
+            return;
+        }
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
     {
         log<level::ERR>("Error in Get Delete Object",
-                        entry("VERSIONPATH=%s", path.c_str()));
-        return;
-    }
-    std::map<std::string, std::vector<std::string>> mapperResponse;
-    mapperResponseMsg.read(mapperResponse);
-    if (mapperResponse.begin() == mapperResponse.end())
-    {
-        log<level::ERR>("ERROR in reading the mapper response",
                         entry("VERSIONPATH=%s", path.c_str()));
         return;
     }
@@ -143,15 +148,7 @@ void Activation::deleteImageManagerObject()
                                        deleteInterface, "Delete");
     try
     {
-        mapperResponseMsg = bus.call(method);
-
-        // Check that the bus call didn't result in an error
-        if (mapperResponseMsg.is_method_error())
-        {
-            log<level::ERR>("Error in Deleting image from image manager",
-                            entry("VERSIONPATH=%s", path.c_str()));
-            return;
-        }
+        bus.call(method);
     }
     catch (const SdBusError& e)
     {
@@ -216,16 +213,20 @@ bool Activation::fieldModeEnabled()
                                       "org.freedesktop.DBus.Properties", "Get");
 
     method.append(FIELDMODE_INTERFACE, "FieldModeEnabled");
-    auto reply = bus.call(method);
-    if (reply.is_method_error())
+
+    sdbusplus::message::variant<bool> fieldMode;
+
+    try
+    {
+        auto reply = bus.call(method);
+        reply.read(fieldMode);
+        return sdbusplus::message::variant_ns::get<bool>(fieldMode);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
     {
         log<level::ERR>("Error in fieldModeEnabled getValue");
         elog<InternalFailure>();
     }
-    sdbusplus::message::variant<bool> fieldMode;
-    reply.read(fieldMode);
-
-    return sdbusplus::message::variant_ns::get<bool>(fieldMode);
 }
 
 #endif

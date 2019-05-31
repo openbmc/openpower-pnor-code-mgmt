@@ -214,18 +214,22 @@ bool ItemUpdater::isChassisOn()
 
     mapperCall.append(CHASSIS_STATE_PATH,
                       std::vector<std::string>({CHASSIS_STATE_OBJ}));
-    auto mapperResponseMsg = bus.call(mapperCall);
-    if (mapperResponseMsg.is_method_error())
+
+    std::map<std::string, std::vector<std::string>> mapperResponse;
+
+    try
+    {
+        auto mapperResponseMsg = bus.call(mapperCall);
+        mapperResponseMsg.read(mapperResponse);
+        if (mapperResponse.empty())
+        {
+            log<level::ERR>("Invalid Response from mapper");
+            elog<InternalFailure>();
+        }
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
     {
         log<level::ERR>("Error in Mapper call");
-        elog<InternalFailure>();
-    }
-    using MapperResponseType = std::map<std::string, std::vector<std::string>>;
-    MapperResponseType mapperResponse;
-    mapperResponseMsg.read(mapperResponse);
-    if (mapperResponse.empty())
-    {
-        log<level::ERR>("Invalid Response from mapper");
         elog<InternalFailure>();
     }
 
@@ -233,19 +237,24 @@ bool ItemUpdater::isChassisOn()
                                       CHASSIS_STATE_PATH,
                                       SYSTEMD_PROPERTY_INTERFACE, "Get");
     method.append(CHASSIS_STATE_OBJ, "CurrentPowerState");
-    auto response = bus.call(method);
-    if (response.is_method_error())
+
+    sdbusplus::message::variant<std::string> currentChassisState;
+
+    try
+    {
+        auto response = bus.call(method);
+        response.read(currentChassisState);
+        auto strParam = sdbusplus::message::variant_ns::get<std::string>(
+            currentChassisState);
+        return (strParam != CHASSIS_STATE_OFF);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
     {
         log<level::ERR>("Error in fetching current Chassis State",
                         entry("MAPPERRESPONSE=%s",
                               (mapperResponse.begin()->first).c_str()));
         elog<InternalFailure>();
     }
-    sdbusplus::message::variant<std::string> currentChassisState;
-    response.read(currentChassisState);
-    auto strParam =
-        sdbusplus::message::variant_ns::get<std::string>(currentChassisState);
-    return (strParam != CHASSIS_STATE_OFF);
 }
 
 } // namespace updater
