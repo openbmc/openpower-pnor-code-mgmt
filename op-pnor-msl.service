@@ -1,0 +1,11 @@
+[Unit]
+Description=OpenPOWER PNOR Minimum Ship Level Verification
+After=obmc-flash-bios-updatesymlinks.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/openpower-pnor-msl
+RemainAfterExit=yes
+
+[Install]
+WantedBy=obmc-flash-bios-updatesymlinks.service

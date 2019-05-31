@@ -1,0 +1,10 @@
+[Unit]
+Description=Create a ubi volume for pnor patches
+Before=mboxd.service
+Wants=usr-local.mount
+After=usr-local.mount
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/usr/bin/obmc-flash-bios ubimount pnor-patch

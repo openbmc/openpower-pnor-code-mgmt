@@ -3,3 +3,20 @@ openpower_update_manager_SOURCES += \
 	%reldir%/item_updater_ubi.cpp \
 	%reldir%/serialize.cpp \
 	%reldir%/watch.cpp
+
+dist_bin_SCRIPTS = \
+	%reldir%/obmc-flash-bios
+
+if HAVE_SYSTEMD
+systemdsystemunit_DATA += \
+	%reldir%/obmc-flash-bios-check-clearvolatile@.service \
+	%reldir%/obmc-flash-bios-cleanup.service \
+	%reldir%/obmc-flash-bios-enable-clearvolatile@.service \
+	%reldir%/obmc-flash-bios-ubiattach.service \
+	%reldir%/obmc-flash-bios-ubimount@.service \
+	%reldir%/obmc-flash-bios-ubipatch.service \
+	%reldir%/obmc-flash-bios-ubiremount.service \
+	%reldir%/obmc-flash-bios-ubiumount-ro@.service \
+	%reldir%/obmc-flash-bios-ubiumount-rw@.service \
+	%reldir%/obmc-flash-bios-updatesymlinks.service
+endif
