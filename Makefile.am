@@ -13,12 +13,18 @@ openpower_update_manager_SOURCES = \
 	item_updater_main.cpp \
 	utils.cpp
 
+if HAVE_SYSTEMD
+systemdsystemunit_DATA = \
+	op-pnor-msl.service \
+	org.open_power.Software.Host.Updater.service
+endif
+
 if UBIFS_LAYOUT
 include ubi/Makefile.am.include
 else
 include static/Makefile.am.include
 if HAVE_SYSTEMD
-  systemdsystemunit_DATA = \
+  systemdsystemunit_DATA += \
     openpower-pnor-update@.service
 endif
 endif
