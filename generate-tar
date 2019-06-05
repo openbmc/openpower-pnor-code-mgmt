@@ -147,22 +147,25 @@ fi
 
 echo "Parsing PNOR TOC..."
 
-pflash --partition=part --read=${scratch_dir}/part -F ${pnorfile}
-pflash --partition=VERSION --read=${scratch_dir}/VERSION -F ${pnorfile}
-version_size=$(du -k ${scratch_dir}/VERSION | head -1 | cut -f 1)
-magic_number=$(xxd -p -l 4 ${scratch_dir}/VERSION)
+pnor_dir="${scratch_dir}/pnor"
+mkdir ${pnor_dir}
+
+pflash --partition=part --read=${pnor_dir}/part -F ${pnorfile}
+pflash --partition=VERSION --read=${pnor_dir}/VERSION -F ${pnorfile}
+version_size=$(du -k ${pnor_dir}/VERSION | head -1 | cut -f 1)
+magic_number=$(xxd -p -l 4 ${pnor_dir}/VERSION)
 # Check if VERSION is signed. A signed version partition will have an extra
 # 4K header starting with the magic number 0x17082011, see:
 # https://github.com/open-power/skiboot/blob/master/libstb/container.h#L47
 if [ "$version_size" == "8" -a "$magic_number" == "17082011" ]; then
   # Advance past the STB header (4K, indexed from 1)
-  cp ${scratch_dir}/VERSION ${scratch_dir}/VERSION_FULL
-  tail --bytes=+4097 ${scratch_dir}/VERSION_FULL > ${scratch_dir}/VERSION
+  cp ${pnor_dir}/VERSION ${pnor_dir}/VERSION_FULL
+  tail --bytes=+4097 ${pnor_dir}/VERSION_FULL > ${pnor_dir}/VERSION
 fi
 {
-  version=$(head -n 1 ${scratch_dir}/VERSION)
+  version=$(head -n 1 ${pnor_dir}/VERSION)
   echo "version=$version"
-  extended_version=$(echo $(tail -n +2 ${scratch_dir}/VERSION)|tr ' ' ',')
+  extended_version=$(echo $(tail -n +2 ${pnor_dir}/VERSION)|tr ' ' ',')
   echo "extended_version=$extended_version"
   while read line; do
     if [[ $line == "ID="* ]]; then
@@ -172,7 +175,7 @@ fi
 
         id=${fields[0]##*=}
         offset=$((${ffs_entry_size} * 10#${id} + ${vercheck_offset}))
-        vercheck=$(xxd -p -l  0x1 -seek ${offset} ${scratch_dir}/part)
+        vercheck=$(xxd -p -l  0x1 -seek ${offset} ${pnor_dir}/part)
         export flags=$(pflash --detail=$((10#$id)) -F ${pnorfile} | grep "\[" |
                 sed 's/....$//' | tr '\n' ',' | sed 's/.$//')
         if [[ $flags != "" ]]; then
@@ -192,12 +195,12 @@ fi
     fi
   # Don't need the BACKUP_PART partition
   done < <(pflash --info -F ${pnorfile} | grep -v "BACKUP")
-} > ${scratch_dir}/${tocfile}
+} > ${pnor_dir}/${tocfile}
 
 for partition in "${partitions[@]}"; do
   echo "Reading ${partition}..."
   pflash --partition=${partition} \
-    --read=${scratch_dir}/${partition} \
+    --read=${pnor_dir}/${partition} \
     -F ${pnorfile}
 done
 
@@ -209,8 +212,9 @@ files_to_sign="$manifest_location $public_key_file"
 if [[ "${image_type}" == "squashfs" ]]; then
   echo "Creating SquashFS image..."
   # Prepare pnor file in scratch_dir
+  cd "${pnor_dir}"
+  mksquashfs ${tocfile} ${partitions[*]} ${scratch_dir}/pnor.xz.squashfs
   cd "${scratch_dir}"
-  mksquashfs ${tocfile} ${partitions[*]} pnor.xz.squashfs
   files_to_sign+=" pnor.xz.squashfs"
 else
   cp ${pnorfile} ${scratch_dir}
