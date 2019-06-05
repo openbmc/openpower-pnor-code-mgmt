@@ -124,6 +124,7 @@ fi
 
 
 scratch_dir=`mktemp -d`
+trap "{ rm -r ${scratch_dir}; }" EXIT
 
 if [[ "${do_sign}" == true ]]; then
   if [[ -z "${private_key_path}" ]]; then
@@ -243,4 +244,3 @@ else
   echo "Static layout tarball at $outfile"
 fi
 
-rm -r "${scratch_dir}"
