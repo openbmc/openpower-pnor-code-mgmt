@@ -152,7 +152,7 @@ mkdir ${pnor_dir}
 
 pflash --partition=part --read=${pnor_dir}/part -F ${pnorfile}
 pflash --partition=VERSION --read=${pnor_dir}/VERSION -F ${pnorfile}
-version_size=$(du -k ${pnor_dir}/VERSION | head -1 | cut -f 1)
+version_size=$(du -bk ${pnor_dir}/VERSION | head -1 | cut -f 1)
 magic_number=$(xxd -p -l 4 ${pnor_dir}/VERSION)
 # Check if VERSION is signed. A signed version partition will have an extra
 # 4K header starting with the magic number 0x17082011, see:
