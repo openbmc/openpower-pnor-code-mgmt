@@ -48,6 +48,8 @@ class ItemUpdaterStatic : public ItemUpdater
 
     bool freeSpace() override;
 
+    bool erase(std::string entryId) override;
+
     void updateFunctionalAssociation(const std::string& versionId) override;
 
     bool isVersionFunctional(const std::string& versionId) override;
