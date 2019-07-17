@@ -349,6 +349,11 @@ bool ItemUpdaterStatic::freeSpace()
     return true;
 }
 
+bool ItemUpdaterStatic::erase(std::string entryId)
+{
+    return ItemUpdater::erase(entryId);
+}
+
 void ItemUpdaterStatic::updateFunctionalAssociation(
     const std::string& versionId)
 {
