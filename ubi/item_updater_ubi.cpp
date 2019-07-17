@@ -269,17 +269,36 @@ bool ItemUpdaterUbi::isVersionFunctional(const std::string& versionId)
 
 void ItemUpdaterUbi::freePriority(uint8_t value, const std::string& versionId)
 {
-    // TODO openbmc/openbmc#1896 Improve the performance of this function
+    //  Versions with the lowest priority in front
+    std::priority_queue<std::pair<int, std::string>,
+                        std::vector<std::pair<int, std::string>>,
+                        std::greater<std::pair<int, std::string>>>
+        versionsPQ;
+
     for (const auto& intf : activations)
     {
         if (intf.second->redundancyPriority)
         {
-            if (intf.second->redundancyPriority.get()->priority() == value &&
-                intf.second->versionId != versionId)
-            {
-                intf.second->redundancyPriority.get()->priority(value + 1);
-            }
+            versionsPQ.push(std::make_pair(
+                intf.second->redundancyPriority.get()->priority(),
+                intf.second->versionId));
         }
+    }
+
+    while (!versionsPQ.empty())
+    {
+        if (versionsPQ.top().first == value &&
+            versionsPQ.top().second != versionId)
+        {
+            // Increase priority by 1 and update its value
+            ++value;
+            storeToFile(versionsPQ.top().second, value);
+            auto it = activations.find(versionsPQ.top().second);
+            it->second->redundancyPriority.get()->sdbusplus::xyz::
+                openbmc_project::Software::server::RedundancyPriority::priority(
+                    value);
+        }
+        versionsPQ.pop();
     }
 }
 

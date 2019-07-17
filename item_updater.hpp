@@ -94,7 +94,9 @@ class ItemUpdater : public ItemUpdaterInherit
     virtual ~ItemUpdater() = default;
 
     /** @brief Sets the given priority free by incrementing
-     *  any existing priority with the same value by 1
+     *  any existing priority with the same value by 1. It will then continue
+     *  to resolve duplicate priorities caused by this increase, by increasing
+     *  the priority by 1 until there are no more duplicate values.
      *
      *  @param[in] value - The priority that needs to be set free.
      *  @param[in] versionId - The Id of the version for which we
