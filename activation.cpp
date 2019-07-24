@@ -5,16 +5,15 @@
 #include "item_updater.hpp"
 
 #include <experimental/filesystem>
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/elog.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/exception.hpp>
+#include <sdbusplus/server.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
 
 #ifdef WANT_SIGNATURE_VERIFY
 #include "image_verify.hpp"
-
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/elog.hpp>
-#include <sdbusplus/server.hpp>
-#include <xyz/openbmc_project/Common/error.hpp>
 #endif
 
 namespace openpower
@@ -29,11 +28,10 @@ namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
 
 using namespace phosphor::logging;
 using sdbusplus::exception::SdBusError;
-
-#ifdef WANT_SIGNATURE_VERIFY
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
+#ifdef WANT_SIGNATURE_VERIFY
 // Field mode path and interface.
 constexpr auto FIELDMODE_PATH("/xyz/openbmc_project/software");
 constexpr auto FIELDMODE_INTERFACE("xyz.openbmc_project.Control.FieldMode");
@@ -163,6 +161,74 @@ void Activation::deleteImageManagerObject()
                             entry("PATH=%s", path.c_str()));
         }
         return;
+    }
+}
+
+bool Activation::checkApplyTimeImmediate()
+{
+    auto service = utils::getService(bus, applyTimeObjPath, applyTimeIntf);
+    if (service.empty())
+    {
+        log<level::INFO>("Error getting the service name for Host image "
+                         "ApplyTime. The Host needs to be manually rebooted to "
+                         "complete the image activation if needed "
+                         "immediately.");
+    }
+    else
+    {
+
+        auto method = bus.new_method_call(service.c_str(), applyTimeObjPath,
+                                          dbusPropIntf, "Get");
+        method.append(applyTimeIntf, applyTimeProp);
+
+        try
+        {
+            auto reply = bus.call(method);
+
+            sdbusplus::message::variant<std::string> result;
+            reply.read(result);
+            auto applyTime =
+                sdbusplus::message::variant_ns::get<std::string>(result);
+            if (applyTime == applyTimeImmediate)
+            {
+                return true;
+            }
+        }
+        catch (const SdBusError& e)
+        {
+            log<level::ERR>("Error in getting ApplyTime",
+                            entry("ERROR=%s", e.what()));
+        }
+    }
+    return false;
+}
+
+void Activation::rebootHost()
+{
+    auto service = utils::getService(bus, hostStateObjPath, hostStateIntf);
+    if (service.empty())
+    {
+        log<level::ALERT>("Error in getting the service name to reboot the "
+                          "Host. The Host needs to be manually rebooted to "
+                          "complete the image activation.");
+    }
+
+    auto method = bus.new_method_call(service.c_str(), hostStateObjPath,
+                                      dbusPropIntf, "Set");
+    sdbusplus::message::variant<std::string> hostReboot = hostStateRebootVal;
+    method.append(hostStateIntf, hostStateRebootProp, hostReboot);
+
+    try
+    {
+        auto reply = bus.call(method);
+    }
+    catch (const SdBusError& e)
+    {
+        log<level::ALERT>("Error in trying to reboot the Host. "
+                          "The Host needs to be manually rebooted to complete "
+                          "the image activation.",
+                          entry("ERROR=%s", e.what()));
+        report<InternalFailure>();
     }
 }
 
