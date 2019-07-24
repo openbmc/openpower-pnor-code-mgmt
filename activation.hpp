@@ -3,6 +3,7 @@
 #include "config.h"
 
 #include "org/openbmc/Associations/server.hpp"
+#include "utils.hpp"
 #include "xyz/openbmc_project/Software/ActivationProgress/server.hpp"
 #include "xyz/openbmc_project/Software/ExtendedVersion/server.hpp"
 #include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
@@ -31,6 +32,19 @@ using RedundancyPriorityInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Software::server::RedundancyPriority>;
 using ActivationProgressInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Software::server::ActivationProgress>;
+
+constexpr auto applyTimeImmediate =
+    "xyz.openbmc_project.Software.ApplyTime.RequestedApplyTimes.Immediate";
+constexpr auto applyTimeIntf = "xyz.openbmc_project.Software.ApplyTime";
+constexpr auto dbusPropIntf = "org.freedesktop.DBus.Properties";
+constexpr auto applyTimeObjPath = "/xyz/openbmc_project/software/apply_time";
+constexpr auto applyTimeProp = "RequestedApplyTime";
+
+constexpr auto hostStateIntf = "xyz.openbmc_project.State.Host";
+constexpr auto hostStateObjPath = "/xyz/openbmc_project/state/host0";
+constexpr auto hostStateRebootProp = "RequestedHostTransition";
+constexpr auto hostStateRebootVal =
+    "xyz.openbmc_project.State.Host.Transition.Reboot";
 
 namespace sdbusRule = sdbusplus::bus::match::rules;
 
@@ -267,6 +281,20 @@ class Activation : public ActivationInherit
      * @returns Activations - The activation value
      */
     using ActivationInherit::activation;
+
+    /**
+     * @brief Determine the configured image apply time value
+     *
+     * @return true if the image apply time value is immediate
+     **/
+    bool checkApplyTimeImmediate();
+
+    /**
+     * @brief Reboot the Host. Called when ApplyTime is immediate.
+     *
+     * @return none
+     **/
+    void rebootHost();
 
   protected:
     /** @brief Check if systemd state change is relevant to this object
