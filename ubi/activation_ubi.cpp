@@ -65,6 +65,12 @@ auto ActivationUbi::activation(Activations value) -> Activations
                 (fs::is_directory(PNOR_RO_PREFIX + versionId)))
             {
                 finishActivation();
+                if (Activation::checkApplyTimeImmediate() == true)
+                {
+                    log<level::INFO>("Image Active. ApplyTime is immediate, "
+                                     "rebooting Host.");
+                    Activation::rebootHost();
+                }
                 return softwareServer::Activation::activation(
                     softwareServer::Activation::Activations::Active);
             }
