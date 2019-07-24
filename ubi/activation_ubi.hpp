@@ -2,6 +2,8 @@
 
 #include "activation.hpp"
 
+#include <phosphor-logging/log.hpp>
+
 namespace openpower
 {
 namespace software
@@ -10,6 +12,7 @@ namespace updater
 {
 
 constexpr auto squashFSImage = "pnor.xz.squashfs";
+using namespace phosphor::logging;
 
 class RedundancyPriorityUbi : public RedundancyPriority
 {
