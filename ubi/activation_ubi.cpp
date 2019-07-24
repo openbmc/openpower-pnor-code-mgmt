@@ -4,6 +4,7 @@
 #include "serialize.hpp"
 
 #include <experimental/filesystem>
+#include <phosphor-logging/log.hpp>
 
 namespace openpower
 {
@@ -13,6 +14,7 @@ namespace updater
 {
 namespace fs = std::experimental::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
+using namespace phosphor::logging;
 
 uint8_t RedundancyPriorityUbi::priority(uint8_t value)
 {
@@ -65,6 +67,12 @@ auto ActivationUbi::activation(Activations value) -> Activations
                 (fs::is_directory(PNOR_RO_PREFIX + versionId)))
             {
                 finishActivation();
+                if (Activation::checkApplyTimeImmediate())
+                {
+                    log<level::INFO>("Image Active. ApplyTime is immediate, "
+                                     "rebooting Host.");
+                    Activation::rebootHost();
+                }
                 return softwareServer::Activation::activation(
                     softwareServer::Activation::Activations::Active);
             }
