@@ -1,11 +1,11 @@
 #pragma once
 
 #include "activation.hpp"
-#include "org/openbmc/Associations/server.hpp"
 #include "version.hpp"
 #include "xyz/openbmc_project/Collection/DeleteAll/server.hpp"
 
 #include <sdbusplus/server.hpp>
+#include <xyz/openbmc_project/Association/Definitions/server.hpp>
 #include <xyz/openbmc_project/Common/FactoryReset/server.hpp>
 #include <xyz/openbmc_project/Object/Enable/server.hpp>
 
@@ -18,7 +18,7 @@ namespace updater
 
 using ItemUpdaterInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Common::server::FactoryReset,
-    sdbusplus::org::openbmc::server::Associations,
+    sdbusplus::xyz::openbmc_project::Association::server::Definitions,
     sdbusplus::xyz::openbmc_project::Collection::server::DeleteAll>;
 using GardResetInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Common::server::FactoryReset>;
