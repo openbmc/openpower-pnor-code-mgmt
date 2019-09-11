@@ -31,7 +31,6 @@ utest_SOURCES = \
 	../activation.cpp \
 	../version.cpp \
 	../item_updater.cpp \
-	../org/openbmc/Associations/server.cpp \
 	../image_verify.cpp \
 	../utils.cpp \
 	../msl_verify.cpp \

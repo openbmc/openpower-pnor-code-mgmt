@@ -2,13 +2,13 @@
 
 #include "config.h"
 
-#include "org/openbmc/Associations/server.hpp"
 #include "utils.hpp"
 #include "xyz/openbmc_project/Software/ActivationProgress/server.hpp"
 #include "xyz/openbmc_project/Software/ExtendedVersion/server.hpp"
 #include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
 
 #include <sdbusplus/server.hpp>
+#include <xyz/openbmc_project/Association/Definitions/server.hpp>
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
 #include <xyz/openbmc_project/Software/ActivationBlocksTransition/server.hpp>
 
@@ -24,7 +24,7 @@ using AssociationList =
 using ActivationInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Software::server::ExtendedVersion,
     sdbusplus::xyz::openbmc_project::Software::server::Activation,
-    sdbusplus::org::openbmc::server::Associations>;
+    sdbusplus::xyz::openbmc_project::Association::server::Definitions>;
 using ActivationBlocksTransitionInherit = sdbusplus::server::object::object<
     sdbusplus::xyz::openbmc_project::Software::server::
         ActivationBlocksTransition>;

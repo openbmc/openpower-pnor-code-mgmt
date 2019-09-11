@@ -85,7 +85,7 @@ std::string MinimumShipLevel::getFunctionalVersion()
     auto bus = sdbusplus::bus::new_default();
     auto method = bus.new_method_call(BUSNAME_UPDATER, SOFTWARE_OBJPATH,
                                       SYSTEMD_PROPERTY_INTERFACE, "Get");
-    method.append(ASSOCIATIONS_INTERFACE, "associations");
+    method.append(ASSOCIATIONS_INTERFACE, "Associations");
     auto response = bus.call(method);
 
     sdbusplus::message::variant<AssociationList> associations;
