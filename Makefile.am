@@ -34,20 +34,10 @@ openpower_update_manager_SOURCES += \
 	image_verify.cpp
 endif
 
-nodist_openpower_update_manager_SOURCES = \
-	org/openbmc/Associations/server.cpp
 
 openpower_pnor_msl_SOURCES = \
 	msl_verify.cpp \
 	msl_verify_main.cpp
-
-CLEANFILES = \
-	org/openbmc/Associations/server.cpp \
-	org/openbmc/Associations/server.hpp
-
-BUILT_SOURCES = \
-	org/openbmc/Associations/server.cpp \
-	org/openbmc/Associations/server.hpp
 
 generic_cxxflags = \
 	$(SYSTEMD_CFLAGS) \
@@ -63,14 +53,6 @@ generic_ldflags = \
 	-lstdc++fs \
 	-lssl \
 	-lcrypto
-
-org/openbmc/Associations/server.cpp: org/openbmc/Associations.interface.yaml
-	@mkdir -p `dirname $@`
-	$(SDBUSPLUSPLUS) -r $(srcdir) interface server-cpp org.openbmc.Associations > $@
-
-org/openbmc/Associations/server.hpp: org/openbmc/Associations.interface.yaml
-	@mkdir -p `dirname $@`
-	$(SDBUSPLUSPLUS) -r $(srcdir) interface server-header org.openbmc.Associations > $@
 
 openpower_update_manager_CXXFLAGS = $(generic_cxxflags)
 openpower_update_manager_LDFLAGS = $(generic_ldflags)

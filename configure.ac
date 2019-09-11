@@ -138,7 +138,7 @@ AC_DEFINE(SYSTEMD_INTERFACE, "org.freedesktop.systemd1.Manager",
     [systemd interface.])
 AC_DEFINE(SYSTEMD_PROPERTY_INTERFACE, "org.freedesktop.DBus.Properties",
     [systemd properties interface.])
-AC_DEFINE(ASSOCIATIONS_INTERFACE, "org.openbmc.Associations",
+AC_DEFINE(ASSOCIATIONS_INTERFACE, "xyz.openbmc_project.Association",
     [The associations interface.])
 
 AC_DEFINE(PNOR_TOC_FILE, "pnor.toc",
