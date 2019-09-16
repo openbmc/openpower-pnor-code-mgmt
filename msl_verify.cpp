@@ -57,13 +57,13 @@ void MinimumShipLevel::parse(const std::string& versionStr, Version& version)
     std::smatch match;
     version = {0, 0, 0};
 
-    // Match for vX.Y.Z
-    std::regex regex{"v([0-9]+)\\.([0-9]+)\\.([0-9]+)", std::regex::extended};
+    // Match for vX.Y.Z or v-X.Y.Z
+    std::regex regex{"v-?([0-9]+)\\.([0-9]+)\\.([0-9]+)", std::regex::extended};
 
     if (!std::regex_search(versionStr, match, regex))
     {
-        // Match for vX.Y
-        std::regex regexShort{"v([0-9]+)\\.([0-9]+)", std::regex::extended};
+        // Match for vX.Y or v-X.Y
+        std::regex regexShort{"v-?([0-9]+)\\.([0-9]+)", std::regex::extended};
         if (!std::regex_search(versionStr, match, regexShort))
         {
             log<level::ERR>("Unable to parse PNOR version",
