@@ -71,6 +71,18 @@ TEST_F(MinimumShipLevelTest, parse)
     EXPECT_EQ(6, version.major);
     EXPECT_EQ(7, version.minor);
     EXPECT_EQ(0, version.rev);
+
+    versionStr = "Vendor-Model-v-4.1.01";
+    minimumShipLevel->parse(versionStr, version);
+    EXPECT_EQ(4, version.major);
+    EXPECT_EQ(1, version.minor);
+    EXPECT_EQ(1, version.rev);
+
+    versionStr = "Vendor-Model-v-4.1-abc";
+    minimumShipLevel->parse(versionStr, version);
+    EXPECT_EQ(4, version.major);
+    EXPECT_EQ(1, version.minor);
+    EXPECT_EQ(0, version.rev);
 }
 
 } // namespace image
