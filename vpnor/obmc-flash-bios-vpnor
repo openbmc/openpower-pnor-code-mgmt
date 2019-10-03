@@ -8,6 +8,9 @@ update_symlinks() {
   PNOR_RW_PREFIX="/media/pnor-rw-"
   PNOR_PRSV_ACTIVE_PATH="/var/lib/phosphor-software-manager/pnor/prsv"
   PNOR_PRSV="/media/pnor-prsv"
+  PNOR_RO_COMBINED_PATH="/usr/share/host-fw/"
+  PNOR_RW_COMBINED_PATH="/var/lib/host-fw/rw/"
+  PNOR_PRSV_COMBINED_PATH="/var/lib/host-fw/prsv/"
   PERSISTENCE_PATH="/var/lib/obmc/openpower-pnor-code-mgmt/"
   PNOR_PATCH_LOCATION="/usr/local/share/pnor/"
 
@@ -32,9 +35,20 @@ update_symlinks() {
     fi
   done
 
-  # Return if no active version found
+  # Check for a combined image if no active version found
   if [ -z $currentVersion ]; then
-    return 0;
+      if [ ! -d "${PNOR_RO_COMBINED_PATH}" ]; then
+          return 0;
+      fi
+      mkdir -p "${PNOR_RW_COMBINED_PATH}"
+      mkdir -p "${PNOR_PRSV_COMBINED_PATH}"
+      roTarget="${PNOR_RO_COMBINED_PATH}"
+      rwTarget="${PNOR_RW_COMBINED_PATH}"
+      prsvTarget="${PNOR_PRSV_COMBINED_PATH}"
+  else
+      roTarget="${PNOR_RO_PREFIX}${currentVersion}"
+      rwTarget="${PNOR_RW_PREFIX}${currentVersion}"
+      prsvTarget="${PNOR_PRSV}"
   fi
 
   if [ ! -d "${PNOR_ACTIVE_PATH}" ]; then
@@ -43,19 +57,20 @@ update_symlinks() {
 
   # If the RW or RO active links doesn't point to the version with
   # lowest priority, then remove the symlink and create new ones.
-  if [[ $(readlink -f "${PNOR_RO_ACTIVE_PATH}") != ${PNOR_RO_PREFIX}${currentVersion}  ]]; then
+  if [[ $(readlink -f "${PNOR_RO_ACTIVE_PATH}") != ${roTarget}  ]]; then
     rm -f ${PNOR_RO_ACTIVE_PATH}
     rm -rf ${PNOR_PATCH_LOCATION}*
-    ln -sfv ${PNOR_RO_PREFIX}${currentVersion} ${PNOR_RO_ACTIVE_PATH}
+    ln -sfv ${roTarget} ${PNOR_RO_ACTIVE_PATH}
   fi
 
-  if [[ $(readlink -f "${PNOR_RW_ACTIVE_PATH}") != ${PNOR_RW_PREFIX}${currentVersion}  ]]; then
+  if [[ $(readlink -f "${PNOR_RW_ACTIVE_PATH}") != ${rwTarget}  ]]; then
     rm -f ${PNOR_RW_ACTIVE_PATH}
-    ln -sfv ${PNOR_RW_PREFIX}${currentVersion} ${PNOR_RW_ACTIVE_PATH}
+    ln -sfv ${rwTarget} ${PNOR_RW_ACTIVE_PATH}
   fi
 
-  if [[ ! -h ${PNOR_PRSV_ACTIVE_PATH}  ]]; then
-    ln -sfv ${PNOR_PRSV} ${PNOR_PRSV_ACTIVE_PATH}
+  if [[ $(readlink -f "${PNOR_PRSV_ACTIVE_PATH}") != ${prsvTarget} ]]; then
+    rm -f ${PNOR_PRSV_ACTIVE_PATH}
+    ln -sfv ${prsvTarget} ${PNOR_PRSV_ACTIVE_PATH}
   fi
 }
 
