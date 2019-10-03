@@ -1,0 +1,8 @@
+dist_bin_SCRIPTS = \
+	%reldir%/obmc-flash-bios-si
+
+if HAVE_SYSTEMD
+systemdsystemunit_DATA += \
+	%reldir%/obmc-flash-bios-rmsymlink-ro@.service \
+	%reldir%/obmc-flash-bios-symlink-ro@.service
+endif

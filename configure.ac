@@ -170,6 +170,14 @@ AS_IF([test "x$enable_ubifs_layout" != "xno"], \
     [AC_DEFINE([UBIFS_LAYOUT],[],[Enable ubifs support.])])
 AM_CONDITIONAL([UBIFS_LAYOUT], [test "x$enable_ubifs_layout" != "xno"])
 
+# Setup single-image layout support
+# For now make it not enabled by default
+AC_ARG_ENABLE([single_image_layout],
+    AS_HELP_STRING([--enable-single_image_layout], [Enable single-image support.]))
+AS_IF([test "x$enable_single_image_layout" == "xyes"], \
+    [AC_DEFINE([SINGLE_IMAGE_LAYOUT],[],[Enable single-image support.])])
+AM_CONDITIONAL([SINGLE_IMAGE_LAYOUT], [test "x$enable_single_image_layout" == "xyes"])
+
 AC_ARG_VAR(ACTIVE_PNOR_MAX_ALLOWED, [The maximum allowed active pnor versions])
 AS_IF([test "x$ACTIVE_PNOR_MAX_ALLOWED" == "x"], [ACTIVE_PNOR_MAX_ALLOWED=2])
 AC_DEFINE_UNQUOTED([ACTIVE_PNOR_MAX_ALLOWED], [$ACTIVE_PNOR_MAX_ALLOWED], [The maximum allowed active pnor versions])

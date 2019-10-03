@@ -1,0 +1,43 @@
+#!/bin/bash
+set -eo pipefail
+
+remove_symlink() {
+    symlinkname="/media/${name}"
+    rm "${symlinkname}"
+}
+
+create_symlink() {
+  symlinkname="/media/${name}"
+  pnordir="/usr/share/host-fw"
+
+  if [ -L "${symlinkname}" ]; then
+    if [ -e "$symlinkname}" ]; then
+        echo "${symlinkname} is already created."
+        return 0
+    else
+        remove_symlink
+    fi
+  fi
+
+  if[ ! -e "${pnordir}" ]; then
+    echo "${pnordir}" does not exist!
+    return 1
+  fi
+
+  ln -s "${pnordir}" "${symlinkname}"
+}
+
+case "$1" in
+  createpnorsymlink)
+    name="$2"
+    create_symlink
+    ;;
+  removepnorsymlink)
+    name="$2"
+    remove_symlink
+    ;;
+  *)
+    echo "Invalid argument"
+    exit 1
+    ;;
+esac
