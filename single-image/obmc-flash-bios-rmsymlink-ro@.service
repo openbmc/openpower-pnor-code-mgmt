@@ -1,0 +1,9 @@
+[Unit]
+Description=Remove pnor files symlink pnor-ro-%I
+Wants=obmc-flash-bmc-ubiro-remove@.service
+After=obmc-flash-bmc-ubiro-remove@.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/usr/bin/obmc-flash-bios-si removepnorsymlink pnor-ro-%i

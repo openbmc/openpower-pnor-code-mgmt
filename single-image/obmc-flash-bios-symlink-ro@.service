@@ -1,0 +1,10 @@
+[Unit]
+Description=Create symlink from /media/pnor-ro-%I to pnor files in /usr/share/host-fw
+Wants=org.open_power.Software.Host.Updater.service
+Before=org.open_power.Software.Host.Updater.service
+OnFailure=obmc-flash-bios-ubirmsymlink-ro@%i.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/usr/bin/obmc-flash-bios-si createpnorsymlink pnor-ro-%i

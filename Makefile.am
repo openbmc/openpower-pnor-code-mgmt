@@ -29,6 +29,10 @@ if HAVE_SYSTEMD
 endif
 endif
 
+if SINGLE_IMAGE_LAYOUT
+include single-image/Makefile.am.include
+endif
+
 if WANT_SIGNATURE_VERIFY_BUILD
 openpower_update_manager_SOURCES += \
 	image_verify.cpp
