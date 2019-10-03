@@ -1,0 +1,41 @@
+#!/bin/bash
+set -eo pipefail
+
+PNOR_SYMLINK="/var/lib/phosphor-software-manager/pnor/ro"
+
+remove_symlink() {
+    rm "${PNOR_SYMLINK}"
+}
+
+create_symlink() {
+  pnordir="/usr/share/host-fw"
+
+  if [ -L "${PNOR_SYMLINK}" ]; then
+    if [ -e "${PNOR_SYMLINK}" ]; then
+        echo "${PNOR_SYMLINK} is already created."
+        return 0
+    else
+        remove_symlink
+    fi
+  fi
+
+  if [ ! -e "${pnordir}" ]; then
+    echo "${pnordir}" does not exist!
+    return 1
+  fi
+
+  ln -s "${pnordir}" "${PNOR_SYMLINK}"
+}
+
+case "$1" in
+  createpnorsymlink)
+    create_symlink
+    ;;
+  removepnorsymlink)
+    remove_symlink
+    ;;
+  *)
+    echo "Invalid argument"
+    exit 1
+    ;;
+esac

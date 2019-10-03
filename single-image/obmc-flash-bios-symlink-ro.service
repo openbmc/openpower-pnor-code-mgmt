@@ -1,0 +1,9 @@
+[Unit]
+Description=Create symlink from /var/lib/phosphor-software-manager/pnor/ro to pnor files in /usr/share/host-fw
+Wants=org.open_power.Software.Host.Updater.service
+Before=org.open_power.Software.Host.Updater.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=no
+ExecStart=/usr/bin/obmc-flash-bios-si createpnorsymlink
