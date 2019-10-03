@@ -5,7 +5,8 @@ openpower_update_manager_SOURCES += \
 	%reldir%/watch.cpp
 
 dist_bin_SCRIPTS = \
-	%reldir%/obmc-flash-bios
+	%reldir%/obmc-flash-bios \
+	%reldir%/obmc-flash-bios-si
 
 if HAVE_SYSTEMD
 systemdsystemunit_DATA += \
@@ -16,6 +17,8 @@ systemdsystemunit_DATA += \
 	%reldir%/obmc-flash-bios-ubimount@.service \
 	%reldir%/obmc-flash-bios-ubipatch.service \
 	%reldir%/obmc-flash-bios-ubiremount.service \
+	%reldir%/obmc-flash-bios-ubirmsymlink-ro@.service \
+	%reldir%/obmc-flash-bios-ubisymlink-ro@.service \
 	%reldir%/obmc-flash-bios-ubiumount-ro@.service \
 	%reldir%/obmc-flash-bios-ubiumount-rw@.service \
 	%reldir%/obmc-flash-bios-updatesymlinks.service

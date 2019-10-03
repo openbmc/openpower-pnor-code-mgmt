@@ -1,0 +1,52 @@
+#!/bin/sh
+
+remove_symlink() {
+    symlinkname="/media/${name}"
+    rm "${symlinkname}
+}
+
+create_symlink() {
+  symlinkname="/media/${name}"
+  pnordir="/usr/share/host-fw"
+
+  if [ -L "${symlinkname}" ]; then
+    if [ -e "$symlinkname}" ]; then
+        echo "${symlinkname} is already created."
+        return 0
+    else
+        remove_symlink
+    fi
+  fi
+
+  if[ ! -e "${pnordir}" ]; then
+    echo "${pnordir}" does not exist!
+    return 1
+  fi
+
+  ln -s "${pnordir}" "${symlinkname}"
+
+  if [ $? != 0 ]; then
+    echo "Unable to create symlink ${symlinkname} -> ${pnordir}"
+    return 1
+  fi
+}
+
+case "$1" in
+  createpnorsymlink)
+    name="$2"
+    create_symlink
+    ;;
+  removepnorsymlink)
+    name="$2"
+    remove_symlink
+    ;;
+  *)
+    echo "Invalid argument"
+    exit 1
+    ;;
+esac
+rc=$?
+if [ ${rc} -ne 0 ]; then
+  echo "$0: error ${rc}"
+  exit ${rc}
+fi
