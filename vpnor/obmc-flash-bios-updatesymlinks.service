@@ -9,7 +9,7 @@ ConditionPathExists=!/run/openbmc/chassis@0-on
 [Service]
 Type=oneshot
 RemainAfterExit=no
-ExecStart=/usr/bin/obmc-flash-bios updatesymlinks
+ExecStart=/usr/bin/obmc-flash-bios-vpnor updatesymlinks
 
 [Install]
 WantedBy=mboxd.service mboxd-reload@.service
