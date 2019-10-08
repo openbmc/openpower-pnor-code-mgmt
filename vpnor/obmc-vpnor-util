@@ -1,0 +1,75 @@
+#!/bin/sh
+
+update_symlinks() {
+  PNOR_ACTIVE_PATH="/var/lib/phosphor-software-manager/pnor/"
+  PNOR_RO_ACTIVE_PATH="/var/lib/phosphor-software-manager/pnor/ro"
+  PNOR_RO_PREFIX="/media/pnor-ro-"
+  PNOR_RW_ACTIVE_PATH="/var/lib/phosphor-software-manager/pnor/rw"
+  PNOR_RW_PREFIX="/media/pnor-rw-"
+  PNOR_PRSV_ACTIVE_PATH="/var/lib/phosphor-software-manager/pnor/prsv"
+  PNOR_PRSV="/media/pnor-prsv"
+  PERSISTENCE_PATH="/var/lib/obmc/openpower-pnor-code-mgmt/"
+  PNOR_PATCH_LOCATION="/usr/local/share/pnor/"
+
+  # Get a list of all active PNOR versions
+  data="$(ls -d ${PNOR_RO_PREFIX}*)"
+  IFS=$'\n'  array=(${data})
+
+  currentVersion=""
+  lowestPriority=255
+  for element in ${array[@]}; do
+    #Remove the PNOR_RO_PREFIX from the path to get version ID.
+    versionId="${element#${PNOR_RO_PREFIX}}"
+
+    # Get the priority of active versions from persistence files.
+    if [[ -f "${PERSISTENCE_PATH}${versionId}" ]]; then
+      data="$(grep -r "priority" ${PERSISTENCE_PATH}${versionId})"
+      priority="${data: -1}"
+      if [[ priority -le lowestPriority  ]]; then
+        lowestPriority=${priority}
+        currentVersion=${versionId}
+      fi
+    fi
+  done
+
+  # Return if no active version found
+  if [ -z $currentVersion ]; then
+    return 0;
+  fi
+
+  if [ ! -d "${PNOR_ACTIVE_PATH}" ]; then
+        mkdir -p "${PNOR_ACTIVE_PATH}"
+  fi
+
+  # If the RW or RO active links doesn't point to the version with
+  # lowest priority, then remove the symlink and create new ones.
+  if [[ $(readlink -f "${PNOR_RO_ACTIVE_PATH}") != ${PNOR_RO_PREFIX}${currentVersion}  ]]; then
+    rm -f ${PNOR_RO_ACTIVE_PATH}
+    rm -rf ${PNOR_PATCH_LOCATION}*
+    ln -sfv ${PNOR_RO_PREFIX}${currentVersion} ${PNOR_RO_ACTIVE_PATH}
+  fi
+
+  if [[ $(readlink -f "${PNOR_RW_ACTIVE_PATH}") != ${PNOR_RW_PREFIX}${currentVersion}  ]]; then
+    rm -f ${PNOR_RW_ACTIVE_PATH}
+    ln -sfv ${PNOR_RW_PREFIX}${currentVersion} ${PNOR_RW_ACTIVE_PATH}
+  fi
+
+  if [[ ! -h ${PNOR_PRSV_ACTIVE_PATH}  ]]; then
+    ln -sfv ${PNOR_PRSV} ${PNOR_PRSV_ACTIVE_PATH}
+  fi
+}
+
+case "$1" in
+  updatesymlinks)
+    update_symlinks
+    ;;
+  *)
+    echo "Invalid argument"
+    exit 1
+    ;;
+esac
+rc=$?
+if [ ${rc} -ne 0 ]; then
+  echo "$0: error ${rc}"
+  exit ${rc}
+fi

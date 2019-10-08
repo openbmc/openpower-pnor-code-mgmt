@@ -1,0 +1,15 @@
+dist_bin_SCRIPTS += \
+<<<<<<< HEAD
+	%reldir%/obmc-flash-bios-vpnor
+
+if HAVE_SYSTEMD
+systemdsystemunit_DATA += \
+	%reldir%/obmc-flash-bios-updatesymlinks.service
+=======
+	%reldir%/obmc-vpnor-util
+
+if HAVE_SYSTEMD
+systemdsystemunit_DATA += \
+	%reldir%/obmc-vpnor-updatesymlinks.service
+>>>>>>> bc282e6... Move updatesymlinks to new vpnor feature
+endif
