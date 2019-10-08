@@ -2,6 +2,8 @@ AM_DEFAULT_SOURCE_EXT = .cpp
 
 ACLOCAL_AMFLAGS = -Im4
 
+dist_bin_SCRIPTS =
+
 bin_PROGRAMS = \
 	openpower-update-manager \
 	openpower-pnor-msl
@@ -34,6 +36,9 @@ openpower_update_manager_SOURCES += \
 	image_verify.cpp
 endif
 
+if VIRTUAL_PNOR_ENABLED
+include vpnor/Makefile.am.include
+endif
 
 openpower_pnor_msl_SOURCES = \
 	msl_verify.cpp \

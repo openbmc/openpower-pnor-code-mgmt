@@ -1,0 +1,7 @@
+dist_bin_SCRIPTS += \
+	%reldir%/obmc-flash-bios-vpnor
+
+if HAVE_SYSTEMD
+systemdsystemunit_DATA += \
+	%reldir%/obmc-flash-bios-updatesymlinks.service
+endif
