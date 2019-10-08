@@ -116,6 +116,12 @@ AS_IF([test "x$enable_verify_pnor_signature" == "xyes"], \
     [AC_DEFINE([WANT_SIGNATURE_VERIFY],[],[Enable image signature validation.])])
 AM_CONDITIONAL([WANT_SIGNATURE_VERIFY_BUILD], [test "x$enable_verify_pnor_signature" == "xyes"])
 
+# setup virtual pnor support
+AC_ARG_ENABLE([virtual-pnor],
+    AS_HELP_STRING([--enable-virtual-pnor], [Enable support for virtual pnor])
+)
+AM_CONDITIONAL([VIRTUAL_PNOR_ENABLED], [test "x$enable_virtual_pnor" == "xyes"])
+
 AC_DEFINE(CHASSIS_STATE_PATH, "/xyz/openbmc_project/state/chassis0",
     [The chassis state path.])
 AC_DEFINE(CHASSIS_STATE_OBJ, "xyz.openbmc_project.State.Chassis",
