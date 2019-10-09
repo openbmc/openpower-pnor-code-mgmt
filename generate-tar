@@ -213,6 +213,8 @@ if [[ "${image_type}" == "squashfs" ]]; then
   echo "Creating SquashFS image..."
   # Prepare pnor file in ${pnor_dir}
   cd "${pnor_dir}"
+  # Set permissions of partition files to read only
+  chmod 440 *
   mksquashfs ${tocfile} ${partitions[*]} ${scratch_dir}/pnor.xz.squashfs -all-root
   cd "${scratch_dir}"
   files_to_sign+=" pnor.xz.squashfs"
