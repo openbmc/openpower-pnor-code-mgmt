@@ -147,7 +147,7 @@ std::vector<PartClear> getPartsToClear(const std::string& info)
         // Each line looks like
         // ID=06 MVPD 0x0012d000..0x001bd000 (actual=0x00090000) [E--P--F-C-]
         // Flag 'F' means REPROVISION
-        // Flag 'C' means CLEARECC
+        // Flag 'E' means ECC required
         auto pos = line.find('[');
         if (pos == std::string::npos)
         {
@@ -178,7 +178,7 @@ std::vector<PartClear> getPartsToClear(const std::string& info)
             }
             line = line.substr(0, pos); // The part name
 
-            bool ecc = flags.find('C') != std::string::npos;
+            bool ecc = flags.find('E') != std::string::npos;
             ret.emplace_back(line, ecc);
         }
     }

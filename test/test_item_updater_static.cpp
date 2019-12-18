@@ -127,3 +127,62 @@ TEST(TestItemUpdaterStatic, getPartsToClearNotOK)
     EXPECT_EQ("ATTR_PERM", parts[0].first);
     EXPECT_TRUE(parts[0].second);
 }
+
+TEST(TestItemUpdaterStatic, getPartsToClearP8BasedOK)
+{
+    // NOTE: P8 doesn't support CLEARECC flags.
+    constexpr auto info = R"(
+Flash info:
+-----------
+Name          = /dev/mtd6
+Total size    = 64MB	 Flags E:ECC, P:PRESERVED, R:READONLY, B:BACKUP
+Erase granule = 64KB           F:REPROVISION, V:VOLATILE, C:CLEARECC
+
+TOC@0x00000000 Partitions:
+-----------
+ID=00            part 0x00000000..0x00001000 (actual=0x00001000) [----R-----]
+ID=01            HBEL 0x00008000..0x0002c000 (actual=0x00024000) [E-----F---]
+ID=02           GUARD 0x0002c000..0x00031000 (actual=0x00005000) [E--P--F---]
+ID=03             HBD 0x00031000..0x0008b000 (actual=0x0005a000) [E---R-----]
+ID=04          HBD_RW 0x0008b000..0x00091000 (actual=0x00006000) [E---------]
+ID=05           DJVPD 0x00091000..0x000d9000 (actual=0x00048000) [E-----F---]
+ID=06            MVPD 0x000d9000..0x00169000 (actual=0x00090000) [E-----F---]
+ID=07            CVPD 0x00169000..0x001b1000 (actual=0x00048000) [E-----F---]
+ID=08             HBI 0x001b1000..0x00751000 (actual=0x005a0000) [EL--R-----]
+ID=09            SBEC 0x00751000..0x007e1000 (actual=0x00090000) [E-I-R-----]
+ID=10             SBE 0x007e1000..0x00829000 (actual=0x00048000) [E-I-R-----]
+ID=11            WINK 0x00829000..0x00949000 (actual=0x00120000) [EL--R-----]
+ID=12            HBRT 0x00949000..0x00ca9000 (actual=0x00360000) [EL--R-----]
+ID=13         PAYLOAD 0x00ca9000..0x00d29000 (actual=0x00080000) [----R-----]
+ID=14      BOOTKERNEL 0x00d29000..0x01ca9000 (actual=0x00f80000) [----R-----]
+ID=15        ATTR_TMP 0x01ca9000..0x01cb1000 (actual=0x00008000) [------F---]
+ID=16       ATTR_PERM 0x01cb1000..0x01cb9000 (actual=0x00008000) [E-----F---]
+ID=17             OCC 0x01cb9000..0x01dd9000 (actual=0x00120000) [E---R-----]
+ID=18            TEST 0x01dd9000..0x01de2000 (actual=0x00009000) [E---------]
+ID=19           NVRAM 0x01de2000..0x01e72000 (actual=0x00090000) [---P--F---]
+ID=20         FIRDATA 0x01e72000..0x01e75000 (actual=0x00003000) [E-----F---]
+ID=21         BMC_INV 0x01e75000..0x01e7e000 (actual=0x00009000) [------F---]
+ID=22            CAPP 0x01e7e000..0x01ea2000 (actual=0x00024000) [E---R-----]
+ID=23         SECBOOT 0x01ea2000..0x01ec6000 (actual=0x00024000) [E--P------]
+ID=24     IMA_CATALOG 0x01ec6000..0x01ecf000 (actual=0x00009000) [E---R-F---]
+ID=25             HBB 0x01f60000..0x01ff0000 (actual=0x00090000) [EL--R-----]
+ID=26         VERSION 0x01ff7000..0x01ff8000 (actual=0x00001000) [----R-----]
+ID=27     BACKUP_PART 0x01ff8000..0x02000000 (actual=0x00000000) [----RB----]
+ID=28      OTHER_SIDE 0x02000000..0x02008000 (actual=0x00000000) [----RB----]
+    )";
+
+    auto parts = utils::getPartsToClear(info);
+    EXPECT_EQ(11, parts.size());
+
+    EXPECT_EQ("HBEL", parts[0].first);
+    EXPECT_TRUE(parts[0].second);
+
+    EXPECT_EQ("GUARD", parts[1].first);
+    EXPECT_TRUE(parts[1].second);
+
+    EXPECT_EQ("NVRAM", parts[7].first);
+    EXPECT_FALSE(parts[7].second);
+
+    EXPECT_EQ("IMA_CATALOG", parts[10].first);
+    EXPECT_TRUE(parts[10].second);
+}
