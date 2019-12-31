@@ -25,6 +25,8 @@ Options:
                           the private key file. Defaults to the bash variable
                           PRIVATE_KEY_PATH if available, or else uses the
                           open-source private key in this script.
+   -m, --machine <name>   Optionally specify the target machine name of this
+                          image.
    -h, --help             Display this help text and exit.
 '
 
@@ -57,6 +59,7 @@ image_type=""
 outfile=""
 declare -a partitions=()
 tocfile="pnor.toc"
+machine_name=""
 
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -77,6 +80,10 @@ while [[ $# -gt 0 ]]; do
       else
         shift 1
       fi
+      ;;
+    -m|--machine)
+      machine_name="$2"
+      shift 2
       ;;
     -h|--help)
       echo "$help"
@@ -230,6 +237,10 @@ fi
 echo "Creating MANIFEST for the image"
 echo -e "purpose=xyz.openbmc_project.Software.Version.VersionPurpose.Host\nversion=$version\n\
 extended_version=$extended_version" >> $manifest_location
+
+if [[ ! -z "${machine_name}" ]]; then
+    echo -e "MachineName=${machine_name}" >> $manifest_location
+fi
 
 if [[ "${do_sign}" == true ]]; then
   private_key_name=$(basename "${private_key_path}")
