@@ -57,6 +57,7 @@ image_type=""
 outfile=""
 declare -a partitions=()
 tocfile="pnor.toc"
+machine_name=""
 
 while [[ $# -gt 0 ]]; do
   key="$1"
@@ -197,6 +198,9 @@ fi
   done < <(pflash --info -F ${pnorfile} | grep -v "BACKUP")
 } > ${pnor_dir}/${tocfile}
 
+# Retrive machine name from the version string
+machine_name=$(head -n 1 ${pnor_dir}/VERSION | awk -F '-' '{print $3;}')
+
 for partition in "${partitions[@]}"; do
   echo "Reading ${partition}..."
   pflash --partition=${partition} \
@@ -227,6 +231,10 @@ fi
 echo "Creating MANIFEST for the image"
 echo -e "purpose=xyz.openbmc_project.Software.Version.VersionPurpose.Host\nversion=$version\n\
 extended_version=$extended_version" >> $manifest_location
+
+if [[ ! -z "${machine_name}" ]]; then
+    echo -e "MachineName=${machine_name}" >> $manifest_location
+fi
 
 if [[ "${do_sign}" == true ]]; then
   private_key_name=$(basename "${private_key_path}")
