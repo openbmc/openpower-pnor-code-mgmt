@@ -125,7 +125,7 @@ fi
 
 
 scratch_dir=`mktemp -d`
-trap "{ rm -r ${scratch_dir}; }" EXIT
+trap "{ rm -r --interactive=never ${scratch_dir}; }" EXIT
 
 if [[ "${do_sign}" == true ]]; then
   if [[ -z "${private_key_path}" ]]; then
