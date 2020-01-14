@@ -124,7 +124,10 @@ fi
 
 
 scratch_dir=`mktemp -d`
-trap "{ rm -r ${scratch_dir}; }" EXIT
+# Remove the temp directory on exit.
+# The files in the temp directory may contain read-only files, so add
+# --interactive=never to skip the prompt.
+trap "{ rm -r --interactive=never ${scratch_dir}; }" EXIT
 
 if [[ "${do_sign}" == true ]]; then
   if [[ -z "${private_key_path}" ]]; then
