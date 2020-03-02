@@ -45,17 +45,9 @@ class Delete : public DeleteInherit
      *  @param[in] parent - Parent object.
      */
     Delete(sdbusplus::bus::bus& bus, const std::string& path, Version& parent) :
-        DeleteInherit(bus, path.c_str(), true), parent(parent), bus(bus),
-        path(path)
+        DeleteInherit(bus, path.c_str(), action::emit_interface_added),
+        parent(parent)
     {
-        std::vector<std::string> interfaces({interface});
-        bus.emit_interfaces_added(path.c_str(), interfaces);
-    }
-
-    ~Delete()
-    {
-        std::vector<std::string> interfaces({interface});
-        bus.emit_interfaces_removed(path.c_str(), interfaces);
     }
 
     /**
@@ -68,11 +60,6 @@ class Delete : public DeleteInherit
   private:
     /** @brief Parent Object. */
     Version& parent;
-
-    // TODO Remove once openbmc/openbmc#1975 is resolved
-    static constexpr auto interface = "xyz.openbmc_project.Object.Delete";
-    sdbusplus::bus::bus& bus;
-    std::string path;
 };
 
 /** @class Version
