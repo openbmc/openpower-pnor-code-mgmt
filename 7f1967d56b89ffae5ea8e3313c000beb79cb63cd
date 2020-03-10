@@ -1,0 +1,9 @@
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+1: Xiaochao Ma <maxiaochao@inspur.com>
+Code-Review+2: Lei YU <mine260309@gmail.com>
+Submitted-by: Albert Zhang <zhanghaodi@inspur.com>
+Submitted-at: Tue, 10 Mar 2020 06:12:19 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/openpower-pnor-code-mgmt/+/29901
+Project: openbmc/openpower-pnor-code-mgmt
+Branch: refs/heads/master
