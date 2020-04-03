@@ -17,8 +17,6 @@ PKG_CHECK_MODULES([PHOSPHOR_DBUS_INTERFACES], [phosphor-dbus-interfaces])
 PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus])
 PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging])
 
-AC_PATH_PROG([SDBUSPLUSPLUS], [sdbus++])
-
 # Checks for library functions
 LT_INIT # Required for systemd linking
 
