@@ -57,6 +57,25 @@ update_symlinks() {
   if [[ ! -h ${PNOR_PRSV_ACTIVE_PATH}  ]]; then
     ln -sfv ${PNOR_PRSV} ${PNOR_PRSV_ACTIVE_PATH}
   fi
+
+  # Ensure correct BOOTKERNEL selected
+  if [[ -f ${PNOR_RO_ACTIVE_PATH}/BOOTKERNEL.phyp ]] &&
+     [[ -f ${PNOR_RO_ACTIVE_PATH}/BOOTKERNEL.opal ]]; then
+
+    # property will be second param in response
+    hypTarget="$(busctl get-property  xyz.openbmc_project.Settings /com/ibm/host0/hypervisor com.ibm.Host.Target Target | awk '{ print $2 }')"
+
+    #remove quotation marks
+    hypTarget="$(echo $hypTarget | sed 's/\"//g')"
+
+    if [ "$hypTarget" = "com.ibm.Host.Target.Hypervisor.PowerVM" ]; then
+        rm ${PNOR_RO_ACTIVE_PATH}/BOOTKERNEL
+        ln -sfv ${PNOR_RO_ACTIVE_PATH}/BOOTKERNEL.phyp ${PNOR_RO_ACTIVE_PATH}/BOOTKERNEL
+    elif [ "$hypTarget" = "com.ibm.Host.Target.Hypervisor.OPAL" ]; then
+        rm ${PNOR_RO_ACTIVE_PATH}/BOOTKERNEL
+        ln -sfv ${PNOR_RO_ACTIVE_PATH}/BOOTKERNEL.opal ${PNOR_RO_ACTIVE_PATH}/BOOTKERNEL
+    fi
+  fi
 }
 
 case "$1" in
