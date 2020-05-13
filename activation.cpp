@@ -187,8 +187,7 @@ bool Activation::checkApplyTimeImmediate()
 
             sdbusplus::message::variant<std::string> result;
             reply.read(result);
-            auto applyTime =
-                sdbusplus::message::variant_ns::get<std::string>(result);
+            auto applyTime = std::get<std::string>(result);
             if (applyTime == applyTimeImmediate)
             {
                 return true;
@@ -286,7 +285,7 @@ bool Activation::fieldModeEnabled()
     {
         auto reply = bus.call(method);
         reply.read(fieldMode);
-        return sdbusplus::message::variant_ns::get<bool>(fieldMode);
+        return std::get<bool>(fieldMode);
     }
     catch (const SdBusError& e)
     {

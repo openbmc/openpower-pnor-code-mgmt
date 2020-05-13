@@ -25,7 +25,6 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
     using SVersion = server::Version;
     using VersionPurpose = SVersion::VersionPurpose;
     namespace msg = sdbusplus::message;
-    namespace variant_ns = msg::variant_ns;
 
     sdbusplus::message::object_path objPath;
     std::map<std::string, std::map<std::string, msg::variant<std::string>>>
@@ -47,7 +46,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                 {
                     // Only process the Host and System images
                     auto value = SVersion::convertVersionPurposeFromString(
-                        variant_ns::get<std::string>(property.second));
+                        std::get<std::string>(property.second));
 
                     if (value == VersionPurpose::Host ||
                         value == VersionPurpose::System)
@@ -57,7 +56,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
                 }
                 else if (property.first == "Version")
                 {
-                    version = variant_ns::get<std::string>(property.second);
+                    version = std::get<std::string>(property.second);
                 }
             }
         }
@@ -67,7 +66,7 @@ void ItemUpdater::createActivation(sdbusplus::message::message& m)
             {
                 if (property.first == "Path")
                 {
-                    filePath = variant_ns::get<std::string>(property.second);
+                    filePath = std::get<std::string>(property.second);
                 }
             }
         }
@@ -244,8 +243,7 @@ bool ItemUpdater::isChassisOn()
     {
         auto response = bus.call(method);
         response.read(currentChassisState);
-        auto strParam = sdbusplus::message::variant_ns::get<std::string>(
-            currentChassisState);
+        auto strParam = std::get<std::string>(currentChassisState);
         return (strParam != CHASSIS_STATE_OFF);
     }
     catch (const sdbusplus::exception::SdBusError& e)
