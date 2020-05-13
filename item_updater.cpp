@@ -237,7 +237,7 @@ bool ItemUpdater::isChassisOn()
                                       SYSTEMD_PROPERTY_INTERFACE, "Get");
     method.append(CHASSIS_STATE_OBJ, "CurrentPowerState");
 
-    sdbusplus::message::variant<std::string> currentChassisState;
+    std::variant<std::string> currentChassisState;
 
     try
     {

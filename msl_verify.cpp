@@ -87,7 +87,7 @@ std::string MinimumShipLevel::getFunctionalVersion()
     method.append(ASSOCIATIONS_INTERFACE, "Associations");
     auto response = bus.call(method);
 
-    sdbusplus::message::variant<AssociationList> associations;
+    std::variant<AssociationList> associations;
     try
     {
         response.read(associations);
@@ -116,7 +116,7 @@ std::string MinimumShipLevel::getFunctionalVersion()
             method.append(VERSION_IFACE, "Version");
             response = bus.call(method);
 
-            sdbusplus::message::variant<std::string> functionalVersion;
+            std::variant<std::string> functionalVersion;
             try
             {
                 response.read(functionalVersion);

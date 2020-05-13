@@ -145,7 +145,7 @@ void Delete::delete_()
 void Version::updateDeleteInterface(sdbusplus::message::message& msg)
 {
     std::string interface, chassisState;
-    std::map<std::string, sdbusplus::message::variant<std::string>> properties;
+    std::map<std::string, std::variant<std::string>> properties;
 
     msg.read(interface, properties);
 

@@ -185,7 +185,7 @@ bool Activation::checkApplyTimeImmediate()
         {
             auto reply = bus.call(method);
 
-            sdbusplus::message::variant<std::string> result;
+            std::variant<std::string> result;
             reply.read(result);
             auto applyTime = std::get<std::string>(result);
             if (applyTime == applyTimeImmediate)
@@ -214,7 +214,7 @@ void Activation::rebootHost()
 
     auto method = bus.new_method_call(service.c_str(), hostStateObjPath,
                                       dbusPropIntf, "Set");
-    sdbusplus::message::variant<std::string> hostReboot = hostStateRebootVal;
+    std::variant<std::string> hostReboot = hostStateRebootVal;
     method.append(hostStateIntf, hostStateRebootProp, hostReboot);
 
     try
@@ -279,7 +279,7 @@ bool Activation::fieldModeEnabled()
 
     method.append(FIELDMODE_INTERFACE, "FieldModeEnabled");
 
-    sdbusplus::message::variant<bool> fieldMode;
+    std::variant<bool> fieldMode;
 
     try
     {
