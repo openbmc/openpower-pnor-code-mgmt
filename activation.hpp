@@ -179,12 +179,6 @@ class Activation : public ActivationInherit
     }
     virtual ~Activation() = default;
 
-    /** @brief Activation property get function
-     *
-     *  @returns One of Activation::Activations
-     */
-    using ActivationInherit::activation;
-
     /** @brief Overloaded requestedActivation property setter function
      *
      *  @param[in] value - One of Activation::RequestedActivations
@@ -235,12 +229,6 @@ class Activation : public ActivationInherit
 
     /** @brief Used to subscribe to dbus systemd signals **/
     sdbusplus::bus::match_t systemdSignals;
-
-    /** @brief activation status property get function
-     *
-     * @returns Activations - The activation value
-     */
-    using ActivationInherit::activation;
 
     /**
      * @brief Determine the configured image apply time value
