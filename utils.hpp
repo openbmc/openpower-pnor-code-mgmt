@@ -8,6 +8,7 @@
 #include <openssl/evp.h>
 
 #include <sdbusplus/bus.hpp>
+#include <string>
 
 extern "C" {
 EVP_MD_CTX* EVP_MD_CTX_new(void);

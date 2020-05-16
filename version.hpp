@@ -7,6 +7,7 @@
 #include "xyz/openbmc_project/Software/Version/server.hpp"
 
 #include <sdbusplus/bus.hpp>
+#include <string>
 
 namespace openpower
 {

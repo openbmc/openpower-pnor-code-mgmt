@@ -8,6 +8,7 @@
 #include "xyz/openbmc_project/Software/RedundancyPriority/server.hpp"
 
 #include <sdbusplus/server.hpp>
+#include <string>
 #include <xyz/openbmc_project/Association/Definitions/server.hpp>
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
 #include <xyz/openbmc_project/Software/ActivationBlocksTransition/server.hpp>
