@@ -12,6 +12,8 @@
 #include <xyz/openbmc_project/Software/Activation/server.hpp>
 #include <xyz/openbmc_project/Software/ActivationBlocksTransition/server.hpp>
 
+#include <string>
+
 namespace openpower
 {
 namespace software

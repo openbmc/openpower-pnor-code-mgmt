@@ -9,6 +9,8 @@
 #include <xyz/openbmc_project/Common/FactoryReset/server.hpp>
 #include <xyz/openbmc_project/Object/Enable/server.hpp>
 
+#include <string>
+
 namespace openpower
 {
 namespace software

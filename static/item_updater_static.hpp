@@ -2,6 +2,8 @@
 
 #include "item_updater.hpp"
 
+#include <string>
+
 namespace openpower
 {
 namespace software

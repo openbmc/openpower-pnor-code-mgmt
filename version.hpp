@@ -8,6 +8,8 @@
 
 #include <sdbusplus/bus.hpp>
 
+#include <string>
+
 namespace openpower
 {
 namespace software

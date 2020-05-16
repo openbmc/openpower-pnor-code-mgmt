@@ -3,6 +3,7 @@
 #include "activation.hpp"
 
 #include <filesystem>
+#include <string>
 
 namespace openpower
 {

@@ -2,6 +2,8 @@
 
 #include "activation.hpp"
 
+#include <string>
+
 namespace openpower
 {
 namespace software
