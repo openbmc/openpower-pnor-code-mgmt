@@ -1,0 +1,10 @@
+Ok-To-Test+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Ok-To-Test+1: Andrew Geissler <geissonator@yahoo.com>
+Code-Review+1: Andrew Geissler <geissonator@yahoo.com>
+Verified+1: Jenkins <openbmc-ci-admin@ozlabs.org>
+Code-Review+2: Adriana Kobylak <anoo@linux.ibm.com>
+Submitted-by: Adriana Kobylak <anoo@linux.ibm.com>
+Submitted-at: Mon, 08 Jun 2020 18:03:55 +0000
+Reviewed-on: https://gerrit.openbmc-project.xyz/c/openbmc/openpower-pnor-code-mgmt/+/33323
+Project: openbmc/openpower-pnor-code-mgmt
+Branch: refs/heads/master
