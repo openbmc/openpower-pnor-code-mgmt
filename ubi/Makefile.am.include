@@ -9,9 +9,7 @@ dist_bin_SCRIPTS += \
 
 if HAVE_SYSTEMD
 systemdsystemunit_DATA += \
-	%reldir%/obmc-flash-bios-check-clearvolatile@.service \
 	%reldir%/obmc-flash-bios-cleanup.service \
-	%reldir%/obmc-flash-bios-enable-clearvolatile@.service \
 	%reldir%/obmc-flash-bios-ubiattach.service \
 	%reldir%/obmc-flash-bios-ubimount@.service \
 	%reldir%/obmc-flash-bios-ubipatch.service \
