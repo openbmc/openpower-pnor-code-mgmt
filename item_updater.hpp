@@ -142,6 +142,13 @@ class ItemUpdater : public ItemUpdaterInherit
      */
     virtual void createActiveAssociation(const std::string& path);
 
+    /** @brief Creates a updateable association to the
+     *  "running" BMC software image
+     *
+     * @param[in]  path - The path to create the association.
+     */
+    virtual void createUpdateableAssociation(const std::string& path);
+
     /** @brief Updates the functional association to the
      *  new "running" PNOR image
      *
