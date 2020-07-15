@@ -1,3 +1,12 @@
 openpower_update_manager_SOURCES += \
 	%reldir%/activation_mmc.cpp \
 	%reldir%/item_updater_mmc.cpp
+
+dist_bin_SCRIPTS += \
+	%reldir%/obmc-flash-bios
+
+if HAVE_SYSTEMD
+systemdsystemunit_DATA += \
+	%reldir%/obmc-flash-bios-init.service \
+	%reldir%/obmc-flash-bios-patch.service
+endif
