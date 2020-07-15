@@ -36,6 +36,7 @@ clear_volatile() {
 
 update_symlinks() {
   PNOR_ACTIVE_PATH="/var/lib/phosphor-software-manager/pnor/"
+  HOSTFW_ACTIVE_PATH="/var/lib/phosphor-software-manager/hostfw/"
   PNOR_RO_ACTIVE_PATH="/var/lib/phosphor-software-manager/pnor/ro"
   PNOR_RO_PREFIX="/media/pnor-ro-"
   PNOR_RW_ACTIVE_PATH="/var/lib/phosphor-software-manager/pnor/rw"
@@ -44,9 +45,15 @@ update_symlinks() {
   PNOR_PRSV="/media/pnor-prsv"
   PERSISTENCE_PATH="/var/lib/obmc/openpower-pnor-code-mgmt/"
   PNOR_PATCH_LOCATION="/usr/local/share/pnor/"
+  HOSTFW_PATCH_LOCATION="/usr/local/share/hostfw/"
+  MMC_BASE_PATH="/media/hostfw"
+  MMC_RUNNING_PATH="${MMC_BASE_PATH}/running"
+  MMC_ALTERNATE_PATH="${MMC_BASE_PATH}/alternate"
+  HOSTFW_RUNNING_PATH="${HOSTFW_ACTIVE_PATH}/running"
+  HOSTFW_ALTERNATE_PATH="${HOSTFW_ACTIVE_PATH}/alternate"
 
   # Get a list of all active PNOR versions
-  data="$(ls -d ${PNOR_RO_PREFIX}*)"
+  data="$(ls -d ${PNOR_RO_PREFIX}* 2>/dev/null)"
   IFS=$'\n'  array=(${data})
 
   currentVersion=""
@@ -66,9 +73,28 @@ update_symlinks() {
     fi
   done
 
-  # Return if no active version found
-  if [ -z $currentVersion ]; then
-    return 0;
+  if [ ! -z $currentVersion ]; then
+      # Use active version
+      roTarget="${PNOR_RO_PREFIX}${currentVersion}"
+      rwTarget="${PNOR_RW_PREFIX}${currentVersion}"
+      prsvTarget="${PNOR_PRSV}"
+  elif [ -d "${MMC_BASE_PATH}" ]; then
+      # Use eMMC
+      roTarget="${MMC_RUNNING_PATH}"
+      rwTarget="${MMC_RUNNING_PATH}"
+      prsvTarget="${MMC_RUNNING_PATH}"
+
+      if [ ! -d "${HOSTFW_ACTIVE_PATH}" ]; then
+          mkdir -p "${HOSTFW_ACTIVE_PATH}"
+      fi
+      if [[ $(readlink -f "${HOSTFW_RUNNING_PATH}") != ${MMC_RUNNING_PATH} ]]; then
+          rm -f ${HOSTFW_RUNNING_PATH}
+          ln -sfv ${MMC_RUNNING_PATH} ${HOSTFW_RUNNING_PATH}
+      fi
+      if [[ $(readlink -f "${HOSTFW_ALTERNATE_PATH}") != ${MMC_ALTERNATE_PATH} ]]; then
+          rm -f ${HOSTFW_ALTERNATE_PATH}
+          ln -sfv ${MMC_ALTERNATE_PATH} ${HOSTFW_ALTERNATE_PATH}
+      fi
   fi
 
   if [ ! -d "${PNOR_ACTIVE_PATH}" ]; then
@@ -77,19 +103,20 @@ update_symlinks() {
 
   # If the RW or RO active links doesn't point to the version with
   # lowest priority, then remove the symlink and create new ones.
-  if [[ $(readlink -f "${PNOR_RO_ACTIVE_PATH}") != ${PNOR_RO_PREFIX}${currentVersion}  ]]; then
+  if [[ $(readlink -f "${PNOR_RO_ACTIVE_PATH}") != ${roTarget}  ]]; then
     rm -f ${PNOR_RO_ACTIVE_PATH}
     rm -rf ${PNOR_PATCH_LOCATION}*
-    ln -sfv ${PNOR_RO_PREFIX}${currentVersion} ${PNOR_RO_ACTIVE_PATH}
+    ln -sfv ${roTarget} ${PNOR_RO_ACTIVE_PATH}
   fi
 
-  if [[ $(readlink -f "${PNOR_RW_ACTIVE_PATH}") != ${PNOR_RW_PREFIX}${currentVersion}  ]]; then
+  if [[ $(readlink -f "${PNOR_RW_ACTIVE_PATH}") != ${rwTarget}  ]]; then
     rm -f ${PNOR_RW_ACTIVE_PATH}
-    ln -sfv ${PNOR_RW_PREFIX}${currentVersion} ${PNOR_RW_ACTIVE_PATH}
+    ln -sfv ${rwTarget} ${PNOR_RW_ACTIVE_PATH}
   fi
 
-  if [[ ! -h ${PNOR_PRSV_ACTIVE_PATH}  ]]; then
-    ln -sfv ${PNOR_PRSV} ${PNOR_PRSV_ACTIVE_PATH}
+  if [[ $(readlink -f "${PNOR_PRSV_ACTIVE_PATH}") != ${prsvTarget} ]]; then
+    rm -f ${PNOR_PRSV_ACTIVE_PATH}
+    ln -sfv ${prsvTarget} ${PNOR_PRSV_ACTIVE_PATH}
   fi
 }
 
