@@ -275,6 +275,10 @@ void ItemUpdaterStatic::processPNORImage()
         createActiveAssociation(path);
     }
 
+    // All updateable firmware components must expose the updateable
+    // association.
+    createUpdateableAssociation(path);
+
     // Create Activation instance for this version.
     activations.insert(std::make_pair(
         id, std::make_unique<ActivationStatic>(bus, path, *this, id,

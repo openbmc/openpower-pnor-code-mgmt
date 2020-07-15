@@ -127,6 +127,13 @@ void ItemUpdater::createActiveAssociation(const std::string& path)
     associations(assocs);
 }
 
+void ItemUpdater::createUpdateableAssociation(const std::string& path)
+{
+    assocs.emplace_back(std::make_tuple(UPDATEABLE_FWD_ASSOCIATION,
+                                        UPDATEABLE_REV_ASSOCIATION, path));
+    associations(assocs);
+}
+
 void ItemUpdater::updateFunctionalAssociation(const std::string& versionId)
 {
     std::string path = std::string{SOFTWARE_OBJPATH} + '/' + versionId;

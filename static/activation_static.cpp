@@ -154,6 +154,9 @@ void ActivationStatic::finishActivation()
     deleteImageManagerObject();
     // Create active association
     parent.createActiveAssociation(path);
+    // Create updateable association as this
+    // can be re-programmed.
+    parent.createUpdateableAssociation(path);
     // Create functional assocaition
     parent.updateFunctionalAssociation(versionId);
 
