@@ -24,10 +24,14 @@ endif
 if UBIFS_LAYOUT
 include ubi/Makefile.am.include
 else
+if MMC_LAYOUT
+include mmc/Makefile.am.include
+else
 include static/Makefile.am.include
 if HAVE_SYSTEMD
   systemdsystemunit_DATA += \
     openpower-pnor-update@.service
+endif
 endif
 endif
 
