@@ -1,0 +1,100 @@
+#!/bin/sh
+
+mmc_init() {
+  base_dir="/media/hostfw"
+  primary_dir="${base_dir}/primary"
+  prsv_dir="${base_dir}/prsv"
+
+  if [ ! -d "${primary_dir}" ]; then
+    mkdir -p ${primary_dir}
+  fi
+  if [ ! -d "${prsv_dir}" ]; then
+    mkdir -p "${prsv_dir}"
+  fi
+
+  # Determine if the primary dir contains the running version
+  current_label="$(fw_printenv -n bootside)"
+  primar_label=""
+  primary_label_file="${primary_dir}/partlabel"
+  if [ -f "${primary_label_file}" ]; then
+    primary_label=$(cat ${primary_label_file})
+  fi
+  if [ "${primary_label}" != "${current_label}" ]; then
+    # Copy off the preserved partitions
+    # A line in the pnor.toc looks like this:
+    # partition05=SECBOOT,0x00381000,0x003a5000,00,ECC,PRESERVED
+    rm -f ${prsv_dir}/*
+    if [ -f ${primary_dir}/pnor.toc ]; then
+      prsvs=$(grep PRESERVED ${primary_dir}/pnor.toc)
+      for prsv in ${prsvs}; do
+        prsv=${prsv##partition*=}
+        prsv=$(echo ${prsv} | cut -d "," -f 1)
+        cp -p ${primary_dir}/${prsv} ${prsv_dir}
+      done
+    fi
+
+    # Copy contents of running image to primary dir
+    tmp_dir="/tmp/hostfw"
+    mkdir -p "${tmp_dir}"
+    mount ${base_dir}/hostfw-${current_label} ${tmp_dir} -o ro
+    rm -f ${primary_dir}/*
+    cp -p ${tmp_dir}/* ${primary_dir}/
+    umount ${tmp_dir}
+    rm -rf ${tmp_dir}
+
+    # Restore the preserved partitions
+    cp -p ${prsv_dir}/* ${primary_dir}/ || true
+    rm -f ${prsv_dir}/*
+
+    # Save the label
+    echo "${current_label}" > "${primary_label_file}"
+
+    # Remove patches
+    rm -f ${base_dir}/patch/*
+  fi
+
+  # Mount secondary dir
+  if [ "${current_label}" = "a" ]; then
+    secondary_label="b"
+  else
+    secondary_label="a"
+  fi
+  secondary_dir="${base_dir}/secondary"
+  if [ ! -d "${secondary_dir}" ]; then
+    mkdir -p ${secondary_dir}
+  fi
+  mount ${base_dir}/hostfw-${secondary_label} ${secondary_dir} -o ro
+}
+
+mmc_patch() {
+  # Patching is disabled if field mode is set
+  if [[ "$(fw_printenv fieldmode 2>/dev/null)" == "fieldmode=true" ]]; then
+    return 0
+  fi
+
+  target="/media/hostfw/patch"
+  if [ ! -d "${target}" ]; then
+    mkdir -p "${target}"
+  fi
+
+  patchdir="/usr/local/share"
+  if [ ! -d "${patchdir}" ]; then
+    mkdir -p "${patchdir}"
+  fi
+
+  ln -s "${target}" "${patchdir}/hostfw"
+  ln -s "${target}" "${patchdir}/pnor"
+}
+
+case "$1" in
+  mmc-init)
+    mmc_init
+    ;;
+  mmc-patch)
+    mmc_patch
+    ;;
+  *)
+    echo "Invalid argument"
+    exit 1
+    ;;
+esac
