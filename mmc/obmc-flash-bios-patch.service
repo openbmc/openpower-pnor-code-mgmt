@@ -1,5 +1,6 @@
 [Unit]
 Description=Create patch directory for Host FW
+Before=mboxd.service
 Before=pldmd.service
 Wants=usr-local.mount
 After=usr-local.mount

@@ -2,9 +2,13 @@
 
 mmc_init() {
   base_dir="/media/hostfw"
+  ro_dir="${base_dir}/running-ro"
   running_dir="${base_dir}/running"
   prsv_dir="${base_dir}/prsv"
 
+  if [ ! -d "${ro_dir}" ]; then
+    mkdir -p "${ro_dir}"
+  fi
   if [ ! -d "${running_dir}" ]; then
     mkdir -p ${running_dir}
   fi
@@ -12,8 +16,12 @@ mmc_init() {
     mkdir -p "${prsv_dir}"
   fi
 
-  # Determine if the running dir contains the running version
+  # Mount the image that corresponds to the boot label as read-only to be used
+  # to populate the running directory.
   boot_label="$(fw_printenv -n bootside)"
+  mount ${base_dir}/hostfw-${boot_label} ${ro_dir} -o ro
+
+  # Determine if the running dir contains the running version
   running_label=""
   running_label_file="${running_dir}/partlabel"
   if [ -f "${running_label_file}" ]; then
@@ -34,16 +42,11 @@ mmc_init() {
     fi
 
     # Copy contents of running image to running dir
-    tmp_dir="/tmp/hostfw"
-    mkdir -p "${tmp_dir}"
-    mount ${base_dir}/hostfw-${boot_label} ${tmp_dir} -o ro
     rm -f ${running_dir}/*
-    cp -p ${tmp_dir}/* ${running_dir}/
-    umount ${tmp_dir}
-    rm -rf ${tmp_dir}
+    cp -p ${ro_dir}/* ${running_dir}/
 
-    # Restore the preserved partitions
-    cp -p ${prsv_dir}/* ${running_dir}/ || true
+    # Restore the preserved partitions. Ignore error, there may be none.
+    cp -p ${prsv_dir}/* ${running_dir}/ 2>/dev/null || true
     rm -f ${prsv_dir}/*
 
     # Save the label

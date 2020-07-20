@@ -47,6 +47,7 @@ update_symlinks() {
   PNOR_PATCH_LOCATION="/usr/local/share/pnor/"
   HOSTFW_PATCH_LOCATION="/usr/local/share/hostfw/"
   MMC_BASE_PATH="/media/hostfw"
+  MMC_RO_PATH="${MMC_BASE_PATH}/running-ro"
   MMC_RUNNING_PATH="${MMC_BASE_PATH}/running"
   MMC_ALTERNATE_PATH="${MMC_BASE_PATH}/alternate"
   HOSTFW_RUNNING_PATH="${HOSTFW_ACTIVE_PATH}/running"
@@ -80,13 +81,14 @@ update_symlinks() {
       prsvTarget="${PNOR_PRSV}"
   elif [ -d "${MMC_BASE_PATH}" ]; then
       # Use eMMC
-      roTarget="${MMC_RUNNING_PATH}"
+      roTarget="${MMC_RO_PATH}"
       rwTarget="${MMC_RUNNING_PATH}"
       prsvTarget="${MMC_RUNNING_PATH}"
 
       if [ ! -d "${HOSTFW_ACTIVE_PATH}" ]; then
           mkdir -p "${HOSTFW_ACTIVE_PATH}"
       fi
+      # Symlinks used by PLDM
       if [[ $(readlink -f "${HOSTFW_RUNNING_PATH}") != ${MMC_RUNNING_PATH} ]]; then
           rm -f ${HOSTFW_RUNNING_PATH}
           ln -sfv ${MMC_RUNNING_PATH} ${HOSTFW_RUNNING_PATH}
