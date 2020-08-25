@@ -52,8 +52,9 @@ mmc_init() {
     # Save the label
     echo "${boot_label}" > "${running_label_file}"
 
-    # Remove patches
-    rm -f ${base_dir}/patch/*
+    # Don't remove patches here, or they'd be removed on a side switch.
+    # They should be removed as part of the code update.
+    # rm -f ${base_dir}/patch-${boot_label}/*
   fi
 
   # Mount alternate dir
@@ -75,18 +76,37 @@ mmc_patch() {
     return 0
   fi
 
-  target="/media/hostfw/patch"
-  if [ ! -d "${target}" ]; then
-    mkdir -p "${target}"
+  boot_label="$(fw_printenv -n bootside)"
+  if [ "${boot_label}" = "a" ]; then
+    alternate_label="b"
+  else
+    alternate_label="a"
   fi
 
-  patchdir="/usr/local/share"
-  if [ ! -d "${patchdir}" ]; then
-    mkdir -p "${patchdir}"
+  # Patch directories in flash
+  patch_dir="/media/hostfw/patch-"
+  running_patch_dir="${patch_dir}${boot_label}"
+  if [ ! -d "${running_patch_dir}" ]; then
+    mkdir -p "${running_patch_dir}"
+  fi
+  alternate_patch_dir="${patch_dir}${alternate_label}"
+  if [ ! -d "${alternate_patch_dir}" ]; then
+    mkdir -p "${alternate_patch_dir}"
   fi
 
-  ln -s "${target}" "${patchdir}/hostfw"
-  ln -s "${target}" "${patchdir}/pnor"
+  # Patch symlinks
+  symlink_base="/usr/local/share"
+  if [ ! -d "${symlink_base}" ]; then
+    mkdir -p "${symlink_base}"
+  fi
+  hostfw_symlink_base="${symlink_base}/hostfw"
+  if [ ! -d "${hostfw_symlink_base}" ]; then
+    mkdir -p "${hostfw_symlink_base}"
+  fi
+
+  ln -s "${running_patch_dir}" "${symlink_base}/pnor"
+  ln -s "${running_patch_dir}" "${hostfw_symlink_base}/running"
+  ln -s "${alternate_patch_dir}" "${hostfw_symlink_base}/alternate"
 }
 
 case "$1" in
