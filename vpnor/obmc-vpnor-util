@@ -45,7 +45,6 @@ update_symlinks() {
   PNOR_PRSV="/media/pnor-prsv"
   PERSISTENCE_PATH="/var/lib/obmc/openpower-pnor-code-mgmt/"
   PNOR_PATCH_LOCATION="/usr/local/share/pnor/"
-  HOSTFW_PATCH_LOCATION="/usr/local/share/hostfw/"
   MMC_BASE_PATH="/media/hostfw"
   MMC_RO_PATH="${MMC_BASE_PATH}/running-ro"
   MMC_RUNNING_PATH="${MMC_BASE_PATH}/running"
