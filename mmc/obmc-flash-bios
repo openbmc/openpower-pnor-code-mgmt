@@ -5,6 +5,7 @@ mmc_init() {
   ro_dir="${base_dir}/running-ro"
   running_dir="${base_dir}/running"
   prsv_dir="${base_dir}/prsv"
+  staging_dir="${base_dir}/staging"
 
   if [ ! -d "${ro_dir}" ]; then
     mkdir -p "${ro_dir}"
@@ -14,6 +15,9 @@ mmc_init() {
   fi
   if [ ! -d "${prsv_dir}" ]; then
     mkdir -p "${prsv_dir}"
+  fi
+  if [ ! -d "${staging_dir}" ]; then
+    mkdir -p "${staging_dir}"
   fi
 
   # Mount the image that corresponds to the boot label as read-only to be used
@@ -48,6 +52,9 @@ mmc_init() {
     # Restore the preserved partitions. Ignore error, there may be none.
     cp -p ${prsv_dir}/* ${running_dir}/ 2>/dev/null || true
     rm -f ${prsv_dir}/*
+
+    # Clean up the staging dir in case of a failed update
+    rm -rf ${staging_dir}/*
 
     # Save the label
     echo "${boot_label}" > "${running_label_file}"

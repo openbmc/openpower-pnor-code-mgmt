@@ -49,8 +49,10 @@ update_symlinks() {
   MMC_RO_PATH="${MMC_BASE_PATH}/running-ro"
   MMC_RUNNING_PATH="${MMC_BASE_PATH}/running"
   MMC_ALTERNATE_PATH="${MMC_BASE_PATH}/alternate"
+  MMC_STAGING_PATH="${MMC_BASE_PATH}/staging"
   HOSTFW_RUNNING_PATH="${HOSTFW_ACTIVE_PATH}/running"
   HOSTFW_ALTERNATE_PATH="${HOSTFW_ACTIVE_PATH}/alternate"
+  HOSTFW_STAGING_PATH="${HOSTFW_ACTIVE_PATH}/staging"
 
   # Get a list of all active PNOR versions
   data="$(ls -d ${PNOR_RO_PREFIX}* 2>/dev/null)"
@@ -95,6 +97,10 @@ update_symlinks() {
       if [[ $(readlink -f "${HOSTFW_ALTERNATE_PATH}") != ${MMC_ALTERNATE_PATH} ]]; then
           rm -f ${HOSTFW_ALTERNATE_PATH}
           ln -sfv ${MMC_ALTERNATE_PATH} ${HOSTFW_ALTERNATE_PATH}
+      fi
+      if [[ $(readlink -f "${HOSTFW_STAGING_PATH}") != ${MMC_STAGING_PATH} ]]; then
+          rm -f ${HOSTFW_STAGING_PATH}
+          ln -sfv ${MMC_STAGING_PATH} ${HOSTFW_STAGING_PATH}
       fi
   fi
 
