@@ -12,6 +12,7 @@
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/server/manager.hpp>
+
 #include <system_error>
 
 int main(int argc, char* argv[])

@@ -7,6 +7,7 @@
 #include "xyz/openbmc_project/Software/Version/server.hpp"
 
 #include <sdbusplus/bus.hpp>
+
 #include <string>
 
 namespace openpower
@@ -48,8 +49,7 @@ class Delete : public DeleteInherit
     Delete(sdbusplus::bus::bus& bus, const std::string& path, Version& parent) :
         DeleteInherit(bus, path.c_str(), action::emit_interface_added),
         parent(parent)
-    {
-    }
+    {}
 
     /**
      * @brief Delete the D-Bus object.

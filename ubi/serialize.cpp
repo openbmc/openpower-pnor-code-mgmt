@@ -3,9 +3,10 @@
 #include "serialize.hpp"
 
 #include <cereal/archives/json.hpp>
+#include <sdbusplus/server.hpp>
+
 #include <experimental/filesystem>
 #include <fstream>
-#include <sdbusplus/server.hpp>
 
 namespace openpower
 {
@@ -107,8 +108,7 @@ bool restoreFromFile(const std::string& versionId, uint8_t& priority)
         }
     }
     catch (const std::exception& e)
-    {
-    }
+    {}
 
     return false;
 }

@@ -3,8 +3,9 @@
 #include "item_updater.hpp"
 #include "serialize.hpp"
 
-#include <experimental/filesystem>
 #include <phosphor-logging/log.hpp>
+
+#include <experimental/filesystem>
 
 namespace openpower
 {

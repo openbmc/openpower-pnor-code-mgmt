@@ -2,9 +2,10 @@
 
 #include "msl_verify.hpp"
 
+#include <phosphor-logging/log.hpp>
+
 #include <experimental/filesystem>
 #include <fstream>
-#include <phosphor-logging/log.hpp>
 #include <regex>
 
 namespace openpower

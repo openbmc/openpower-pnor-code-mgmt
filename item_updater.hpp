@@ -5,10 +5,11 @@
 #include "xyz/openbmc_project/Collection/DeleteAll/server.hpp"
 
 #include <sdbusplus/server.hpp>
-#include <string>
 #include <xyz/openbmc_project/Association/Definitions/server.hpp>
 #include <xyz/openbmc_project/Common/FactoryReset/server.hpp>
 #include <xyz/openbmc_project/Object/Enable/server.hpp>
+
+#include <string>
 
 namespace openpower
 {
@@ -89,8 +90,7 @@ class ItemUpdater : public ItemUpdaterInherit
                          MatchRules::path("/xyz/openbmc_project/software"),
                      std::bind(std::mem_fn(&ItemUpdater::createActivation),
                                this, std::placeholders::_1))
-    {
-    }
+    {}
 
     virtual ~ItemUpdater() = default;
 

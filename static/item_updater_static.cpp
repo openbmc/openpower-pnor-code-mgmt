@@ -6,16 +6,17 @@
 #include "utils.hpp"
 #include "version.hpp"
 
+#include <phosphor-logging/elog-errors.hpp>
+#include <phosphor-logging/log.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
+
 #include <array>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
-#include <phosphor-logging/elog-errors.hpp>
-#include <phosphor-logging/log.hpp>
 #include <sstream>
 #include <string>
 #include <tuple>
-#include <xyz/openbmc_project/Common/error.hpp>
 
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace phosphor::logging;
@@ -328,8 +329,7 @@ bool ItemUpdaterStatic::isVersionFunctional(const std::string& versionId)
 
 void ItemUpdaterStatic::freePriority(uint8_t value,
                                      const std::string& versionId)
-{
-}
+{}
 
 void ItemUpdaterStatic::deleteAll()
 {

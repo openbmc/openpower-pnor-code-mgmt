@@ -48,12 +48,10 @@ bool ItemUpdaterMMC::validateImage(const std::string& path)
 }
 
 void ItemUpdaterMMC::processPNORImage()
-{
-}
+{}
 
 void ItemUpdaterMMC::reset()
-{
-}
+{}
 
 bool ItemUpdaterMMC::isVersionFunctional(const std::string& versionId)
 {
@@ -61,12 +59,10 @@ bool ItemUpdaterMMC::isVersionFunctional(const std::string& versionId)
 }
 
 void ItemUpdaterMMC::freePriority(uint8_t value, const std::string& versionId)
-{
-}
+{}
 
 void ItemUpdaterMMC::deleteAll()
-{
-}
+{}
 
 bool ItemUpdaterMMC::freeSpace()
 {
@@ -74,12 +70,10 @@ bool ItemUpdaterMMC::freeSpace()
 }
 
 void ItemUpdaterMMC::updateFunctionalAssociation(const std::string& versionId)
-{
-}
+{}
 
 void GardResetMMC::reset()
-{
-}
+{}
 
 } // namespace updater
 } // namespace software

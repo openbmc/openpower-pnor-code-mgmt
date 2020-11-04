@@ -4,9 +4,10 @@
 
 #include "xyz/openbmc_project/Common/error.hpp"
 
-#include <filesystem>
 #include <phosphor-logging/elog-errors.hpp>
 #include <phosphor-logging/log.hpp>
+
+#include <filesystem>
 
 namespace openpower
 {

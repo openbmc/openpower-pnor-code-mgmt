@@ -14,16 +14,13 @@ auto ActivationMMC::activation(Activations value) -> Activations
 }
 
 void ActivationMMC::startActivation()
-{
-}
+{}
 
 void ActivationMMC::unitStateChange(sdbusplus::message::message& msg)
-{
-}
+{}
 
 void ActivationMMC::finishActivation()
-{
-}
+{}
 
 } // namespace updater
 } // namespace software
