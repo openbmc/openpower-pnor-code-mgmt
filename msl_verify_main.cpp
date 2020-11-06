@@ -6,7 +6,7 @@
 #include <phosphor-logging/elog.hpp>
 #include <xyz/openbmc_project/Software/Version/error.hpp>
 
-int main(int argc, char* argv[])
+int main(int, char*[])
 {
     using MinimumShipLevel = openpower::software::image::MinimumShipLevel;
     MinimumShipLevel minimumShipLevel(PNOR_MSL);

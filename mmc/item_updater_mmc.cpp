@@ -42,7 +42,7 @@ std::unique_ptr<Version> ItemUpdaterMMC::createVersionObject(
     return version;
 }
 
-bool ItemUpdaterMMC::validateImage(const std::string& path)
+bool ItemUpdaterMMC::validateImage(const std::string&)
 {
     return true;
 }
@@ -58,7 +58,7 @@ bool ItemUpdaterMMC::isVersionFunctional(const std::string& versionId)
     return versionId == functionalVersionId;
 }
 
-void ItemUpdaterMMC::freePriority(uint8_t value, const std::string& versionId)
+void ItemUpdaterMMC::freePriority(uint8_t, const std::string&)
 {}
 
 void ItemUpdaterMMC::deleteAll()
@@ -69,7 +69,7 @@ bool ItemUpdaterMMC::freeSpace()
     return true;
 }
 
-void ItemUpdaterMMC::updateFunctionalAssociation(const std::string& versionId)
+void ItemUpdaterMMC::updateFunctionalAssociation(const std::string&)
 {}
 
 void GardResetMMC::reset()

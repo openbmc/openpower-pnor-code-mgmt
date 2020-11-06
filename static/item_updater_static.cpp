@@ -227,7 +227,7 @@ std::unique_ptr<Version> ItemUpdaterStatic::createVersionObject(
     return version;
 }
 
-bool ItemUpdaterStatic::validateImage(const std::string& path)
+bool ItemUpdaterStatic::validateImage(const std::string&)
 {
     // There is no need to validate static layout pnor
     return true;
@@ -327,8 +327,7 @@ bool ItemUpdaterStatic::isVersionFunctional(const std::string& versionId)
     return versionId == functionalVersionId;
 }
 
-void ItemUpdaterStatic::freePriority(uint8_t value,
-                                     const std::string& versionId)
+void ItemUpdaterStatic::freePriority(uint8_t, const std::string&)
 {}
 
 void ItemUpdaterStatic::deleteAll()

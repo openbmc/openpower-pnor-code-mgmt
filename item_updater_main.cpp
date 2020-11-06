@@ -15,7 +15,7 @@
 
 #include <system_error>
 
-int main(int argc, char* argv[])
+int main(int, char*[])
 {
     using namespace openpower::software::updater;
     using namespace phosphor::logging;
