@@ -1,0 +1,5 @@
+option('tests', type: 'feature', description: 'Build tests.')
+option('device-type', type: 'combo', choices: ['static', 'ubi', 'mmc'], description: 'Select which device type to support')
+option('vpnor', type: 'feature', description: 'Enable virtual PNOR support')
+option('verify-signature', type: 'feature', description: 'Enable image signature validation')
+option('msl', type: 'string', description: 'Minimum Ship Level')
