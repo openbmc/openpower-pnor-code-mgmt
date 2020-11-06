@@ -11,7 +11,7 @@
 
 #include <cstddef>
 #include <cstring>
-#include <experimental/filesystem>
+#include <filesystem>
 #include <functional>
 #include <stdexcept>
 #include <string>
@@ -24,7 +24,6 @@ namespace updater
 {
 
 using namespace phosphor::logging;
-namespace fs = std::experimental::filesystem;
 
 Watch::Watch(sd_event* loop,
              std::function<void(const std::string&)> functionalCallback) :
@@ -33,9 +32,9 @@ Watch::Watch(sd_event* loop,
 
 {
     // Create PNOR_ACTIVE_PATH if doesn't exist.
-    if (!fs::is_directory(PNOR_ACTIVE_PATH))
+    if (!std::filesystem::is_directory(PNOR_ACTIVE_PATH))
     {
-        fs::create_directories(PNOR_ACTIVE_PATH);
+        std::filesystem::create_directories(PNOR_ACTIVE_PATH);
     }
 
     wd = inotify_add_watch(fd(), PNOR_ACTIVE_PATH, IN_CREATE);
@@ -90,9 +89,9 @@ int Watch::callback(sd_event_source* s, int fd, uint32_t revents,
         auto event = reinterpret_cast<inotify_event*>(&buffer[offset]);
         // Update the functional association on a RO
         // active image symlink change
-        fs::path path(PNOR_ACTIVE_PATH);
+        std::filesystem::path path(PNOR_ACTIVE_PATH);
         path /= event->name;
-        if (fs::equivalent(path, PNOR_RO_ACTIVE_PATH))
+        if (std::filesystem::equivalent(path, PNOR_RO_ACTIVE_PATH))
         {
             auto id = ItemUpdaterUbi::determineId(path);
             static_cast<Watch*>(userdata)->functionalCallback(id);

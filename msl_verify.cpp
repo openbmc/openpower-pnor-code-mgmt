@@ -4,7 +4,7 @@
 
 #include <phosphor-logging/log.hpp>
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <fstream>
 #include <regex>
 
@@ -15,7 +15,6 @@ namespace software
 namespace image
 {
 
-namespace fs = std::experimental::filesystem;
 using namespace phosphor::logging;
 using AssociationList =
     std::vector<std::tuple<std::string, std::string, std::string>>;

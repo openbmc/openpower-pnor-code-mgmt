@@ -5,7 +5,7 @@
 #include <cereal/archives/json.hpp>
 #include <sdbusplus/server.hpp>
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <fstream>
 
 namespace openpower
@@ -15,15 +15,13 @@ namespace software
 namespace updater
 {
 
-namespace fs = std::experimental::filesystem;
-
 void storeToFile(const std::string& versionId, uint8_t priority)
 {
     auto bus = sdbusplus::bus::new_default();
 
-    if (!fs::is_directory(PERSIST_DIR))
+    if (!std::filesystem::is_directory(PERSIST_DIR))
     {
-        fs::create_directories(PERSIST_DIR);
+        std::filesystem::create_directories(PERSIST_DIR);
     }
 
     // store one copy in /var/lib/obmc/openpower-pnor-code-mgmt/[versionId]
@@ -32,7 +30,7 @@ void storeToFile(const std::string& versionId, uint8_t priority)
     cereal::JSONOutputArchive varArchive(varOutput);
     varArchive(cereal::make_nvp("priority", priority));
 
-    if (fs::is_directory(PNOR_RW_PREFIX + versionId))
+    if (std::filesystem::is_directory(PNOR_RW_PREFIX + versionId))
     {
         // store another copy in /media/pnor-rw-[versionId]/[versionId]
         auto rwPath = PNOR_RW_PREFIX + versionId + "/" + versionId;
@@ -53,7 +51,7 @@ void storeToFile(const std::string& versionId, uint8_t priority)
 bool restoreFromFile(const std::string& versionId, uint8_t& priority)
 {
     auto varPath = PERSIST_DIR + versionId;
-    if (fs::exists(varPath))
+    if (std::filesystem::exists(varPath))
     {
         std::ifstream varInput(varPath.c_str(), std::ios::in);
         try
@@ -64,12 +62,12 @@ bool restoreFromFile(const std::string& versionId, uint8_t& priority)
         }
         catch (cereal::RapidJSONException& e)
         {
-            fs::remove(varPath);
+            std::filesystem::remove(varPath);
         }
     }
 
     auto rwPath = PNOR_RW_PREFIX + versionId + "/" + versionId;
-    if (fs::exists(rwPath))
+    if (std::filesystem::exists(rwPath))
     {
         std::ifstream rwInput(rwPath.c_str(), std::ios::in);
         try
@@ -80,7 +78,7 @@ bool restoreFromFile(const std::string& versionId, uint8_t& priority)
         }
         catch (cereal::RapidJSONException& e)
         {
-            fs::remove(rwPath);
+            std::filesystem::remove(rwPath);
         }
     }
 
@@ -88,7 +86,7 @@ bool restoreFromFile(const std::string& versionId, uint8_t& priority)
     {
         std::string devicePath = "/dev/mtd/u-boot-env";
 
-        if (fs::exists(devicePath) && !devicePath.empty())
+        if (std::filesystem::exists(devicePath) && !devicePath.empty())
         {
             std::ifstream input(devicePath.c_str());
             std::string envVars;
@@ -130,9 +128,9 @@ void removeFile(const std::string& versionId)
     // so the file /media/pnor-rw-[versionId]/[versionId] will also be deleted
     // along with its surrounding directory.
     std::string path = PERSIST_DIR + versionId;
-    if (fs::exists(path))
+    if (std::filesystem::exists(path))
     {
-        fs::remove(path);
+        std::filesystem::remove(path);
     }
 }
 

@@ -31,13 +31,13 @@ using InternalFailure =
 constexpr auto keyTypeTag = "KeyType";
 constexpr auto hashFunctionTag = "HashType";
 
-Signature::Signature(const fs::path& imageDirPath,
+Signature::Signature(const std::filesystem::path& imageDirPath,
                      const std::string& pnorFileName,
-                     const fs::path& signedConfPath) :
+                     const std::filesystem::path& signedConfPath) :
     imageDirPath(imageDirPath),
     pnorFileName(pnorFileName), signedConfPath(signedConfPath)
 {
-    fs::path file(imageDirPath / MANIFEST_FILE);
+    std::filesystem::path file(imageDirPath / MANIFEST_FILE);
 
     auto keyValues =
         Version::getValue(file, {{keyTypeTag, " "}, {hashFunctionTag, " "}});
@@ -50,7 +50,7 @@ AvailableKeyTypes Signature::getAvailableKeyTypesFromSystem() const
     AvailableKeyTypes keyTypes{};
 
     // Find the path of all the files
-    if (!fs::is_directory(signedConfPath))
+    if (!std::filesystem::is_directory(signedConfPath))
     {
         log<level::ERR>("Signed configuration path not found in the system");
         elog<InternalFailure>();
@@ -64,7 +64,8 @@ AvailableKeyTypes Signature::getAvailableKeyTypesFromSystem() const
     // /etc/activationdata/GA/hashfunc
     // Set will have OpenPOWER, GA
 
-    for (const auto& p : fs::recursive_directory_iterator(signedConfPath))
+    for (const auto& p :
+         std::filesystem::recursive_directory_iterator(signedConfPath))
     {
         if ((p.path().filename() == HASH_FILE_NAME) ||
             (p.path().filename() == PUBLICKEY_FILE_NAME))
@@ -81,8 +82,8 @@ AvailableKeyTypes Signature::getAvailableKeyTypesFromSystem() const
 
 inline KeyHashPathPair Signature::getKeyHashFileNames(const Key_t& key) const
 {
-    fs::path hashpath(signedConfPath / key / HASH_FILE_NAME);
-    fs::path keyPath(signedConfPath / key / PUBLICKEY_FILE_NAME);
+    std::filesystem::path hashpath(signedConfPath / key / HASH_FILE_NAME);
+    std::filesystem::path keyPath(signedConfPath / key / PUBLICKEY_FILE_NAME);
 
     return std::make_pair(std::move(hashpath), std::move(keyPath));
 }
@@ -100,16 +101,16 @@ bool Signature::verify()
         }
 
         // image specific publickey file name.
-        fs::path publicKeyFile(imageDirPath / PUBLICKEY_FILE_NAME);
+        std::filesystem::path publicKeyFile(imageDirPath / PUBLICKEY_FILE_NAME);
 
         // Validate the PNOR image file.
         // Build Image File name
-        fs::path file(imageDirPath);
+        std::filesystem::path file(imageDirPath);
         file /= pnorFileName;
 
         // Build Signature File name
         std::string fileName = file.filename();
-        fs::path sigFile(imageDirPath);
+        std::filesystem::path sigFile(imageDirPath);
         sigFile /= fileName + SIGNATURE_FILE_EXT;
 
         // Verify the signature.
@@ -147,13 +148,13 @@ bool Signature::systemLevelVerify()
     }
 
     // Build publickey and its signature file name.
-    fs::path pkeyFile(imageDirPath / PUBLICKEY_FILE_NAME);
-    fs::path pkeyFileSig(pkeyFile);
+    std::filesystem::path pkeyFile(imageDirPath / PUBLICKEY_FILE_NAME);
+    std::filesystem::path pkeyFileSig(pkeyFile);
     pkeyFileSig.replace_extension(SIGNATURE_FILE_EXT);
 
     // Build manifest and its signature file name.
-    fs::path manifestFile(imageDirPath / MANIFEST_FILE);
-    fs::path manifestFileSig(manifestFile);
+    std::filesystem::path manifestFile(imageDirPath / MANIFEST_FILE);
+    std::filesystem::path manifestFileSig(manifestFile);
     manifestFileSig.replace_extension(SIGNATURE_FILE_EXT);
 
     auto valid = false;
@@ -194,13 +195,14 @@ bool Signature::systemLevelVerify()
     return valid;
 }
 
-bool Signature::verifyFile(const fs::path& file, const fs::path& sigFile,
-                           const fs::path& publicKey,
+bool Signature::verifyFile(const std::filesystem::path& file,
+                           const std::filesystem::path& sigFile,
+                           const std::filesystem::path& publicKey,
                            const std::string& hashFunc)
 {
 
     // Check existence of the files in the system.
-    if (!(fs::exists(file) && fs::exists(sigFile)))
+    if (!(std::filesystem::exists(file) && std::filesystem::exists(sigFile)))
     {
         log<level::ERR>("Failed to find the Data or signature file.",
                         entry("FILE=%s", file.c_str()));
@@ -246,7 +248,7 @@ bool Signature::verifyFile(const fs::path& file, const fs::path& sigFile,
     }
 
     // Hash the data file and update the verification context
-    auto size = fs::file_size(file);
+    auto size = std::filesystem::file_size(file);
     auto dataPtr = mapFile(file, size);
 
     result = EVP_DigestVerifyUpdate(rsaVerifyCtx.get(), dataPtr(), size);
@@ -258,7 +260,7 @@ bool Signature::verifyFile(const fs::path& file, const fs::path& sigFile,
     }
 
     // Verify the data with signature.
-    size = fs::file_size(sigFile);
+    size = std::filesystem::file_size(sigFile);
     auto signature = mapFile(sigFile, size);
 
     result = EVP_DigestVerifyFinal(
@@ -282,10 +284,10 @@ bool Signature::verifyFile(const fs::path& file, const fs::path& sigFile,
     return true;
 }
 
-inline RSA* Signature::createPublicRSA(const fs::path& publicKey)
+inline RSA* Signature::createPublicRSA(const std::filesystem::path& publicKey)
 {
     RSA* rsa = nullptr;
-    auto size = fs::file_size(publicKey);
+    auto size = std::filesystem::file_size(publicKey);
 
     // Read public key file
     auto data = mapFile(publicKey, size);
@@ -302,7 +304,7 @@ inline RSA* Signature::createPublicRSA(const fs::path& publicKey)
     return rsa;
 }
 
-CustomMap Signature::mapFile(const fs::path& path, size_t size)
+CustomMap Signature::mapFile(const std::filesystem::path& path, size_t size)
 {
 
     CustomFd fd(open(path.c_str(), O_RDONLY));

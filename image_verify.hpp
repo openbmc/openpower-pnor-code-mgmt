@@ -7,7 +7,7 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <set>
 #include <string>
 
@@ -18,11 +18,10 @@ namespace software
 namespace image
 {
 
-namespace fs = std::experimental::filesystem;
 using Key_t = std::string;
 using Hash_t = std::string;
-using PublicKeyPath = fs::path;
-using HashFilePath = fs::path;
+using PublicKeyPath = std::filesystem::path;
+using HashFilePath = std::filesystem::path;
 using KeyHashPathPair = std::pair<HashFilePath, PublicKeyPath>;
 using AvailableKeyTypes = std::set<Key_t>;
 
@@ -129,9 +128,9 @@ class Signature
      * @param[in]  signedConfPath - Path of public key
      *                              hash function files
      */
-    explicit Signature(const fs::path& imageDirPath,
+    explicit Signature(const std::filesystem::path& imageDirPath,
                        const std::string& pnorFileName,
-                       const fs::path& signedConfPath);
+                       const std::filesystem::path& signedConfPath);
 
     /**
      * @brief Image signature verification function.
@@ -182,15 +181,17 @@ class Signature
      * @param[in]  - Hash function name
      * @return true if signature verification was successful, false if not
      */
-    bool verifyFile(const fs::path& file, const fs::path& signature,
-                    const fs::path& publicKey, const std::string& hashFunc);
+    bool verifyFile(const std::filesystem::path& file,
+                    const std::filesystem::path& signature,
+                    const std::filesystem::path& publicKey,
+                    const std::string& hashFunc);
 
     /**
      * @brief Create RSA object from the public key
      * @param[in]  - publickey
      * @param[out] - RSA Object.
      */
-    inline RSA* createPublicRSA(const fs::path& publicKey);
+    inline RSA* createPublicRSA(const std::filesystem::path& publicKey);
 
     /**
      * @brief Memory map the  file
@@ -198,16 +199,16 @@ class Signature
      * @param[in]  - file size
      * @param[out] - Custom Mmap address
      */
-    CustomMap mapFile(const fs::path& path, size_t size);
+    CustomMap mapFile(const std::filesystem::path& path, size_t size);
 
     /** @brief Directory where software images are placed*/
-    fs::path imageDirPath;
+    std::filesystem::path imageDirPath;
 
     /** @brief The PNOR file name in imageDirPath */
     std::string pnorFileName;
 
     /** @brief Path of public key and hash function files */
-    fs::path signedConfPath;
+    std::filesystem::path signedConfPath;
 
     /** @brief key type defined in mainfest file */
     Key_t keyType;

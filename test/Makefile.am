@@ -44,5 +44,3 @@ utest_SOURCES = \
 	test_version.cpp \
 	test_item_updater_static.cpp \
 	msl_verify.cpp
-
-utest_LDADD = -lstdc++fs

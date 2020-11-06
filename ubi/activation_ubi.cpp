@@ -5,7 +5,7 @@
 
 #include <phosphor-logging/log.hpp>
 
-#include <experimental/filesystem>
+#include <filesystem>
 
 namespace openpower
 {
@@ -13,7 +13,6 @@ namespace software
 {
 namespace updater
 {
-namespace fs = std::experimental::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
 using namespace phosphor::logging;
 
@@ -63,9 +62,9 @@ auto ActivationUbi::activation(Activations value) -> Activations
             // verify that this happened, we check for the mount dirs PNOR_PRSV
             // and PNOR_RW_PREFIX_<versionid>, as well as the image dir R0.
 
-            if ((fs::is_directory(PNOR_PRSV)) &&
-                (fs::is_directory(PNOR_RW_PREFIX + versionId)) &&
-                (fs::is_directory(PNOR_RO_PREFIX + versionId)))
+            if ((std::filesystem::is_directory(PNOR_PRSV)) &&
+                (std::filesystem::is_directory(PNOR_RW_PREFIX + versionId)) &&
+                (std::filesystem::is_directory(PNOR_RO_PREFIX + versionId)))
             {
                 finishActivation();
                 if (Activation::checkApplyTimeImmediate())

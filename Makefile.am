@@ -59,7 +59,6 @@ generic_ldflags = \
 	$(PHOSPHOR_DBUS_INTERFACES_LIBS) \
 	$(SDBUSPLUS_LIBS) \
 	$(PHOSPHOR_LOGGING_LIBS) \
-	-lstdc++fs \
 	-lssl \
 	-lcrypto
 

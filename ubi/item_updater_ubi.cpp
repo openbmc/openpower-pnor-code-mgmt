@@ -12,7 +12,7 @@
 #include <phosphor-logging/log.hpp>
 #include <xyz/openbmc_project/Software/Version/server.hpp>
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <fstream>
 #include <queue>
 #include <string>
@@ -26,7 +26,6 @@ namespace updater
 
 // When you see server:: you know we're referencing our base class
 namespace server = sdbusplus::xyz::openbmc_project::Software::server;
-namespace fs = std::experimental::filesystem;
 
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace phosphor::logging;
@@ -65,7 +64,7 @@ void ItemUpdaterUbi::processPNORImage()
 {
     // Read pnor.toc from folders under /media/
     // to get Active Software Versions.
-    for (const auto& iter : fs::directory_iterator(MEDIA_DIR))
+    for (const auto& iter : std::filesystem::directory_iterator(MEDIA_DIR))
     {
         auto activationState = server::Activation::Activations::Active;
 
@@ -80,7 +79,7 @@ void ItemUpdaterUbi::processPNORImage()
             // for example /media/pnor-ro-2a1022fe.
             auto id = iter.path().native().substr(PNOR_RO_PREFIX_LEN);
             auto pnorTOC = iter.path() / PNOR_TOC_FILE;
-            if (!fs::is_regular_file(pnorTOC))
+            if (!std::filesystem::is_regular_file(pnorTOC))
             {
                 log<level::ERR>("Failed to read pnorTOC.",
                                 entry("FILENAME=%s", pnorTOC.c_str()));
@@ -106,7 +105,7 @@ void ItemUpdaterUbi::processPNORImage()
             }
 
             auto purpose = server::Version::VersionPurpose::Host;
-            auto path = fs::path(SOFTWARE_OBJPATH) / id;
+            auto path = std::filesystem::path(SOFTWARE_OBJPATH) / id;
             AssociationList associations = {};
 
             if (activationState == server::Activation::Activations::Active)
@@ -157,7 +156,7 @@ void ItemUpdaterUbi::processPNORImage()
         {
             auto id = iter.path().native().substr(PNOR_RW_PREFIX_LEN);
             auto roDir = PNOR_RO_PREFIX + id;
-            if (!fs::is_directory(roDir))
+            if (!std::filesystem::is_directory(roDir))
             {
                 log<level::ERR>("No corresponding read-only volume found.",
                                 entry("DIRNAME=%s", roDir.c_str()));
@@ -177,8 +176,8 @@ void ItemUpdaterUbi::processPNORImage()
 
 int ItemUpdaterUbi::validateSquashFSImage(const std::string& filePath)
 {
-    auto file = fs::path(filePath) / squashFSImage;
-    if (fs::is_regular_file(file))
+    auto file = std::filesystem::path(filePath) / squashFSImage;
+    if (std::filesystem::is_regular_file(file))
     {
         return 0;
     }
@@ -216,11 +215,11 @@ void ItemUpdaterUbi::reset()
     utils::hiomapdSuspend(bus);
 
     constexpr static auto patchDir = "/usr/local/share/pnor";
-    if (fs::is_directory(patchDir))
+    if (std::filesystem::is_directory(patchDir))
     {
-        for (const auto& iter : fs::directory_iterator(patchDir))
+        for (const auto& iter : std::filesystem::directory_iterator(patchDir))
         {
-            fs::remove_all(iter);
+            std::filesystem::remove_all(iter);
         }
     }
 
@@ -228,21 +227,21 @@ void ItemUpdaterUbi::reset()
     for (const auto& it : activations)
     {
         auto rwDir = PNOR_RW_PREFIX + it.first;
-        if (fs::is_directory(rwDir))
+        if (std::filesystem::is_directory(rwDir))
         {
-            for (const auto& iter : fs::directory_iterator(rwDir))
+            for (const auto& iter : std::filesystem::directory_iterator(rwDir))
             {
-                fs::remove_all(iter);
+                std::filesystem::remove_all(iter);
             }
         }
     }
 
     // Clear the preserved partition.
-    if (fs::is_directory(PNOR_PRSV))
+    if (std::filesystem::is_directory(PNOR_PRSV))
     {
-        for (const auto& iter : fs::directory_iterator(PNOR_PRSV))
+        for (const auto& iter : std::filesystem::directory_iterator(PNOR_PRSV))
         {
-            fs::remove_all(iter);
+            std::filesystem::remove_all(iter);
         }
     }
 
@@ -251,14 +250,15 @@ void ItemUpdaterUbi::reset()
 
 bool ItemUpdaterUbi::isVersionFunctional(const std::string& versionId)
 {
-    if (!fs::exists(PNOR_RO_ACTIVE_PATH))
+    if (!std::filesystem::exists(PNOR_RO_ACTIVE_PATH))
     {
         return false;
     }
 
-    fs::path activeRO = fs::read_symlink(PNOR_RO_ACTIVE_PATH);
+    std::filesystem::path activeRO =
+        std::filesystem::read_symlink(PNOR_RO_ACTIVE_PATH);
 
-    if (!fs::is_directory(activeRO))
+    if (!std::filesystem::is_directory(activeRO))
     {
         return false;
     }
@@ -393,15 +393,15 @@ bool ItemUpdaterUbi::freeSpace()
 
 std::string ItemUpdaterUbi::determineId(const std::string& symlinkPath)
 {
-    if (!fs::exists(symlinkPath))
+    if (!std::filesystem::exists(symlinkPath))
     {
         return {};
     }
 
-    auto target = fs::canonical(symlinkPath).string();
+    auto target = std::filesystem::canonical(symlinkPath).string();
 
     // check to make sure the target really exists
-    if (!fs::is_regular_file(target + "/" + PNOR_TOC_FILE))
+    if (!std::filesystem::is_regular_file(target + "/" + PNOR_TOC_FILE))
     {
         return {};
     }
@@ -415,14 +415,14 @@ void GardResetUbi::reset()
 {
     // The GARD partition is currently misspelled "GUARD." This file path will
     // need to be updated in the future.
-    auto path = fs::path(PNOR_PRSV_ACTIVE_PATH);
+    auto path = std::filesystem::path(PNOR_PRSV_ACTIVE_PATH);
     path /= "GUARD";
 
     utils::hiomapdSuspend(bus);
 
-    if (fs::is_regular_file(path))
+    if (std::filesystem::is_regular_file(path))
     {
-        fs::remove(path);
+        std::filesystem::remove(path);
     }
 
     utils::hiomapdResume(bus);

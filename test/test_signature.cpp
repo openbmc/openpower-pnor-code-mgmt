@@ -2,7 +2,7 @@
 
 #include <openssl/sha.h>
 
-#include <experimental/filesystem>
+#include <filesystem>
 #include <string>
 
 #include <gtest/gtest.h>
@@ -26,7 +26,7 @@ class SignatureTest : public testing::Test
     virtual void SetUp()
     {
         // Create test base directory.
-        fs::create_directories(testPath);
+        std::filesystem::create_directories(testPath);
 
         // Create unique temporary path for images.
         std::string tmpDir(testPath);
@@ -90,9 +90,9 @@ class SignatureTest : public testing::Test
         command("rm -rf " + std::string(testPath));
     }
     std::unique_ptr<Signature> signature;
-    fs::path extractPath;
-    fs::path signedConfPath;
-    fs::path signedConfPNORPath;
+    std::filesystem::path extractPath;
+    std::filesystem::path signedConfPath;
+    std::filesystem::path signedConfPNORPath;
 };
 
 /** @brief Test for success scenario*/

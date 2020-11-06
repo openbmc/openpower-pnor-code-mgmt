@@ -11,7 +11,7 @@
 #include <sdbusplus/server.hpp>
 #include <xyz/openbmc_project/Common/error.hpp>
 
-#include <experimental/filesystem>
+#include <filesystem>
 
 #ifdef WANT_SIGNATURE_VERIFY
 #include "image_verify.hpp"
@@ -24,7 +24,6 @@ namespace software
 namespace updater
 {
 
-namespace fs = std::experimental::filesystem;
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
 
 using namespace phosphor::logging;
@@ -242,7 +241,7 @@ uint8_t RedundancyPriority::priority(uint8_t value)
 bool Activation::validateSignature(const std::string& pnorFileName)
 {
     using Signature = openpower::software::image::Signature;
-    fs::path imageDir(IMG_DIR);
+    std::filesystem::path imageDir(IMG_DIR);
 
     Signature signature(imageDir / versionId, pnorFileName,
                         PNOR_SIGNED_IMAGE_CONF_PATH);
