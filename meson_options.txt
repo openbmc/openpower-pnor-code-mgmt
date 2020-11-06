@@ -1,0 +1,6 @@
+option('tests', type: 'feature', description: 'Build tests.')
+option('ubi', type: 'feature', description: 'Enable UBI support')
+option('mmc', type: 'feature', description: 'Enable MMC support')
+option('vpnor', type: 'feature', description: 'Enable virtual PNOR support')
+option('verify', type: 'feature', description: 'Enable image signature validation')
+option('msl', type: 'string', description: 'Minimum Ship Level')
