@@ -10,7 +10,7 @@ After=obmc-mapper.target
 ExecStart=/usr/bin/openpower-update-manager
 Restart=always
 Type=dbus
-BusName={BUSNAME}
+BusName=org.open_power.Software.Host.Updater
 
 [Install]
 WantedBy=multi-user.target
