@@ -1,7 +1,7 @@
 AM_CPPFLAGS = -I$(top_srcdir)
 
 # gtest unit tests which run during a 'make check'
-check_PROGRAMS = utest
+check_PROGRAMS = utest test_functions
 
 # Run all 'check' test programs
 TESTS = $(check_PROGRAMS)
@@ -44,3 +44,23 @@ utest_SOURCES = \
 	test_version.cpp \
 	test_item_updater_static.cpp \
 	msl_verify.cpp
+
+test_functions_CPPFLAGS = \
+	-Igtest \
+	$(GTEST_CPPFLAGS) \
+	$(AM_CPPFLAGS)
+
+test_functions_CXXFLAGS = \
+	$(PTHREAD_CFLAGS) \
+	$(SDBUSPLUS_CFLAGS) \
+	$(SDEVENTPLUS_CFLAGS)
+
+test_functions_LDFLAGS = \
+	-lgtest_main \
+	-lgtest \
+	$(SDBUSPLUS_LIBS) \
+	$(SDEVENTPLUS_LIBS)
+
+test_functions_SOURCES = \
+	test_functions.cpp \
+	../functions.cpp

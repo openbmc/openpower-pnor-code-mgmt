@@ -18,6 +18,9 @@ PKG_CHECK_MODULES([SDBUSPLUS], [sdbusplus])
 PKG_CHECK_MODULES([SDEVENTPLUS], [sdeventplus])
 PKG_CHECK_MODULES([PHOSPHOR_LOGGING], [phosphor-logging])
 
+# Check for headers
+AC_CHECK_HEADERS([CLI/CLI.hpp], [], [AC_MSG_ERROR([CLI11 is required and was not found])])
+
 # Checks for library functions
 LT_INIT # Required for systemd linking
 
