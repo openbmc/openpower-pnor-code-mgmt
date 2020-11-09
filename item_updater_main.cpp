@@ -16,6 +16,32 @@
 
 #include <system_error>
 
+namespace openpower
+{
+namespace software
+{
+namespace updater
+{
+void initializeService(sdbusplus::bus::bus& bus)
+{
+    sdbusplus::server::manager::manager objManager(bus, SOFTWARE_OBJPATH);
+#ifdef UBIFS_LAYOUT
+    static ItemUpdaterUbi updater(bus, SOFTWARE_OBJPATH);
+    static Watch watch(
+        bus.get_event(),
+        std::bind(std::mem_fn(&ItemUpdater::updateFunctionalAssociation),
+                  &updater, std::placeholders::_1));
+#elif defined MMC_LAYOUT
+    static ItemUpdaterMMC updater(bus, SOFTWARE_OBJPATH);
+#else
+    static ItemUpdaterStatic updater(bus, SOFTWARE_OBJPATH);
+#endif
+    bus.request_name(BUSNAME_UPDATER);
+}
+} // namespace updater
+} // namespace software
+} // namespace openpower
+
 int main(int, char*[])
 {
     using namespace openpower::software::updater;
@@ -23,27 +49,12 @@ int main(int, char*[])
     auto bus = sdbusplus::bus::new_default();
     auto loop = sdeventplus::Event::get_default();
 
-    // Add sdbusplus ObjectManager.
-    sdbusplus::server::manager::manager objManager(bus, SOFTWARE_OBJPATH);
+    bus.attach_event(loop.get(), SD_EVENT_PRIORITY_NORMAL);
 
-#ifdef UBIFS_LAYOUT
-    ItemUpdaterUbi updater(bus, SOFTWARE_OBJPATH);
-#elif defined MMC_LAYOUT
-    ItemUpdaterMMC updater(bus, SOFTWARE_OBJPATH);
-#else
-    ItemUpdaterStatic updater(bus, SOFTWARE_OBJPATH);
-#endif
+    initializeService(bus);
 
-    bus.request_name(BUSNAME_UPDATER);
     try
     {
-#ifdef UBIFS_LAYOUT
-        openpower::software::updater::Watch watch(
-            loop.get(),
-            std::bind(std::mem_fn(&ItemUpdater::updateFunctionalAssociation),
-                      &updater, std::placeholders::_1));
-#endif
-        bus.attach_event(loop.get(), SD_EVENT_PRIORITY_NORMAL);
         auto rc = loop.loop();
         if (rc < 0)
         {
