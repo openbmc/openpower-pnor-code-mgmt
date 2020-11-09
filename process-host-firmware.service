@@ -1,0 +1,8 @@
+[Unit]
+Description=Set POWER host firmware well-known names
+
+[Service]
+ExecStart=/usr/bin/openpower-update-manager process-host-firmware
+Restart=on-failure
+Type=oneshot
+RemainAfterExit=yes
