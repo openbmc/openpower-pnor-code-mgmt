@@ -10,6 +10,7 @@ bin_PROGRAMS = \
 
 openpower_update_manager_SOURCES = \
 	activation.cpp \
+	functions..cpp \
 	version.cpp \
 	item_updater.cpp \
 	item_updater_main.cpp \

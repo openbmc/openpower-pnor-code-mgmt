@@ -8,13 +8,19 @@
 #else
 #include "static/item_updater_static.hpp"
 #endif
+#include "functions.hpp"
 
+#include <CLI/CLI.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/server/manager.hpp>
 #include <sdeventplus/event.hpp>
 
+#include <map>
+#include <memory>
+#include <string>
 #include <system_error>
+#include <vector>
 
 namespace openpower
 {
@@ -42,7 +48,7 @@ void initializeService(sdbusplus::bus::bus& bus)
 } // namespace software
 } // namespace openpower
 
-int main(int, char*[])
+int main(int argc, char* argv[])
 {
     using namespace openpower::software::updater;
     using namespace phosphor::logging;
@@ -51,7 +57,38 @@ int main(int, char*[])
 
     bus.attach_event(loop.get(), SD_EVENT_PRIORITY_NORMAL);
 
-    initializeService(bus);
+    CLI::App app{"OpenPOWER host firmware manager"};
+
+    // subcommandContext allows program subcommand callbacks to add loop event
+    // callbacks (e.g. reception of a dbus signal) and then return to main,
+    // without the loop event callback being destroyed until the loop event
+    // callback has a chance to run and instruct the loop to exit.
+    std::shared_ptr<void> subcommandContext;
+    static_cast<void>(
+        app.add_subcommand("process-host-firmware",
+                           "Point the host firmware at its data.")
+            ->callback([&bus, &loop, &subcommandContext]() {
+                using namespace std::string_literals;
+                std::map<std::string, std::vector<std::string>> extensionMap{{
+                    {"ibm,rainier-2u"s, {".RAINIER_2U_XML"s, ".P10"s}},
+                    {"ibm,rainier-4u"s, {".RAINIER_4U_XML"s, ".P10"s}},
+                }};
+                auto hostFirmwareDirectory = "/media/hostfw/running"s;
+                auto logCallback = [](const auto& path, auto& ec) {
+                    std::cerr << path << ": " << ec.message() << "\n";
+                };
+                subcommandContext =
+                    functions::process_hostfirmware::processHostFirmware(
+                        bus, std::move(extensionMap),
+                        std::move(hostFirmwareDirectory),
+                        std::move(logCallback), loop);
+            }));
+    CLI11_PARSE(app, argc, argv);
+
+    if (app.get_subcommands().size() == 0)
+    {
+        initializeService(bus);
+    }
 
     try
     {

@@ -27,12 +27,18 @@ if(get_option('optimization') == '0')
     message('Disabling lto because optimization is disabled')
 endif
 
+cxx = meson.get_compiler('cpp')
+
 extra_sources = []
 extra_unit_files = []
 extra_scripts = []
 
 build_vpnor = get_option('vpnor').enabled()
 build_verify_signature = get_option('verify-signature').enabled()
+
+if not cxx.has_header('CLI/CLI.hpp')
+      error('Could not find CLI.hpp')
+endif
 
 summary('building for device type', '@0@'.format(get_option('device-type')))
 summary('building vpnor', build_vpnor)
@@ -155,6 +161,7 @@ executable(
     'openpower-update-manager',
     [
         'activation.cpp',
+        'functions.cpp',
         'version.cpp',
         'item_updater.cpp',
         'item_updater_main.cpp',
@@ -246,6 +253,19 @@ if not get_option('tests').disabled()
             ],
             implicit_include_directories: false,
             include_directories: '.',
+        )
+    )
+    test(
+        'test_functions',
+        executable(
+            'test_functions',
+            'test/test_functions.cpp',
+            'functions.cpp',
+            dependencies: [
+                dependency('gtest', main: true),
+                dependency('sdbusplus'),
+                dependency('sdeventplus'),
+            ],
         )
     )
 endif
