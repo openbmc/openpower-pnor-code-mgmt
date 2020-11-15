@@ -1,9 +1,0 @@
-dist_bin_SCRIPTS += \
-	%reldir%/obmc-vpnor-util
-
-if HAVE_SYSTEMD
-systemdsystemunit_DATA += \
-	%reldir%/obmc-vpnor-check-clearvolatile@.service \
-	%reldir%/obmc-vpnor-enable-clearvolatile@.service \
-	%reldir%/obmc-vpnor-updatesymlinks.service
-endif

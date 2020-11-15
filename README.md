@@ -8,12 +8,15 @@ or
 [Host Code Update](https://github.com/openbmc/docs/blob/master/code-update/host-code-update.md)
 
 ## To Build
+
+openpower-pnor-code-mgmt is built using meson.
+
 ```
-To build this package, do the following steps:
+meson build
+cd build
+ninja
+ninja test
+ninja install
 
-    1. ./bootstrap.sh
-    2. ./configure ${CONFIGURE_FLAGS}
-    3. make
-
-To clean the repository run `./bootstrap.sh clean`.
+To clean the repository run `rm -rf build`.
 ```
