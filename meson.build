@@ -223,6 +223,17 @@ foreach u : unit_files
     )
 endforeach
 
+dbus_system_bus_services_dir = dependency('dbus-1').get_pkgconfig_variable(
+    'system_bus_services_dir',
+    define_variable: ['prefix', get_option('prefix')])
+dbus_policy_dir = run_command(
+    'realpath',
+    join_paths(dbus_system_bus_services_dir, '..', 'system.d')).stdout().strip()
+
+install_data(
+    'dbus/org.open_power.Software.Host.Updater.conf',
+    install_dir: dbus_policy_dir)
+
 if not get_option('tests').disabled()
     test(
         'utest',
