@@ -72,6 +72,9 @@ mmc_init() {
     mkdir -p ${alternate_dir}
   fi
   mount ${base_dir}/hostfw-${alternate_label} ${alternate_dir} -o ro
+
+  # setup host firmware runtime well known names
+  openpower-update-manager process-host-firmware
 }
 
 mmc_patch() {
