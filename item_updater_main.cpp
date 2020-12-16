@@ -30,7 +30,8 @@ namespace updater
 {
 void initializeService(sdbusplus::bus::bus& bus)
 {
-    sdbusplus::server::manager::manager objManager(bus, SOFTWARE_OBJPATH);
+    static sdbusplus::server::manager::manager objManager(bus,
+                                                          SOFTWARE_OBJPATH);
 #ifdef UBIFS_LAYOUT
     static ItemUpdaterUbi updater(bus, SOFTWARE_OBJPATH);
     static Watch watch(
