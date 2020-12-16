@@ -70,6 +70,7 @@ int main(int argc, char* argv[])
             ->callback([&bus, &loop, &subcommandContext]() {
                 using namespace std::string_literals;
                 std::map<std::string, std::vector<std::string>> extensionMap{{
+                    {"ibm,everest"s, {".EVEREST_XML"s, ".P10"s}},
                     {"ibm,rainier-2u"s, {".RAINIER_2U_XML"s, ".P10"s}},
                     {"ibm,rainier-4u"s, {".RAINIER_4U_XML"s, ".P10"s}},
                 }};
