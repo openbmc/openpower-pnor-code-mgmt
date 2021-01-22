@@ -1,6 +1,7 @@
 [Unit]
 Description=Clear the Volatile PNOR partitions in host%I if Enabled
 After=obmc-vpnor-enable-clearvolatile@%i.service
+Wants=obmc-host-start-pre@%i.target
 Before=obmc-host-start-pre@%i.target
 ConditionPathExists=!/run/openbmc/host@%i-on
 
