@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "d7eec790_712e9583",
+        "filename": "vpnor/obmc-vpnor-check-clearvolatile@.service",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-01-26T15:43:48Z",
+      "side": 1,
+      "message": "I\u0027m not sure about this change. The clearvolatile service doesn\u0027t need or care about starting the host-start-pre target, it just wants to run before the start-pre target if it\u0027s going to run at the same time.\nThe clearvolatile service is started by the startmin target. Wouldn\u0027t it make more sense to ensure that the startmin target ensures that the start-pre target starts?",
+      "revId": "c73d2bea2dff98350bc0dc2bd8e9b682ff01afe3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
