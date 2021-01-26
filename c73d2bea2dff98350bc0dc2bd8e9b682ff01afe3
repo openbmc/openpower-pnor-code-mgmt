@@ -34,6 +34,24 @@
       "revId": "c73d2bea2dff98350bc0dc2bd8e9b682ff01afe3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "10705842_5edba790",
+        "filename": "vpnor/obmc-vpnor-check-clearvolatile@.service",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-01-26T16:59:52Z",
+      "side": 1,
+      "message": "Yep, I get what you\u0027re saying. Synchronization targets wont start anything on their own so no worries about running this standalone. If you did, it would start the obmc-host-start-pre.target and the only thing required would be this service run before it so all would be fine. But we would now have that target running and if you went to power on, it would actually cause issues because the target is already started. So yeah, let me look into doing what you say and just having obmc-host-startmin@.target wants all of the synch targets to ensure they are started. I keep thinking these synch targets may be more work then they\u0027re worth with all these corner cases and workarounds.",
+      "parentUuid": "594a6e4b_03ac3893",
+      "revId": "c73d2bea2dff98350bc0dc2bd8e9b682ff01afe3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
