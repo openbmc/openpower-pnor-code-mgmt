@@ -16,6 +16,24 @@
       "revId": "c73d2bea2dff98350bc0dc2bd8e9b682ff01afe3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "594a6e4b_03ac3893",
+        "filename": "vpnor/obmc-vpnor-check-clearvolatile@.service",
+        "patchSetId": 1
+      },
+      "lineNbr": 5,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-01-26T16:00:27Z",
+      "side": 1,
+      "message": "I guess the way I see it is that this service clears the volatile partition. If it were to be called manually or by some other service that needs this partition cleared outside a power on path, we probably don\u0027t want to trigger the host-start-pre service to start.",
+      "parentUuid": "d7eec790_712e9583",
+      "revId": "c73d2bea2dff98350bc0dc2bd8e9b682ff01afe3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
