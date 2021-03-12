@@ -74,6 +74,7 @@ int main(int argc, char* argv[])
                     {"ibm,everest"s, {".EVEREST_XML"s, ".P10"s}},
                     {"ibm,rainier-2u"s, {".RAINIER_2U_XML"s, ".P10"s}},
                     {"ibm,rainier-4u"s, {".RAINIER_4U_XML"s, ".P10"s}},
+                    {"ibm,rainier-1s4u"s, {".RAINIER_4U_XML"s, ".P10"s}},
                 }};
                 auto hostFirmwareDirectory = "/media/hostfw/running"s;
                 auto logCallback = [](const auto& path, auto& ec) {
