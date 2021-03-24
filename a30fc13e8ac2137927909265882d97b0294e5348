@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "fc242bff_7a891843",
+        "filename": "item_updater_main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000020
+      },
+      "writtenOn": "2021-03-24T20:43:56Z",
+      "side": 1,
+      "message": "I don\u0027t love that this has be updated every time a new system / new favor of system comes along. \nI don\u0027t have a better solution though at this time.",
+      "revId": "a30fc13e8ac2137927909265882d97b0294e5348",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
