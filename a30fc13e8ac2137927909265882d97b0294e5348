@@ -16,6 +16,24 @@
       "revId": "a30fc13e8ac2137927909265882d97b0294e5348",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ac0c8a56_36fd245a",
+        "filename": "item_updater_main.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2021-03-25T14:59:24Z",
+      "side": 1,
+      "message": "Yeah, if we see more and more of this then Spinler had some ideas on how we could refactor things to be more general. Not sure how much of this we\u0027ll really see though.",
+      "parentUuid": "fc242bff_7a891843",
+      "revId": "a30fc13e8ac2137927909265882d97b0294e5348",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
