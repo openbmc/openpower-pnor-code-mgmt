@@ -14,13 +14,13 @@ Options:
    -i, --image <squashfs|static>
                           Generate SquashFS image or use static PNOR
    -f, --file <file>      Specify destination file. Defaults to
-                          `pwd`/<PNOR FILE>.pnor.<image_type>.tar[.gz] if
+                          $(pwd)/<PNOR FILE>.pnor.<image_type>.tar[.gz] if
                           unspecified.
                           (For example,
                           * "generate-tar -i squashfs my.pnor" would generate
-                          `pwd`/my.pnor.squashfs.tar
+                          $(pwd)/my.pnor.squashfs.tar
                           * "generate-tar -i static my.pnor" would generate
-                          `pwd`/my.pnor.static.tar.gz)
+                          $(pwd)/my.pnor.static.tar.gz)
    -s, --sign <path>      Sign the image. The optional path argument specifies
                           the private key file. Defaults to the bash variable
                           PRIVATE_KEY_PATH if available, or else uses the
@@ -51,9 +51,10 @@ F0nIdUAhR0yTfKM=
 # Reference the ffs structures at:
 # https://github.com/open-power/hostboot/blob/master/src/usr/pnor/common/ffs_hb.H
 # https://github.com/open-power/hostboot/blob/master/src/usr/pnor/ffs.h
-let ffs_entry_size=128
-let vercheck_offset=112
+ffs_entry_size=128
+vercheck_offset=112
 do_sign=false
+PRIVATE_KEY_PATH=${PRIVATE_KEY_PATH:-}
 private_key_path="${PRIVATE_KEY_PATH}"
 image_type=""
 outfile=""
@@ -74,7 +75,7 @@ while [[ $# -gt 0 ]]; do
       ;;
     -s|--sign)
       do_sign=true
-      if [[ ! -z "${2}"  && "${2}" != -* ]]; then
+      if [[ -n "${2}"  && "${2}" != -* ]]; then
         private_key_path="$2"
         shift 2
       else
@@ -115,9 +116,9 @@ fi
 
 if [[ -z $outfile ]]; then
     if [[ ${pnorfile##*.} == "pnor" ]]; then
-        outfile=`pwd`/${pnorfile##*/}.$image_type.tar
+        outfile=$(pwd)/${pnorfile##*/}.$image_type.tar
     else
-        outfile=`pwd`/${pnorfile##*/}.pnor.$image_type.tar
+        outfile=$(pwd)/${pnorfile##*/}.pnor.$image_type.tar
     fi
     if [[ "${image_type}" == "static" ]]; then
         # Append .gz so the tarball is compressed
@@ -125,16 +126,16 @@ if [[ -z $outfile ]]; then
     fi
 else
     if [[ $outfile != /* ]]; then
-        outfile=`pwd`/$outfile
+        outfile=$(pwd)/$outfile
     fi
 fi
 
 
-scratch_dir=`mktemp -d`
+scratch_dir=$(mktemp -d)
 # Remove the temp directory on exit.
 # The files in the temp directory may contain read-only files, so add
 # --interactive=never to skip the prompt.
-trap "{ rm -r --interactive=never ${scratch_dir}; }" EXIT
+trap '{ rm -r --interactive=never ${scratch_dir}; }' EXIT
 
 if [[ "${do_sign}" == true ]]; then
   if [[ -z "${private_key_path}" ]]; then
@@ -152,48 +153,52 @@ if [[ "${do_sign}" == true ]]; then
 
   public_key_file=publickey
   public_key_path=${scratch_dir}/$public_key_file
-  openssl pkey -in "${private_key_path}" -pubout -out ${public_key_path}
+  openssl pkey -in "${private_key_path}" -pubout -out "${public_key_path}"
 fi
 
 echo "Parsing PNOR TOC..."
 
 pnor_dir="${scratch_dir}/pnor"
-mkdir ${pnor_dir}
+mkdir "${pnor_dir}"
 
-pflash --partition=part --read=${pnor_dir}/part -F ${pnorfile}
-pflash --partition=VERSION --read=${pnor_dir}/VERSION -F ${pnorfile}
-version_size=$(wc -c ${pnor_dir}/VERSION | cut -d' ' -f 1)
-magic_number=$(xxd -p -l 4 ${pnor_dir}/VERSION)
+pflash --partition=part --read="${pnor_dir}"/part -F "${pnorfile}"
+pflash --partition=VERSION --read="${pnor_dir}"/VERSION -F "${pnorfile}"
+version_size=$(wc -c "${pnor_dir}"/VERSION | cut -d' ' -f 1)
+magic_number=$(xxd -p -l 4 "${pnor_dir}"/VERSION)
 # Check if VERSION is signed. A signed version partition will have an extra
 # 4K header starting with the magic number 0x17082011, see:
 # https://github.com/open-power/skiboot/blob/master/libstb/container.h#L47
-if [ "$version_size" == "8192" -a "$magic_number" == "17082011" ]; then
+if [ "$version_size" == "8192" ] && [ "$magic_number" == "17082011" ]; then
   # Advance past the STB header (4K, indexed from 1)
-  cp ${pnor_dir}/VERSION ${pnor_dir}/VERSION_FULL
-  tail --bytes=+4097 ${pnor_dir}/VERSION_FULL > ${pnor_dir}/VERSION
+  cp "${pnor_dir}"/VERSION "${pnor_dir}"/VERSION_FULL
+  tail --bytes=+4097 "${pnor_dir}"/VERSION_FULL > "${pnor_dir}"/VERSION
 fi
 {
-  version=$(head -n 1 ${pnor_dir}/VERSION)
+  version=$(head -n 1 "${pnor_dir}"/VERSION)
   echo "version=$version"
-  extended_version=$(echo $(tail -n +2 ${pnor_dir}/VERSION)|tr ' ' ',')
+  # shellcheck disable=SC2005,SC2046 # Need the echo to remove new lines, same
+  # reason for not quoting the tail command
+  extended_version=$(echo $(tail -n +2 "${pnor_dir}"/VERSION)|tr ' ' ',')
   echo "extended_version=$extended_version"
-  while read line; do
+  while read -r line; do
     if [[ $line == "ID="* ]]; then
         # This line looks like
         # "ID=05 MVPD 000d9000..00169000 (actual=00090000) [ECC]"
         read -r -a fields <<< "$line"
 
         id=${fields[0]##*=}
-        offset=$((${ffs_entry_size} * 10#${id} + ${vercheck_offset}))
-        vercheck=$(xxd -p -l  0x1 -seek ${offset} ${pnor_dir}/part)
-        export flags=$(pflash --detail=$((10#$id)) -F ${pnorfile} | grep "\[" |
+        offset=$((ffs_entry_size * 10#${id} + vercheck_offset))
+        vercheck=$(xxd -p -l  0x1 -seek ${offset} "${pnor_dir}"/part)
+        # shellcheck disable=SC2155 # Need the export in the same line to avoid
+        # pflash error
+        export flags=$(pflash --detail=$((10#$id)) -F "${pnorfile}" | grep "\[" |
                 sed 's/....$//' | tr '\n' ',' | sed 's/.$//')
         if [[ $flags != "" ]]; then
             flags=,$flags
         fi
 
-        if [[ $(echo $flags | grep "READONLY") == "" &&
-              $(echo $flags | grep "PRESERVED") == "" ]]; then
+        if [[ $(echo "$flags" | grep "READONLY") == "" &&
+              $(echo "$flags" | grep "PRESERVED") == "" ]]; then
             flags=$flags,READWRITE
         fi
 
@@ -201,17 +206,17 @@ fi
         echo  "partition${id}=${fields[1]},${fields[2]/../,},${vercheck}${flags}"
 
         # Save the partition name
-        partitions+=(${fields[1]})
+        partitions+=("${fields[1]}")
     fi
   # Don't need the BACKUP_PART partition
-  done < <(pflash --info -F ${pnorfile} | grep -v "BACKUP")
-} > ${pnor_dir}/${tocfile}
+  done < <(pflash --info -F "${pnorfile}" | grep -v "BACKUP")
+} > "${pnor_dir}"/${tocfile}
 
 for partition in "${partitions[@]}"; do
   echo "Reading ${partition}..."
-  pflash --partition=${partition} \
-    --read=${pnor_dir}/${partition} \
-    -F ${pnorfile}
+  pflash --partition="${partition}" \
+    --read="${pnor_dir}"/"${partition}" \
+    -F "${pnorfile}"
 done
 
 manifest_location="MANIFEST"
@@ -224,21 +229,23 @@ if [[ "${image_type}" == "squashfs" ]]; then
   # Prepare pnor file in ${pnor_dir}
   cd "${pnor_dir}"
   # Set permissions of partition files to read only
-  chmod 440 *
-  mksquashfs ${tocfile} ${partitions[*]} ${scratch_dir}/pnor.xz.squashfs -all-root
+  chmod 440 -- *
+  # shellcheck disable=SC2086 # Do not quote partitions since it lists multiple
+  # files and mksquashfs would assume to be a single file name within quotes
+  mksquashfs ${tocfile} ${partitions[*]} "${scratch_dir}"/pnor.xz.squashfs -all-root
   cd "${scratch_dir}"
   files_to_sign+=" pnor.xz.squashfs"
 else
-  cp ${pnorfile} ${scratch_dir}
+  cp "${pnorfile}" "${scratch_dir}"
   cd "${scratch_dir}"
-  files_to_sign+=" $(basename ${pnorfile})"
+  files_to_sign+=" $(basename "${pnorfile}")"
 fi
 
 echo "Creating MANIFEST for the image"
 echo -e "purpose=xyz.openbmc_project.Software.Version.VersionPurpose.Host\nversion=$version\n\
 extended_version=$extended_version" >> $manifest_location
 
-if [[ ! -z "${machine_name}" ]]; then
+if [[ -n "${machine_name}" ]]; then
     echo -e "MachineName=${machine_name}" >> $manifest_location
 fi
 
@@ -249,7 +256,7 @@ if [[ "${do_sign}" == true ]]; then
   echo HashType="RSA-SHA256" >> $manifest_location
 
   for file in $files_to_sign; do
-    openssl dgst -sha256 -sign ${private_key_path} -out "${file}.sig" $file
+    openssl dgst -sha256 -sign "${private_key_path}" -out "${file}.sig" "$file"
   done
 
   additional_files="*.sig"
@@ -257,10 +264,13 @@ fi
 
 if [[ "${image_type}" == "squashfs" ]]; then
   echo "Generating tarball to contain the SquashFS image and its MANIFEST"
-  tar -cvf $outfile $files_to_sign $additional_files
+  # shellcheck disable=SC2086 # Do not quote the files variables since they list
+  # multiple files and tar would assume to be a single file name within quotes
+  tar -cvf "$outfile" $files_to_sign $additional_files
   echo "SquashFSTarball at ${outfile}"
 else
-  tar -czvf $outfile $files_to_sign $additional_files
+  # shellcheck disable=SC2086 # Do not quote the files variables since they list
+  # multiple files and tar would assume to be a single file name within quotes
+  tar -czvf "$outfile" $files_to_sign $additional_files
   echo "Static layout tarball at $outfile"
 fi
-
