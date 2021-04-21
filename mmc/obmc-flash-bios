@@ -23,7 +23,7 @@ mmc_init() {
   # Mount the image that corresponds to the boot label as read-only to be used
   # to populate the running directory.
   boot_label="$(fw_printenv -n bootside)"
-  mount ${base_dir}/hostfw-${boot_label} ${ro_dir} -o ro
+  mount ${base_dir}/hostfw-"${boot_label}" ${ro_dir} -o ro
 
   # Determine if the running dir contains the running version
   running_label=""
@@ -40,8 +40,8 @@ mmc_init() {
       prsvs=$(grep PRESERVED ${running_dir}/pnor.toc)
       for prsv in ${prsvs}; do
         prsv=${prsv##partition*=}
-        prsv=$(echo ${prsv} | cut -d "," -f 1)
-        cp -p ${running_dir}/${prsv} ${prsv_dir}
+        prsv=$(echo "${prsv}" | cut -d "," -f 1)
+        cp -p ${running_dir}/"${prsv}" ${prsv_dir}
       done
     fi
 
@@ -51,10 +51,10 @@ mmc_init() {
 
     # Restore the preserved partitions. Ignore error, there may be none.
     cp -p ${prsv_dir}/* ${running_dir}/ 2>/dev/null || true
-    rm -f ${prsv_dir}/*
+    rm -f "${prsv_dir:?}/"*
 
     # Clean up the staging dir in case of a failed update
-    rm -rf ${staging_dir}/*
+    rm -rf "${staging_dir:?}/"*
 
     # Save the label
     echo "${boot_label}" > "${running_label_file}"
@@ -79,7 +79,7 @@ mmc_init() {
 
 mmc_patch() {
   # Patching is disabled if field mode is set
-  if [[ "$(fw_printenv fieldmode 2>/dev/null)" == "fieldmode=true" ]]; then
+  if [ "$(fw_printenv fieldmode 2>/dev/null)" = "fieldmode=true" ]; then
     return 0
   fi
 
