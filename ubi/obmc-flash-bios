@@ -38,17 +38,20 @@ attach_ubi() {
   if [ ${rc} -ne 0 ]; then
     # Check the pnor mtd device is formatted as ubi by reading the first 3 byes,
     # which should be the ascii chars 'UBI'
-    magic="$(hexdump -C -n 3 ${pnordev})"
-    if [[ "${magic}" =~ "UBI" ]]; then
-      # Device already formatted as ubi, ubiattach failed for some other reason
-      return ${rc}
-    else
-      # Format device as ubi
-      echo "Starting ubiformat ${pnordev}"
-      ubiformat "${pnordev}" -y -q
-      # Retry the ubiattach
-      ubiattach /dev/ubi_ctrl -m "${pnor}" -d "${pnor}"
-    fi
+    magic="$(hexdump -C -n 3 "${pnordev}")"
+    case "${magic}" in
+      *UBI*)
+        # Device already formatted as ubi, ubiattach failed for some other reason
+        return ${rc}
+        ;;
+      *)
+        # Format device as ubi
+        echo "Starting ubiformat ${pnordev}"
+        ubiformat "${pnordev}" -y -q
+        # Retry the ubiattach
+        ubiattach /dev/ubi_ctrl -m "${pnor}" -d "${pnor}"
+        ;;
+    esac
   fi
 }
 
@@ -58,14 +61,15 @@ mount_squashfs() {
   mountdir="/media/${name}"
   vol="$(findubi "${name}")"
   img="/tmp/images/${version}/pnor.xz.squashfs"
-  filesize="$(ls -sh $img | awk -F " " {'print $1'})"
+  # shellcheck disable=SC2012 # ls provides the size in human-readable form
+  filesize="$(ls -sh "$img" | awk -F " " '{print $1}')"
 
   if is_mounted "${name}"; then
     echo "${name} is already mounted."
     return 0
   fi
 
-  if [ ! -z "${vol}" ]; then
+  if [ -n "${vol}" ]; then
     ubirmvol "${ubidev}" -N "${name}"
   fi
 
@@ -75,31 +79,23 @@ mount_squashfs() {
 
   # Set size of read-only partition equal to pnor.xz.squashfs
   ubimkvol "${ubidev}" -N "${name}" -s "${filesize}"KiB --type=static
-  vol="$(findubi "${name}")"
-
-  if [ $? != 0 ]; then
+  if ! vol="$(findubi "${name}")"; then
     echo "Unable to create RO volume!"
     return 1
   fi
 
   ubidevid="${vol#ubi}"
-  ubiupdatevol "/dev/ubi${ubidevid}" "${img}"
-
-  if [ $? != 0 ]; then
+  if ! ubiupdatevol "/dev/ubi${ubidevid}" "${img}"; then
     echo "Unable to update RO volume!"
     return 1
   fi
 
-  ubiblock --create "/dev/ubi${ubidevid}"
-
-  if [ $? != 0 ]; then
+  if ! ubiblock --create "/dev/ubi${ubidevid}"; then
     echo "Unable to create UBI block for RO volume!"
     return 1
   fi
 
-  mount -t squashfs -o ro "/dev/ubiblock${ubidevid}" "${mountdir}"
-
-  if [ $? != 0 ]; then
+  if ! mount -t squashfs -o ro "/dev/ubiblock${ubidevid}" "${mountdir}"; then
     echo "Unable to mount RO volume!"
     return 1
   fi
@@ -111,19 +107,23 @@ mount_ubi() {
   ubidev="/dev/ubi${pnor}"
   pnordev="/dev/mtd${pnor}"
 
-  if [[ "${name}" == "pnor-patch" ]]; then
-    if [[ "$(fw_printenv fieldmode 2>/dev/null)" == "fieldmode=true" ]]; then
+  if [ "${name}" = "pnor-patch" ]; then
+    if [ "$(fw_printenv fieldmode 2>/dev/null)" = "fieldmode=true" ]; then
       return 0
     fi
-    if [[ ! "$(hexdump -C -n 3 ${pnordev})" =~ "UBI" ]]; then
-      return 0
-    fi
+    case "$(hexdump -C -n 3 "${pnordev}")" in
+      *UBI*)
+        ;;
+      *)
+        return 0
+        ;;
+    esac
     mountdir="/usr/local/share/pnor"
   else
     mountdir="/media/${name}"
   fi
 
-  if [[ "${name}" == "pnor-prsv" ]]; then
+  if [ "${name}" = "pnor-prsv" ]; then
     size="2MiB"
   else
     size="16MiB"
@@ -171,39 +171,47 @@ remount_ubi() {
   pnordev="/dev/mtd${pnor}"
 
   # Re-Attach the pnor mtd device to ubi
-  if [[ $(hexdump -C -n 3 ${pnordev}) =~ "UBI" ]]; then
-    ubiattach /dev/ubi_ctrl -m "${pnor}" -d "${pnor}"
-  else
-    # Device not formatted as ubi.
-    return 0
-  fi
+  case "$(hexdump -C -n 3 "${pnordev}")" in
+    *UBI*)
+      ubiattach /dev/ubi_ctrl -m "${pnor}" -d "${pnor}"
+      ;;
+    *)
+      return 0
+      ;;
+  esac
 
   # Get information on all ubi volumes
-  ubinfo=$(ubinfo -d ${pnor})
+  ubinfo=$(ubinfo -d "${pnor}")
   presentVolumes=${ubinfo##*:}
+  # shellcheck disable=SC2039 # read -a is for arrays
   IFS=', ' read -r -a array <<< "$presentVolumes"
-  for element in ${array[@]};
+  # shellcheck disable=SC2039 # Ignore error about arrays
+  for element in "${array[@]}";
   do
-    elementProperties=$(ubinfo -d $pnor -n $element)
+    elementProperties=$(ubinfo -d "$pnor" -n "$element")
     # Get ubi volume name by getting rid of additional properties
     name=${elementProperties#*Name:}
     name="${name%Character*}"
+    # shellcheck disable=SC2039 # Ignore error about echo parameters
     name="$(echo -e "${name}" | tr -d '[:space:]')"
 
-    if [[ ${name} == pnor-prsv ]] || [[ ${name} == pnor-rw* ]] || [[ ${name} == pnor-ro* ]]; then
-      mountdir="/media/${name}"
-      if [ ! -d "${mountdir}" ]; then
-        mkdir -p "${mountdir}"
-      fi
-
-      if [[ ${name} == pnor-ro* ]]
-      then
-        ubiblock --create /dev/ubi${pnor}_${element}
+    case "${name}" in
+      pnor-prsv | pnor-rw* | pnor-ro*)
+        mountdir="/media/${name}"
+        if [ ! -d "${mountdir}" ]; then
+          mkdir -p "${mountdir}"
+        fi
+        ;;
+    esac
+    case "${name}" in
+      pnor-ro*)
+        ubiblock --create "/dev/ubi${pnor}_${element}"
         mount -t squashfs -o ro "/dev/ubiblock${pnor}_${element}" "${mountdir}"
-      else
+        ;;
+      *)
         mount -t ubifs "ubi${pnor}:${name}" "${mountdir}"
-      fi
-    fi
+        ;;
+    esac
   done
 }
 
@@ -213,16 +221,21 @@ ubi_cleanup() {
             org.open_power.Software.Host.Updater | \
             grep /xyz/openbmc_project/software/ | tail -c 9)
 
-    if [[ -z "$activeVersion" ]]; then
+    if [ -z "$activeVersion" ]; then
         vols=$(ubinfo -a | grep -e "pnor-ro-" -e "pnor-rw-" | cut -c 14-)
+        # shellcheck disable=SC2039,SC2206 # Ignore error about arrays and quoting
         vols=(${vols})
     else
+        # shellcheck disable=SC2178 # Ignore error about reusing the vols variable
         vols=$(ubinfo -a | grep -e "pnor-ro-" -e "pnor-rw-" | \
                 grep -v "$activeVersion" | cut -c 14-)
+        # shellcheck disable=SC2039,SC2128,SC2206 # Ignore error about arrays
         vols=(${vols})
     fi
 
+    # shellcheck disable=SC2039 # Ignore error about loop index
     for (( index=0; index<${#vols[@]}; index++ )); do
+         # shellcheck disable=SC2039 # Ignore error about arrays
          name=${vols[index]}
          umount_ubi
     done
