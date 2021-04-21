@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Get the mtd device number (mtdX)
 findmtd() {
@@ -38,7 +38,7 @@ attach_ubi() {
   if [ ${rc} -ne 0 ]; then
     # Check the pnor mtd device is formatted as ubi by reading the first 3 byes,
     # which should be the ascii chars 'UBI'
-    magic="$(hexdump -C -n 3 ${pnordev})"
+    magic="$(hexdump -C -n 3 "${pnordev}")"
     if [[ "${magic}" =~ "UBI" ]]; then
       # Device already formatted as ubi, ubiattach failed for some other reason
       return ${rc}
@@ -58,14 +58,15 @@ mount_squashfs() {
   mountdir="/media/${name}"
   vol="$(findubi "${name}")"
   img="/tmp/images/${version}/pnor.xz.squashfs"
-  filesize="$(ls -sh $img | awk -F " " {'print $1'})"
+  # shellcheck disable=SC2012 # ls provides the size in human-readable form
+  filesize="$(ls -sh "$img" | awk -F " " '{print $1}')"
 
   if is_mounted "${name}"; then
     echo "${name} is already mounted."
     return 0
   fi
 
-  if [ ! -z "${vol}" ]; then
+  if [ -n "${vol}" ]; then
     ubirmvol "${ubidev}" -N "${name}"
   fi
 
@@ -75,31 +76,23 @@ mount_squashfs() {
 
   # Set size of read-only partition equal to pnor.xz.squashfs
   ubimkvol "${ubidev}" -N "${name}" -s "${filesize}"KiB --type=static
-  vol="$(findubi "${name}")"
-
-  if [ $? != 0 ]; then
+  if ! vol="$(findubi "${name}")"; then
     echo "Unable to create RO volume!"
     return 1
   fi
 
   ubidevid="${vol#ubi}"
-  ubiupdatevol "/dev/ubi${ubidevid}" "${img}"
-
-  if [ $? != 0 ]; then
+  if ! ubiupdatevol "/dev/ubi${ubidevid}" "${img}"; then
     echo "Unable to update RO volume!"
     return 1
   fi
 
-  ubiblock --create "/dev/ubi${ubidevid}"
-
-  if [ $? != 0 ]; then
+  if ! ubiblock --create "/dev/ubi${ubidevid}"; then
     echo "Unable to create UBI block for RO volume!"
     return 1
   fi
 
-  mount -t squashfs -o ro "/dev/ubiblock${ubidevid}" "${mountdir}"
-
-  if [ $? != 0 ]; then
+  if ! mount -t squashfs -o ro "/dev/ubiblock${ubidevid}" "${mountdir}"; then
     echo "Unable to mount RO volume!"
     return 1
   fi
@@ -115,7 +108,7 @@ mount_ubi() {
     if [[ "$(fw_printenv fieldmode 2>/dev/null)" == "fieldmode=true" ]]; then
       return 0
     fi
-    if [[ ! "$(hexdump -C -n 3 ${pnordev})" =~ "UBI" ]]; then
+    if [[ ! "$(hexdump -C -n 3 "${pnordev}")" =~ "UBI" ]]; then
       return 0
     fi
     mountdir="/usr/local/share/pnor"
@@ -171,7 +164,7 @@ remount_ubi() {
   pnordev="/dev/mtd${pnor}"
 
   # Re-Attach the pnor mtd device to ubi
-  if [[ $(hexdump -C -n 3 ${pnordev}) =~ "UBI" ]]; then
+  if [[ $(hexdump -C -n 3 "${pnordev}") =~ "UBI" ]]; then
     ubiattach /dev/ubi_ctrl -m "${pnor}" -d "${pnor}"
   else
     # Device not formatted as ubi.
@@ -179,12 +172,12 @@ remount_ubi() {
   fi
 
   # Get information on all ubi volumes
-  ubinfo=$(ubinfo -d ${pnor})
+  ubinfo=$(ubinfo -d "${pnor}")
   presentVolumes=${ubinfo##*:}
   IFS=', ' read -r -a array <<< "$presentVolumes"
-  for element in ${array[@]};
+  for element in "${array[@]}";
   do
-    elementProperties=$(ubinfo -d $pnor -n $element)
+    elementProperties=$(ubinfo -d "$pnor" -n "$element")
     # Get ubi volume name by getting rid of additional properties
     name=${elementProperties#*Name:}
     name="${name%Character*}"
@@ -198,7 +191,7 @@ remount_ubi() {
 
       if [[ ${name} == pnor-ro* ]]
       then
-        ubiblock --create /dev/ubi${pnor}_${element}
+        ubiblock --create "/dev/ubi${pnor}_${element}"
         mount -t squashfs -o ro "/dev/ubiblock${pnor}_${element}" "${mountdir}"
       else
         mount -t ubifs "ubi${pnor}:${name}" "${mountdir}"
@@ -215,15 +208,15 @@ ubi_cleanup() {
 
     if [[ -z "$activeVersion" ]]; then
         vols=$(ubinfo -a | grep -e "pnor-ro-" -e "pnor-rw-" | cut -c 14-)
-        vols=(${vols})
+        mapfile -t array <<< "${vols}"
     else
         vols=$(ubinfo -a | grep -e "pnor-ro-" -e "pnor-rw-" | \
                 grep -v "$activeVersion" | cut -c 14-)
-        vols=(${vols})
+        mapfile -t array <<< "${vols}"
     fi
 
-    for (( index=0; index<${#vols[@]}; index++ )); do
-         name=${vols[index]}
+    for (( index=0; index<${#array[@]}; index++ )); do
+         name=${array[index]}
          umount_ubi
     done
 }
