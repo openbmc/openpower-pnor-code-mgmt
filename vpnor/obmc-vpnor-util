@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/bash
 
 clear_volatile() {
   service=$(mapper get-service /org/open_power/control/volatile)
-  clearVolatileEnabled=$(busctl get-property $service /org/open_power/control/volatile xyz.openbmc_project.Object.Enable Enabled)
+  clearVolatileEnabled=$(busctl get-property "$service" /org/open_power/control/volatile xyz.openbmc_project.Object.Enable Enabled)
   if [[ "$clearVolatileEnabled" != "b true" ]]; then
     return 0
   fi
@@ -15,9 +15,9 @@ clear_volatile() {
   # toc partition string format:
   # partition27=HB_VOLATILE,0x02ba9000,0x02bae000,00,ECC,VOLATILE,READWRITE
   tocFilePath="${PNOR_RO_ACTIVE_PATH}${PNOR_TOC_FILE}"
-  volatiles=($(grep VOLATILE "${tocFilePath}" | grep -Eo '^partition([0-9]+)=([A-Za-z0-9_]+)'))
+  mapfile -t volatiles < <(grep VOLATILE "${tocFilePath}" | grep -Eo '^partition([0-9]+)=([A-Za-z0-9_]+)')
   for (( index=0; index<${#volatiles[@]}; index++ )); do
-    volatileName="$(echo ${volatiles[${index}]} | awk -F '=' '{print $2}')"
+    volatileName="$(echo "${volatiles[${index}]}" | awk -F '=' '{print $2}')"
 
     rwVolatile="${PNOR_RW_ACTIVE_PATH}${volatileName}"
     if [ -f "${rwVolatile}" ]; then
@@ -31,7 +31,7 @@ clear_volatile() {
     fi
   done
   # Always reset the sensor after clearing
-  busctl set-property $service /org/open_power/control/volatile xyz.openbmc_project.Object.Enable Enabled b false
+  busctl set-property "$service" /org/open_power/control/volatile xyz.openbmc_project.Object.Enable Enabled b false
 }
 
 update_symlinks() {
@@ -56,26 +56,26 @@ update_symlinks() {
 
   # Get a list of all active PNOR versions
   data="$(ls -d ${PNOR_RO_PREFIX}* 2>/dev/null)"
-  IFS=$'\n'  array=(${data})
+  mapfile -t array <<< "${data}"
 
   currentVersion=""
   lowestPriority=255
-  for element in ${array[@]}; do
+  for element in "${array[@]}"; do
     #Remove the PNOR_RO_PREFIX from the path to get version ID.
     versionId="${element#${PNOR_RO_PREFIX}}"
 
     # Get the priority of active versions from persistence files.
     if [[ -f "${PERSISTENCE_PATH}${versionId}" ]]; then
-      data="$(grep -r "priority" ${PERSISTENCE_PATH}${versionId})"
+      data="$(grep -r "priority" "${PERSISTENCE_PATH}${versionId}")"
       priority="${data: -1}"
-      if [[ priority -le lowestPriority  ]]; then
+      if [[ priority -le lowestPriority ]]; then
         lowestPriority=${priority}
         currentVersion=${versionId}
       fi
     fi
   done
 
-  if [ ! -z $currentVersion ]; then
+  if [ -n "$currentVersion" ]; then
       # Use active version
       roTarget="${PNOR_RO_PREFIX}${currentVersion}"
       rwTarget="${PNOR_RW_PREFIX}${currentVersion}"
@@ -90,15 +90,15 @@ update_symlinks() {
           mkdir -p "${HOSTFW_ACTIVE_PATH}"
       fi
       # Symlinks used by PLDM
-      if [[ $(readlink -f "${HOSTFW_RUNNING_PATH}") != ${MMC_RUNNING_PATH} ]]; then
+      if [[ $(readlink -f "${HOSTFW_RUNNING_PATH}") != "${MMC_RUNNING_PATH}" ]]; then
           rm -f ${HOSTFW_RUNNING_PATH}
           ln -sfv ${MMC_RUNNING_PATH} ${HOSTFW_RUNNING_PATH}
       fi
-      if [[ $(readlink -f "${HOSTFW_ALTERNATE_PATH}") != ${MMC_ALTERNATE_PATH} ]]; then
+      if [[ $(readlink -f "${HOSTFW_ALTERNATE_PATH}") != "${MMC_ALTERNATE_PATH}" ]]; then
           rm -f ${HOSTFW_ALTERNATE_PATH}
           ln -sfv ${MMC_ALTERNATE_PATH} ${HOSTFW_ALTERNATE_PATH}
       fi
-      if [[ $(readlink -f "${HOSTFW_STAGING_PATH}") != ${MMC_STAGING_PATH} ]]; then
+      if [[ $(readlink -f "${HOSTFW_STAGING_PATH}") != "${MMC_STAGING_PATH}" ]]; then
           rm -f ${HOSTFW_STAGING_PATH}
           ln -sfv ${MMC_STAGING_PATH} ${HOSTFW_STAGING_PATH}
       fi
@@ -110,18 +110,18 @@ update_symlinks() {
 
   # If the RW or RO active links doesn't point to the version with
   # lowest priority, then remove the symlink and create new ones.
-  if [[ $(readlink -f "${PNOR_RO_ACTIVE_PATH}") != ${roTarget}  ]]; then
+  if [[ $(readlink -f "${PNOR_RO_ACTIVE_PATH}") != "${roTarget}" ]]; then
     rm -f ${PNOR_RO_ACTIVE_PATH}
     rm -rf ${PNOR_PATCH_LOCATION}*
     ln -sfv ${roTarget} ${PNOR_RO_ACTIVE_PATH}
   fi
 
-  if [[ $(readlink -f "${PNOR_RW_ACTIVE_PATH}") != ${rwTarget}  ]]; then
+  if [[ $(readlink -f "${PNOR_RW_ACTIVE_PATH}") != "${rwTarget}" ]]; then
     rm -f ${PNOR_RW_ACTIVE_PATH}
     ln -sfv ${rwTarget} ${PNOR_RW_ACTIVE_PATH}
   fi
 
-  if [[ $(readlink -f "${PNOR_PRSV_ACTIVE_PATH}") != ${prsvTarget} ]]; then
+  if [[ $(readlink -f "${PNOR_PRSV_ACTIVE_PATH}") != "${prsvTarget}" ]]; then
     rm -f ${PNOR_PRSV_ACTIVE_PATH}
     ln -sfv ${prsvTarget} ${PNOR_PRSV_ACTIVE_PATH}
   fi
