@@ -4,18 +4,15 @@ project(
     default_options: [
         'warning_level=3',
         'werror=true',
-        'cpp_std=c++17',
+        'cpp_std=c++20',
         'buildtype=debugoptimized',
         'b_ndebug=if-release',
         'b_lto=true',
     ],
     license: 'Apache-2.0',
     version: '1.0',
+    meson_version: '>=0.57.0',
 )
-
-if get_option('cpp_std') != 'c++17'
-    error('This project requires c++17')
-endif
 
 if(get_option('buildtype') == 'minsize')
     add_project_arguments('-DNDEBUG', language : 'cpp')
@@ -210,9 +207,9 @@ unit_files = [
     'org.open_power.Software.Host.Updater.service',
 ] + extra_unit_files
 
-systemd_system_unit_dir = dependency('systemd').get_pkgconfig_variable(
-    'systemdsystemunitdir',
-    define_variable: ['prefix', get_option('prefix')])
+systemd_system_unit_dir = dependency('systemd').get_variable(
+    pkgconfig: 'systemdsystemunitdir',
+    pkgconfig_define: ['prefix', get_option('prefix')])
 foreach u : unit_files
     configure_file(
         input: u,
@@ -223,9 +220,9 @@ foreach u : unit_files
     )
 endforeach
 
-dbus_system_bus_services_dir = dependency('dbus-1').get_pkgconfig_variable(
-    'system_bus_services_dir',
-    define_variable: ['prefix', get_option('prefix')])
+dbus_system_bus_services_dir = dependency('dbus-1').get_variable(
+    pkgconfig: 'system_bus_services_dir',
+    pkgconfig_define: ['prefix', get_option('prefix')])
 dbus_policy_dir = run_command(
     'realpath',
     join_paths(dbus_system_bus_services_dir, '..', 'system.d')).stdout().strip()
