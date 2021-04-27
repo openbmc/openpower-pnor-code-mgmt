@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "a82cd880_5d0c1d14",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2021-04-27T03:12:32Z",
+      "side": 1,
+      "message": "CI reported bunch of warning , changing sh -\u003e bash will help to reduce the warnings.",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 9
+      },
+      "revId": "a08c97a96ac6a5ab207a7ae128d84c5e9fa5efb3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
