@@ -16,6 +16,24 @@
       "revId": "638967646245d79d03d88f9e4a0015639d0c1b68",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e0d80e70_ca395122",
+        "filename": "generate-tar",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-04-27T19:00:51Z",
+      "side": 1,
+      "message": "Which warnings? This file is not compiled during CI since it\u0027s a shell script.",
+      "parentUuid": "047d82f2_c1603ada",
+      "revId": "638967646245d79d03d88f9e4a0015639d0c1b68",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
