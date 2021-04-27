@@ -16,6 +16,24 @@
       "revId": "86191c9a2f76ce69081f5a10ff057b9a62d50d0a",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "96d29797_2307448d",
+        "filename": "generate-ubi",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-04-27T19:02:34Z",
+      "side": 1,
+      "message": "This commit is intended to fix shellcheck warnings so that we can enable shellcheck checking in CI, it\u0027s not intended to fix existing compilation warnings, although would be nice for someone to take it on :) , maybe i\u0027ll look at those at some time in the future.",
+      "parentUuid": "d2d3d793_83f06c17",
+      "revId": "86191c9a2f76ce69081f5a10ff057b9a62d50d0a",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
