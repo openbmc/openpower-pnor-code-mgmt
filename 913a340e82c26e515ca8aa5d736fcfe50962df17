@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "ead672a4_937349f5",
+        "filename": "ubi/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2021-04-27T03:39:36Z",
+      "side": 1,
+      "message": "You need to look warnings related usage of sh instead of bash?\nAlso as i mentioned in the other review, please look any scope of optimizng disable keyword by moving file level scope.",
+      "range": {
+        "startLine": 1,
+        "startChar": 1,
+        "endLine": 1,
+        "endChar": 9
+      },
+      "revId": "913a340e82c26e515ca8aa5d736fcfe50962df17",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
