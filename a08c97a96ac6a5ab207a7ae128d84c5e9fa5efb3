@@ -46,6 +46,30 @@
       "revId": "a08c97a96ac6a5ab207a7ae128d84c5e9fa5efb3",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "43fb35eb_1f787b77",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2021-04-28T02:22:40Z",
+      "side": 1,
+      "message": "It is my bad , warning are from ubi/obmc-flash-bios . confused with file path.\nRecenetly i noticed some of the repos migrating sh-\u003ebash to fix these warnings.",
+      "parentUuid": "c6a528da_d8d23a08",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 9
+      },
+      "revId": "a08c97a96ac6a5ab207a7ae128d84c5e9fa5efb3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
