@@ -70,6 +70,30 @@
       "revId": "913a340e82c26e515ca8aa5d736fcfe50962df17",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "bf8e46d1_74076eff",
+        "filename": "ubi/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-04-28T19:53:13Z",
+      "side": 1,
+      "message": "I thought I had seen a review comment that questioned why the phosphor-bmc-code-mgmt needed a bash dependency, but maybe i dreamed it because i can\u0027t find it in gerrit :) .. Maybe it does make sense to convert this script to bash, let me work on it, also like you mentioned other scripts are being converted too.",
+      "parentUuid": "aca34ffb_105f9b8a",
+      "range": {
+        "startLine": 1,
+        "startChar": 1,
+        "endLine": 1,
+        "endChar": 9
+      },
+      "revId": "913a340e82c26e515ca8aa5d736fcfe50962df17",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
