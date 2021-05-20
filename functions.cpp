@@ -152,6 +152,12 @@ void findLinks(const std::filesystem::path& hostFirmwareDirectory,
         return;
     }
 
+    // Create a symlink from HBB to the corresponding LID file to support vpnor
+    static const auto hbbLid = "81e0065a.lid";
+    static const auto hbbName = "HBB";
+    auto hbbLinkPath = hostFirmwareDirectory / hbbName;
+    makeCallback(linkCallback, hbbLid, hbbLinkPath, errorCallback);
+
     for (; directoryIterator != std::filesystem::end(directoryIterator);
          directoryIterator.increment(ec))
     {
