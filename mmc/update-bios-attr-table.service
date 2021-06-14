@@ -1,0 +1,11 @@
+[Unit]
+Description=Update BIOS attr table with host firmware well-known names
+After=org.open_power.Software.Host.Updater.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/openpower-update-manager update-bios-attr-table
+
+[Install]
+WantedBy=org.open_power.Software.Host.Updater.service
