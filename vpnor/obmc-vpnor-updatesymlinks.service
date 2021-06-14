@@ -1,6 +1,5 @@
 [Unit]
 Description=Updates symlinks for active PNOR version
-Before=pldmd.service
 Before=mboxd.service
 Before=mboxd-reload@0.service
 After=org.open_power.Software.Host.Updater.service
@@ -13,5 +12,4 @@ RemainAfterExit=no
 ExecStart=/usr/bin/obmc-vpnor-util updatesymlinks
 
 [Install]
-WantedBy=pldmd.service
 WantedBy=mboxd.service mboxd-reload@.service
