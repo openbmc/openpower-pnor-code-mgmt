@@ -191,6 +191,13 @@ void findLinks(const std::filesystem::path& hostFirmwareDirectory,
 }
 
 /**
+ * @brief Set the bios attribute table with details of the host firmware data
+ * for this system.
+ */
+void setBiosAttr()
+{}
+
+/**
  * @brief Make callbacks on
  * xyz.openbmc_project.Configuration.IBMCompatibleSystem instances.
  *
@@ -300,6 +307,31 @@ void maybeMakeLinks(
                                             extensions))
     {
         findLinks(hostFirmwareDirectory, extensions, errorCallback, writeLink);
+    }
+}
+
+/**
+ * @brief Determine system support for updating the bios attribute table.
+ *
+ * Using the provided extensionMap and
+ * xyz.openbmc_project.Configuration.IBMCompatibleSystem, determine if the bios
+ * attribute table needs to be updated.
+ *
+ * @param[in] extensionMap a map of
+ * xyz.openbmc_project.Configuration.IBMCompatibleSystem to host firmware blob
+ * file extensions.
+ * @param[in] ibmCompatibleSystem The names property of an instance of
+ * xyz.openbmc_project.Configuration.IBMCompatibleSystem
+ */
+void maybeSetBiosAttr(
+    const std::map<std::string, std::vector<std::string>>& extensionMap,
+    const std::vector<std::string>& ibmCompatibleSystem)
+{
+    std::vector<std::string> extensions;
+    if (getExtensionsForIbmCompatibleSystem(extensionMap, ibmCompatibleSystem,
+                                            extensions))
+    {
+        setBiosAttr();
     }
 }
 
@@ -431,5 +463,59 @@ std::shared_ptr<void> processHostFirmware(
     // ownership of the match callback to the caller.
     return interfacesAddedMatch;
 }
+
+/**
+ * @brief Update the Bios Attribute Table
+ *
+ * If an instance of xyz.openbmc_project.Configuration.IBMCompatibleSystem is
+ * found, update the Bios Attribute Table with the appropriate host firmware
+ * data.
+ *
+ * @param[in] bus - D-Bus client connection.
+ * @param[in] extensionMap - Map of IBMCompatibleSystem names and host firmware
+ *                           file extensions.
+ * @param[in] loop - Program event loop.
+ * @return nullptr
+ */
+std::shared_ptr<void> updateBiosAttrTable(
+    sdbusplus::bus::bus& bus,
+    std::map<std::string, std::vector<std::string>> extensionMap,
+    sdeventplus::Event& loop)
+{
+    auto pExtensionMap =
+        std::make_shared<decltype(extensionMap)>(std::move(extensionMap));
+
+    auto getManagedObjects = bus.new_method_call(
+        "xyz.openbmc_project.EntityManager", "/",
+        "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
+    std::map<std::string,
+             std::map<std::string, std::variant<std::vector<std::string>>>>
+        interfacesAndProperties;
+    std::map<sdbusplus::message::object_path, decltype(interfacesAndProperties)>
+        objects;
+    try
+    {
+        auto reply = bus.call(getManagedObjects);
+        reply.read(objects);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {}
+
+    auto maybeSetAttrWithArgsBound = std::bind(
+        maybeSetBiosAttr, std::cref(*pExtensionMap), std::placeholders::_1);
+
+    for (const auto& pair : objects)
+    {
+        std::tie(std::ignore, interfacesAndProperties) = pair;
+        if (maybeCall(interfacesAndProperties, maybeSetAttrWithArgsBound))
+        {
+            break;
+        }
+    }
+
+    loop.exit(0);
+    return nullptr;
+}
+
 } // namespace process_hostfirmware
 } // namespace functions

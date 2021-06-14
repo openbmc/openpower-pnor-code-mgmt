@@ -60,32 +60,42 @@ int main(int argc, char* argv[])
 
     CLI::App app{"OpenPOWER host firmware manager"};
 
+    using namespace std::string_literals;
+    std::map<std::string, std::vector<std::string>> extensionMap{{
+        {"ibm,everest"s, {".EVEREST_XML"s, ".P10"s}},
+        {"ibm,rainier-2u"s, {".RAINIER_2U_XML"s, ".P10"s}},
+        {"ibm,rainier-4u"s, {".RAINIER_4U_XML"s, ".P10"s}},
+        {"ibm,rainier-1s4u"s, {".RAINIER_4U_XML"s, ".P10"s}},
+    }};
+
     // subcommandContext allows program subcommand callbacks to add loop event
     // callbacks (e.g. reception of a dbus signal) and then return to main,
     // without the loop event callback being destroyed until the loop event
     // callback has a chance to run and instruct the loop to exit.
-    std::shared_ptr<void> subcommandContext;
+    std::vector<std::shared_ptr<void>> subcommandContext;
     static_cast<void>(
         app.add_subcommand("process-host-firmware",
                            "Point the host firmware at its data.")
-            ->callback([&bus, &loop, &subcommandContext]() {
-                using namespace std::string_literals;
-                std::map<std::string, std::vector<std::string>> extensionMap{{
-                    {"ibm,everest"s, {".EVEREST_XML"s, ".P10"s}},
-                    {"ibm,rainier-2u"s, {".RAINIER_2U_XML"s, ".P10"s}},
-                    {"ibm,rainier-4u"s, {".RAINIER_4U_XML"s, ".P10"s}},
-                    {"ibm,rainier-1s4u"s, {".RAINIER_4U_XML"s, ".P10"s}},
-                }};
+            ->callback([&bus, &loop, &subcommandContext, extensionMap]() {
                 auto hostFirmwareDirectory = "/media/hostfw/running"s;
                 auto logCallback = [](const auto& path, auto& ec) {
                     std::cerr << path << ": " << ec.message() << "\n";
                 };
-                subcommandContext =
+                subcommandContext.push_back(
                     functions::process_hostfirmware::processHostFirmware(
-                        bus, std::move(extensionMap),
-                        std::move(hostFirmwareDirectory),
-                        std::move(logCallback), loop);
+                        bus, extensionMap, std::move(hostFirmwareDirectory),
+                        std::move(logCallback), loop));
             }));
+    static_cast<void>(
+        app.add_subcommand("update-bios-attr-table",
+                           "Update the bios attribute table with the host "
+                           "firmware data details.")
+            ->callback([&bus, &loop, &subcommandContext, extensionMap]() {
+                subcommandContext.push_back(
+                    functions::process_hostfirmware::updateBiosAttrTable(
+                        bus, extensionMap, loop));
+            }));
+
     CLI11_PARSE(app, argc, argv);
 
     if (app.get_subcommands().size() == 0)

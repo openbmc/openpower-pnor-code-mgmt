@@ -125,6 +125,7 @@ if get_option('device-type') == 'mmc'
         'mmc/obmc-flash-bios-init.service',
         'mmc/obmc-flash-bios-patch.service',
         'mmc/openpower-process-host-firmware.service',
+        'mmc/openpower-update-bios-attr-table.service',
     ]
 endif
 
