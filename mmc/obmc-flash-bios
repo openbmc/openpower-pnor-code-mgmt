@@ -73,6 +73,27 @@ mmc_init() {
   fi
   mount ${base_dir}/hostfw-${alternate_label} ${alternate_dir} -o ro
 
+  # Setup the symlinks for clients like PLDM
+  hostfw_base_dir="/var/lib/phosphor-software-manager/hostfw"
+  hostfw_running="${hostfw_base_dir}/running"
+  hostfw_alternate="${hostfw_base_dir}/alternate"
+  hostfw_staging="${hostfw_base_dir}/staging"
+  if [ ! -d "${hostfw_base_dir}" ]; then
+    mkdir -p "${hostfw_base_dir}"
+  fi
+  if [[ $(readlink -f "${hostfw_running}") != "${running_dir}" ]]; then
+    rm -f ${hostfw_running}
+    ln -sfv ${running_dir} ${hostfw_running}
+  fi
+  if [[ $(readlink -f "${hostfw_alternate}") != "${alternate_dir}" ]]; then
+    rm -f ${hostfw_alternate}
+    ln -sfv ${alternate_dir} ${hostfw_alternate}
+  fi
+  if [[ $(readlink -f "${hostfw_staging}") != "${staging_dir}" ]]; then
+    rm -f ${hostfw_staging}
+    ln -sfv ${staging_dir} ${hostfw_staging}
+  fi
+
   # setup host firmware runtime well known names
   openpower-update-manager process-host-firmware
 }

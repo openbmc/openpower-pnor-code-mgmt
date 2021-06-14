@@ -36,7 +36,6 @@ clear_volatile() {
 
 update_symlinks() {
   PNOR_ACTIVE_PATH="/var/lib/phosphor-software-manager/pnor/"
-  HOSTFW_ACTIVE_PATH="/var/lib/phosphor-software-manager/hostfw/"
   PNOR_RO_ACTIVE_PATH="/var/lib/phosphor-software-manager/pnor/ro"
   PNOR_RO_PREFIX="/media/pnor-ro-"
   PNOR_RW_ACTIVE_PATH="/var/lib/phosphor-software-manager/pnor/rw"
@@ -48,11 +47,6 @@ update_symlinks() {
   MMC_BASE_PATH="/media/hostfw"
   MMC_RO_PATH="${MMC_BASE_PATH}/running-ro"
   MMC_RUNNING_PATH="${MMC_BASE_PATH}/running"
-  MMC_ALTERNATE_PATH="${MMC_BASE_PATH}/alternate"
-  MMC_STAGING_PATH="${MMC_BASE_PATH}/staging"
-  HOSTFW_RUNNING_PATH="${HOSTFW_ACTIVE_PATH}/running"
-  HOSTFW_ALTERNATE_PATH="${HOSTFW_ACTIVE_PATH}/alternate"
-  HOSTFW_STAGING_PATH="${HOSTFW_ACTIVE_PATH}/staging"
 
   # Get a list of all active PNOR versions
   data="$(ls -d ${PNOR_RO_PREFIX}* 2>/dev/null)"
@@ -85,23 +79,6 @@ update_symlinks() {
       roTarget="${MMC_RO_PATH}"
       rwTarget="${MMC_RUNNING_PATH}"
       prsvTarget="${MMC_RUNNING_PATH}"
-
-      if [ ! -d "${HOSTFW_ACTIVE_PATH}" ]; then
-          mkdir -p "${HOSTFW_ACTIVE_PATH}"
-      fi
-      # Symlinks used by PLDM
-      if [[ $(readlink -f "${HOSTFW_RUNNING_PATH}") != "${MMC_RUNNING_PATH}" ]]; then
-          rm -f ${HOSTFW_RUNNING_PATH}
-          ln -sfv ${MMC_RUNNING_PATH} ${HOSTFW_RUNNING_PATH}
-      fi
-      if [[ $(readlink -f "${HOSTFW_ALTERNATE_PATH}") != "${MMC_ALTERNATE_PATH}" ]]; then
-          rm -f ${HOSTFW_ALTERNATE_PATH}
-          ln -sfv ${MMC_ALTERNATE_PATH} ${HOSTFW_ALTERNATE_PATH}
-      fi
-      if [[ $(readlink -f "${HOSTFW_STAGING_PATH}") != "${MMC_STAGING_PATH}" ]]; then
-          rm -f ${HOSTFW_STAGING_PATH}
-          ln -sfv ${MMC_STAGING_PATH} ${HOSTFW_STAGING_PATH}
-      fi
   fi
 
   if [ ! -d "${PNOR_ACTIVE_PATH}" ]; then
