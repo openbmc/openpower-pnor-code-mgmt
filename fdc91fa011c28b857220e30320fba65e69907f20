@@ -34,6 +34,24 @@
       "revId": "fdc91fa011c28b857220e30320fba65e69907f20",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "df1739e6_f2b26bee",
+        "filename": "vpnor/obmc-vpnor-updatesymlinks.service",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-06-15T15:18:51Z",
+      "side": 0,
+      "message": "Removing pldm dependencies per pldm team request: https://gerrit.openbmc-project.xyz/c/openbmc/openpower-pnor-code-mgmt/+/44090",
+      "parentUuid": "def2830f_e633c5f1",
+      "revId": "fdc91fa011c28b857220e30320fba65e69907f20",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
