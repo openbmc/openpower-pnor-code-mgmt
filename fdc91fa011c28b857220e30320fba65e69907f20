@@ -16,6 +16,24 @@
       "revId": "fdc91fa011c28b857220e30320fba65e69907f20",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "def2830f_e633c5f1",
+        "filename": "vpnor/obmc-vpnor-updatesymlinks.service",
+        "patchSetId": 3
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-06-15T13:31:47Z",
+      "side": 0,
+      "message": "It runs super early in the boot, and it has a \"Before\u003dpldmd\" directive: https://github.com/openbmc/openpower-pnor-code-mgmt/blob/master/mmc/obmc-flash-bios-init.service\n\nAlthough there are discussions that it may be desirable to remove the pldm dependencies to not hold up pldm from starting.",
+      "parentUuid": "1aa364b2_7443573a",
+      "revId": "fdc91fa011c28b857220e30320fba65e69907f20",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
