@@ -6,6 +6,7 @@
 
 #include "functions.hpp"
 
+#include <nlohmann/json.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
@@ -14,6 +15,7 @@
 #include <sdeventplus/event.hpp>
 
 #include <filesystem>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <map>
@@ -196,12 +198,80 @@ void findLinks(const std::filesystem::path& hostFirmwareDirectory,
 }
 
 /**
- * @brief Set the bios attribute table with details of the host firmware data
- * for this system.
+ * @brief Parse the elements json file and construct a string with the data to
+ *        be used to update the bios attribute table.
+ *
+ * @param[in] elementsJsonFilePath - The path to the host firmware json file.
+ * @param[in] extensions - The extensions of the firmware blob files.
  */
-void setBiosAttr()
+std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
+                           const std::vector<std::string>& extensions)
 {
     std::string biosAttrStr{};
+
+    std::ifstream jsonFile(elementsJsonFilePath.c_str());
+    if (!jsonFile)
+    {
+        return {};
+    }
+
+    try
+    {
+        std::map<std::string, std::string> attr;
+        auto data = nlohmann::json::parse(jsonFile);
+        for (auto& iter : data["lids"])
+        {
+            auto name = iter["element_name"].get<std::string>();
+            auto lid = iter["short_lid_name"].get<std::string>();
+
+            constexpr auto iplExtension = ".iplTime";
+            std::filesystem::path path(name);
+            if (path.extension() == iplExtension)
+            {
+                if (!path.stem().extension().empty())
+                {
+                    if (std::find(extensions.begin(), extensions.end(),
+                                  path.stem().extension()) == extensions.end())
+                    {
+                        continue;
+                    }
+                }
+                attr[path.stem().stem()] = lid;
+                continue;
+            }
+
+            if (std::find(extensions.begin(), extensions.end(),
+                          path.extension()) != extensions.end())
+            {
+                attr.insert({path.stem(), lid});
+            }
+        }
+        for (const auto& a : attr)
+        {
+            biosAttrStr += a.first + "=" + a.second + ",";
+        }
+    }
+    catch (std::exception& e)
+    {
+        log<level::ERR>("Error parsing json file", entry("ERROR=%s", e.what()),
+                        entry("FILE=%s", elementsJsonFilePath.c_str()));
+        return {};
+    }
+
+    return biosAttrStr;
+}
+
+/**
+ * @brief Set the bios attribute table with details of the host firmware data
+ * for this system.
+ *
+ * @param[in] elementsJsonFilePath - The path to the host firmware json file.
+ * @param[in] extentions - The extensions of the firmware blob files.
+ */
+void setBiosAttr(const std::filesystem::path& elementsJsonFilePath,
+                 const std::vector<std::string>& extensions)
+{
+    auto biosAttrStr = getBiosAttrStr(elementsJsonFilePath, extensions);
 
     constexpr auto biosConfigPath = "/xyz/openbmc_project/bios_config/manager";
     constexpr auto biosConfigIntf = "xyz.openbmc_project.BIOSConfig.Manager";
@@ -370,18 +440,20 @@ void maybeMakeLinks(
  * @param[in] extensionMap a map of
  * xyz.openbmc_project.Configuration.IBMCompatibleSystem to host firmware blob
  * file extensions.
+ * @param[in] elementsJsonFilePath The file path to the json file
  * @param[in] ibmCompatibleSystem The names property of an instance of
  * xyz.openbmc_project.Configuration.IBMCompatibleSystem
  */
 void maybeSetBiosAttr(
     const std::map<std::string, std::vector<std::string>>& extensionMap,
+    const std::filesystem::path& elementsJsonFilePath,
     const std::vector<std::string>& ibmCompatibleSystem)
 {
     std::vector<std::string> extensions;
     if (getExtensionsForIbmCompatibleSystem(extensionMap, ibmCompatibleSystem,
                                             extensions))
     {
-        setBiosAttr();
+        setBiosAttr(elementsJsonFilePath, extensions);
     }
 }
 
@@ -524,16 +596,20 @@ std::shared_ptr<void> processHostFirmware(
  * @param[in] bus - D-Bus client connection.
  * @param[in] extensionMap - Map of IBMCompatibleSystem names and host firmware
  *                           file extensions.
+ * @param[in] elementsJsonFilePath - The Path to the json file
  * @param[in] loop - Program event loop.
  * @return nullptr
  */
 std::shared_ptr<void> updateBiosAttrTable(
     sdbusplus::bus::bus& bus,
     std::map<std::string, std::vector<std::string>> extensionMap,
-    sdeventplus::Event& loop)
+    std::filesystem::path elementsJsonFilePath, sdeventplus::Event& loop)
 {
     auto pExtensionMap =
         std::make_shared<decltype(extensionMap)>(std::move(extensionMap));
+    auto pElementsJsonFilePath =
+        std::make_shared<decltype(elementsJsonFilePath)>(
+            std::move(elementsJsonFilePath));
 
     auto getManagedObjects = bus.new_method_call(
         "xyz.openbmc_project.EntityManager", "/",
@@ -551,8 +627,9 @@ std::shared_ptr<void> updateBiosAttrTable(
     catch (const sdbusplus::exception::SdBusError& e)
     {}
 
-    auto maybeSetAttrWithArgsBound = std::bind(
-        maybeSetBiosAttr, std::cref(*pExtensionMap), std::placeholders::_1);
+    auto maybeSetAttrWithArgsBound =
+        std::bind(maybeSetBiosAttr, std::cref(*pExtensionMap),
+                  std::cref(*pElementsJsonFilePath), std::placeholders::_1);
 
     for (const auto& pair : objects)
     {
