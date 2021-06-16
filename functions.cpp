@@ -2,8 +2,11 @@
 
 /**@file functions.cpp*/
 
+#include "config.h"
+
 #include "functions.hpp"
 
+#include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/exception.hpp>
@@ -23,6 +26,8 @@ namespace functions
 {
 namespace process_hostfirmware
 {
+
+using namespace phosphor::logging;
 
 /**
  * @brief Issue callbacks safely
@@ -195,7 +200,52 @@ void findLinks(const std::filesystem::path& hostFirmwareDirectory,
  * for this system.
  */
 void setBiosAttr()
-{}
+{
+    std::string biosAttrStr{};
+
+    constexpr auto biosConfigPath = "/xyz/openbmc_project/bios_config/manager";
+    constexpr auto biosConfigIntf = "xyz.openbmc_project.BIOSConfig.Manager";
+    constexpr auto dbusAttrName = "hb_lid_ids";
+    constexpr auto dbusAttrType =
+        "xyz.openbmc_project.BIOSConfig.Manager.AttributeType.String";
+
+    using PendingAttributesType = std::vector<std::pair<
+        std::string, std::tuple<std::string, std::variant<std::string>>>>;
+    PendingAttributesType pendingAttributes;
+    pendingAttributes.emplace_back(std::make_pair(
+        dbusAttrName, std::make_tuple(dbusAttrType, biosAttrStr)));
+
+    auto bus = sdbusplus::bus::new_default();
+    auto method = bus.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
+                                      MAPPER_INTERFACE, "GetObject");
+    method.append(biosConfigPath, std::vector<std::string>({biosConfigIntf}));
+    std::vector<std::pair<std::string, std::vector<std::string>>> response;
+    try
+    {
+        auto reply = bus.call(method);
+        reply.read(response);
+        if (response.empty())
+        {
+            log<level::ERR>("Error reading mapper response",
+                            entry("PATH=%s", biosConfigPath),
+                            entry("INTERFACE=%s", biosConfigIntf));
+            return;
+        }
+        auto method = bus.new_method_call((response.begin()->first).c_str(),
+                                          biosConfigPath,
+                                          SYSTEMD_PROPERTY_INTERFACE, "Set");
+        method.append(biosConfigIntf, "PendingAttributes",
+                      std::variant<PendingAttributesType>(pendingAttributes));
+        bus.call(method);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>("Error setting the bios attribute",
+                        entry("ERROR=%s", e.what()),
+                        entry("ATTRIBUTE=%s", dbusAttrName));
+        return;
+    }
+}
 
 /**
  * @brief Make callbacks on
