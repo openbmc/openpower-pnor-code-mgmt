@@ -6,6 +6,7 @@
 
 #include "functions.hpp"
 
+#include <nlohmann/json.hpp>
 #include <phosphor-logging/log.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
@@ -14,6 +15,7 @@
 #include <sdeventplus/event.hpp>
 
 #include <filesystem>
+#include <fstream>
 #include <functional>
 #include <iostream>
 #include <map>
@@ -196,12 +198,112 @@ void findLinks(const std::filesystem::path& hostFirmwareDirectory,
 }
 
 /**
- * @brief Set the bios attribute table with details of the host firmware data
- * for this system.
+ * @brief Parse the elements json file and construct a string with the data to
+ *        be used to update the bios attribute table.
+ *
+ * @param[in] elementsJsonFilePath - The path to the host firmware json file.
+ * @param[in] extensions - The extensions of the firmware blob files.
  */
-void setBiosAttr()
+std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
+                           const std::vector<std::string>& extensions)
 {
     std::string biosAttrStr{};
+
+    std::ifstream jsonFile(elementsJsonFilePath.c_str());
+    if (!jsonFile)
+    {
+        return {};
+    }
+
+    std::map<std::string, std::string> attr;
+    auto data = nlohmann::json::parse(jsonFile, nullptr, false);
+    if (data.is_discarded())
+    {
+        log<level::ERR>("Error parsing JSON file",
+                        entry("FILE=%s", elementsJsonFilePath.c_str()));
+        return {};
+    }
+
+    // std::get_if fails if the iterator is a const, so just use auto&.
+    for (auto& iter : data["lids"])
+    {
+        std::string name{};
+        std::string lid{};
+
+        try
+        {
+            name = iter["element_name"].get<std::string>();
+            lid = iter["short_lid_name"].get<std::string>();
+        }
+        catch (std::exception& e)
+        {
+            // Possibly the element or lid name field was not found
+            log<level::ERR>("Error reading JSON field",
+                            entry("FILE=%s", elementsJsonFilePath.c_str()),
+                            entry("ERROR=%s", e.what()));
+            continue;
+        }
+
+        // The elements with the ipl extension have higher priority. Therefore
+        // Use operator[] to overwrite value if an entry for it alread exists.
+        // Ex: if the JSON contains an entry A.P10 followed by A.P10.iplTime,
+        // the lid value for the latter one will be overwrite the value of the
+        // first one.
+        constexpr auto iplExtension = ".iplTime";
+        std::filesystem::path path(name);
+        if (path.extension() == iplExtension)
+        {
+            // Some elements have an additional extension, ex: .P10.iplTime
+            // Strip off the ipl extension with stem(), then check if there is
+            // an additional extension with extension().
+            if (!path.stem().extension().empty())
+            {
+                // Check if the extension matches the extensions for this system
+                if (std::find(extensions.begin(), extensions.end(),
+                              path.stem().extension()) == extensions.end())
+                {
+                    continue;
+                }
+            }
+            // Get the element name without extensions by calling stem() twice
+            // since stem() returns the base name if no periods are found.
+            // Therefore both "element.P10" and "element.P10.iplTime" would
+            // become "element".
+            attr[path.stem().stem()] = lid;
+            continue;
+        }
+
+        // Process all other extensions. The extension should match the list of
+        // supported extensions for this system. Use .insert() to only add
+        // entries that do not exist, so to not overwrite the values that may
+        // had been added that had the ipl extension.
+        if (std::find(extensions.begin(), extensions.end(), path.extension()) !=
+            extensions.end())
+        {
+            attr.insert({path.stem(), lid});
+        }
+    }
+    for (const auto& a : attr)
+    {
+        // Build the bios attribute string with format:
+        // "element1=lid1,element2=lid2,elementN=lidN,"
+        biosAttrStr += a.first + "=" + a.second + ",";
+    }
+
+    return biosAttrStr;
+}
+
+/**
+ * @brief Set the bios attribute table with details of the host firmware data
+ * for this system.
+ *
+ * @param[in] elementsJsonFilePath - The path to the host firmware json file.
+ * @param[in] extentions - The extensions of the firmware blob files.
+ */
+void setBiosAttr(const std::filesystem::path& elementsJsonFilePath,
+                 const std::vector<std::string>& extensions)
+{
+    auto biosAttrStr = getBiosAttrStr(elementsJsonFilePath, extensions);
 
     constexpr auto biosConfigPath = "/xyz/openbmc_project/bios_config/manager";
     constexpr auto biosConfigIntf = "xyz.openbmc_project.BIOSConfig.Manager";
@@ -370,18 +472,20 @@ void maybeMakeLinks(
  * @param[in] extensionMap a map of
  * xyz.openbmc_project.Configuration.IBMCompatibleSystem to host firmware blob
  * file extensions.
+ * @param[in] elementsJsonFilePath The file path to the json file
  * @param[in] ibmCompatibleSystem The names property of an instance of
  * xyz.openbmc_project.Configuration.IBMCompatibleSystem
  */
 void maybeSetBiosAttr(
     const std::map<std::string, std::vector<std::string>>& extensionMap,
+    const std::filesystem::path& elementsJsonFilePath,
     const std::vector<std::string>& ibmCompatibleSystem)
 {
     std::vector<std::string> extensions;
     if (getExtensionsForIbmCompatibleSystem(extensionMap, ibmCompatibleSystem,
                                             extensions))
     {
-        setBiosAttr();
+        setBiosAttr(elementsJsonFilePath, extensions);
     }
 }
 
@@ -524,16 +628,20 @@ std::shared_ptr<void> processHostFirmware(
  * @param[in] bus - D-Bus client connection.
  * @param[in] extensionMap - Map of IBMCompatibleSystem names and host firmware
  *                           file extensions.
+ * @param[in] elementsJsonFilePath - The Path to the json file
  * @param[in] loop - Program event loop.
  * @return nullptr
  */
 std::shared_ptr<void> updateBiosAttrTable(
     sdbusplus::bus::bus& bus,
     std::map<std::string, std::vector<std::string>> extensionMap,
-    sdeventplus::Event& loop)
+    std::filesystem::path elementsJsonFilePath, sdeventplus::Event& loop)
 {
     auto pExtensionMap =
         std::make_shared<decltype(extensionMap)>(std::move(extensionMap));
+    auto pElementsJsonFilePath =
+        std::make_shared<decltype(elementsJsonFilePath)>(
+            std::move(elementsJsonFilePath));
 
     auto getManagedObjects = bus.new_method_call(
         "xyz.openbmc_project.EntityManager", "/",
@@ -551,8 +659,9 @@ std::shared_ptr<void> updateBiosAttrTable(
     catch (const sdbusplus::exception::SdBusError& e)
     {}
 
-    auto maybeSetAttrWithArgsBound = std::bind(
-        maybeSetBiosAttr, std::cref(*pExtensionMap), std::placeholders::_1);
+    auto maybeSetAttrWithArgsBound =
+        std::bind(maybeSetBiosAttr, std::cref(*pExtensionMap),
+                  std::cref(*pElementsJsonFilePath), std::placeholders::_1);
 
     for (const auto& pair : objects)
     {

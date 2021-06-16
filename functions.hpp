@@ -48,6 +48,6 @@ std::shared_ptr<void> processHostFirmware(
 std::shared_ptr<void>
     updateBiosAttrTable(sdbusplus::bus::bus&,
                         std::map<std::string, std::vector<std::string>>,
-                        sdeventplus::Event&);
+                        std::filesystem::path, sdeventplus::Event&);
 } // namespace process_hostfirmware
 } // namespace functions
