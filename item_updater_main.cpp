@@ -91,9 +91,11 @@ int main(int argc, char* argv[])
                            "Update the bios attribute table with the host "
                            "firmware data details.")
             ->callback([&bus, &loop, &subcommandContext, extensionMap]() {
+                auto elementsJsonFilePath = "/usr/share/hostfw/elements.json"s;
                 subcommandContext.push_back(
                     functions::process_hostfirmware::updateBiosAttrTable(
-                        bus, extensionMap, loop));
+                        bus, extensionMap, std::move(elementsJsonFilePath),
+                        loop));
             }));
 
     CLI11_PARSE(app, argc, argv);
