@@ -668,20 +668,45 @@ std::shared_ptr<void> updateBiosAttrTable(
     std::map<std::string, std::vector<std::string>> extensionMap,
     std::filesystem::path elementsJsonFilePath, sdeventplus::Event& loop)
 {
+    constexpr auto pldmPath = "/xyz/openbmc_project/pldm";
+
     auto pExtensionMap =
         std::make_shared<decltype(extensionMap)>(std::move(extensionMap));
     auto pElementsJsonFilePath =
         std::make_shared<decltype(elementsJsonFilePath)>(
             std::move(elementsJsonFilePath));
 
+    // Entity Manager is needed to get the list of supported extensions. Add a
+    // match to monitor interfaces added in case it's not running yet.
+    auto maybeSetAttrWithArgsBound =
+        std::bind(maybeSetBiosAttr, std::cref(*pExtensionMap),
+                  std::cref(*pElementsJsonFilePath), std::placeholders::_1);
+
+    auto interfacesAddedMatch = std::make_shared<sdbusplus::bus::match::match>(
+        bus,
+        sdbusplus::bus::match::rules::interfacesAdded() +
+            sdbusplus::bus::match::rules::sender(
+                "xyz.openbmc_project.EntityManager"),
+        [pldmPath, pExtensionMap, pElementsJsonFilePath,
+         maybeSetAttrWithArgsBound, &loop](auto& message) {
+            auto bus = sdbusplus::bus::new_default();
+            auto pldmObject = getObject(bus, pldmPath);
+            if (pldmObject.empty())
+            {
+                return;
+            }
+            if (maybeCallMessage(message, maybeSetAttrWithArgsBound))
+            {
+                loop.exit(0);
+            }
+        });
+
     // The BIOS attribute table can only be updated if PLDM is running because
     // PLDM is the one that exposes this property. Return if it's not running.
-    constexpr auto pldmPath = "/xyz/openbmc_project/pldm";
     auto pldmObject = getObject(bus, pldmPath);
     if (pldmObject.empty())
     {
-        loop.exit(0);
-        return nullptr;
+        return interfacesAddedMatch;
     }
 
     auto getManagedObjects = bus.new_method_call(
@@ -700,21 +725,17 @@ std::shared_ptr<void> updateBiosAttrTable(
     catch (const sdbusplus::exception::SdBusError& e)
     {}
 
-    auto maybeSetAttrWithArgsBound =
-        std::bind(maybeSetBiosAttr, std::cref(*pExtensionMap),
-                  std::cref(*pElementsJsonFilePath), std::placeholders::_1);
-
     for (const auto& pair : objects)
     {
         std::tie(std::ignore, interfacesAndProperties) = pair;
         if (maybeCall(interfacesAndProperties, maybeSetAttrWithArgsBound))
         {
-            break;
+            loop.exit(0);
+            return nullptr;
         }
     }
 
-    loop.exit(0);
-    return nullptr;
+    return interfacesAddedMatch;
 }
 
 } // namespace process_hostfirmware
