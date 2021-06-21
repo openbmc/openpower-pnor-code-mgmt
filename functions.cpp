@@ -32,6 +32,37 @@ namespace process_hostfirmware
 using namespace phosphor::logging;
 
 /**
+ * @brief GetObject function to find the service given an object path.
+ *        It is used to determine if a service is running, so there is no need
+ *        to specify interfaces as a parameter to constrain the search.
+ */
+std::string getObject(sdbusplus::bus::bus& bus, const std::string& path)
+{
+    auto method = bus.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
+                                      MAPPER_BUSNAME, "GetObject");
+    method.append(path);
+    std::vector<std::string> interfaces;
+    method.append(interfaces);
+
+    std::vector<std::pair<std::string, std::vector<std::string>>> response;
+
+    try
+    {
+        auto reply = bus.call(method);
+        reply.read(response);
+        if (response.empty())
+        {
+            return std::string{};
+        }
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        return std::string{};
+    }
+    return response[0].first;
+}
+
+/**
  * @brief Issue callbacks safely
  *
  * std::function can be empty, so this wrapper method checks for that prior to
@@ -642,6 +673,16 @@ std::shared_ptr<void> updateBiosAttrTable(
     auto pElementsJsonFilePath =
         std::make_shared<decltype(elementsJsonFilePath)>(
             std::move(elementsJsonFilePath));
+
+    // The BIOS attribute table can only be updated if PLDM is running because
+    // PLDM is the one that exposes this property. Return if it's not running.
+    constexpr auto pldmPath = "/xyz/openbmc_project/pldm";
+    auto pldmObject = getObject(bus, pldmPath);
+    if (pldmObject.empty())
+    {
+        loop.exit(0);
+        return nullptr;
+    }
 
     auto getManagedObjects = bus.new_method_call(
         "xyz.openbmc_project.EntityManager", "/",
