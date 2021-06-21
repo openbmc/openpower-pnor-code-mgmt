@@ -30,6 +30,11 @@ namespace process_hostfirmware
 {
 
 using namespace phosphor::logging;
+using InterfacesPropertiesMap =
+    std::map<std::string,
+             std::map<std::string, std::variant<std::vector<std::string>>>>;
+using ManagedObjectType =
+    std::map<sdbusplus::message::object_path, InterfacesPropertiesMap>;
 
 /**
  * @brief GetObject function to find the service given an object path.
@@ -60,6 +65,30 @@ std::string getObject(sdbusplus::bus::bus& bus, const std::string& path)
         return std::string{};
     }
     return response[0].first;
+}
+
+/**
+ * @brief Returns the managed objects for a given service
+ */
+ManagedObjectType getManagedObjects(sdbusplus::bus::bus& bus,
+                                    const std::string& service)
+{
+    auto method = bus.new_method_call(service.c_str(), "/",
+                                      "org.freedesktop.DBus.ObjectManager",
+                                      "GetManagedObjects");
+
+    ManagedObjectType objects;
+
+    try
+    {
+        auto reply = bus.call(method);
+        reply.read(objects);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        return ManagedObjectType{};
+    }
+    return objects;
 }
 
 /**
@@ -663,12 +692,14 @@ std::shared_ptr<void> processHostFirmware(
  * @param[in] loop - Program event loop.
  * @return nullptr
  */
-std::shared_ptr<void> updateBiosAttrTable(
+std::vector<std::shared_ptr<void>> updateBiosAttrTable(
     sdbusplus::bus::bus& bus,
     std::map<std::string, std::vector<std::string>> extensionMap,
     std::filesystem::path elementsJsonFilePath, sdeventplus::Event& loop)
 {
     constexpr auto pldmPath = "/xyz/openbmc_project/pldm";
+    constexpr auto entityManagerServiceName =
+        "xyz.openbmc_project.EntityManager";
 
     auto pExtensionMap =
         std::make_shared<decltype(extensionMap)>(std::move(extensionMap));
@@ -680,7 +711,8 @@ std::shared_ptr<void> updateBiosAttrTable(
         std::bind(maybeSetBiosAttr, std::cref(*pExtensionMap),
                   std::cref(*pElementsJsonFilePath), std::placeholders::_1);
 
-    auto interfacesAddedMatch = std::make_shared<sdbusplus::bus::match::match>(
+    std::vector<std::shared_ptr<void>> matches;
+    matches.emplace_back(std::make_shared<sdbusplus::bus::match::match>(
         bus,
         sdbusplus::bus::match::rules::interfacesAdded() +
             sdbusplus::bus::match::rules::sender(
@@ -697,41 +729,57 @@ std::shared_ptr<void> updateBiosAttrTable(
             {
                 loop.exit(0);
             }
-        });
+        }));
+    matches.emplace_back(std::make_shared<sdbusplus::bus::match::match>(
+        bus,
+        sdbusplus::bus::match::rules::nameOwnerChanged() +
+            sdbusplus::bus::match::rules::arg0namespace(
+                "xyz.openbmc_project.PLDM"),
+        [pExtensionMap, pElementsJsonFilePath, maybeSetAttrWithArgsBound,
+         &loop](auto& message) {
+            std::string name;
+            std::string oldOwner;
+            std::string newOwner;
+            message.read(name, oldOwner, newOwner);
+
+            if (newOwner.empty())
+            {
+                return;
+            }
+
+            auto bus = sdbusplus::bus::new_default();
+            InterfacesPropertiesMap interfacesAndProperties;
+            auto objects = getManagedObjects(bus, entityManagerServiceName);
+            for (const auto& pair : objects)
+            {
+                std::tie(std::ignore, interfacesAndProperties) = pair;
+                if (maybeCall(interfacesAndProperties,
+                              maybeSetAttrWithArgsBound))
+                {
+                    loop.exit(0);
+                }
+            }
+        }));
 
     auto pldmObject = getObject(bus, pldmPath);
     if (pldmObject.empty())
     {
-        return interfacesAddedMatch;
+        return matches;
     }
 
-    auto getManagedObjects = bus.new_method_call(
-        "xyz.openbmc_project.EntityManager", "/",
-        "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
-    std::map<std::string,
-             std::map<std::string, std::variant<std::vector<std::string>>>>
-        interfacesAndProperties;
-    std::map<sdbusplus::message::object_path, decltype(interfacesAndProperties)>
-        objects;
-    try
-    {
-        auto reply = bus.call(getManagedObjects);
-        reply.read(objects);
-    }
-    catch (const sdbusplus::exception::SdBusError& e)
-    {}
-
+    InterfacesPropertiesMap interfacesAndProperties;
+    auto objects = getManagedObjects(bus, entityManagerServiceName);
     for (const auto& pair : objects)
     {
         std::tie(std::ignore, interfacesAndProperties) = pair;
         if (maybeCall(interfacesAndProperties, maybeSetAttrWithArgsBound))
         {
             loop.exit(0);
-            return nullptr;
+            return {};
         }
     }
 
-    return interfacesAddedMatch;
+    return matches;
 }
 
 } // namespace process_hostfirmware
