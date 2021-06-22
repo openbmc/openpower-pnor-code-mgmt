@@ -8,12 +8,9 @@ or
 [Host Code Update](https://github.com/openbmc/docs/blob/master/code-update/host-code-update.md)
 
 ## To Build
-```
 To build this package, do the following steps:
 
-    1. ./bootstrap.sh
-    2. ./configure ${CONFIGURE_FLAGS}
-    3. make
+1. `meson build`
+2. `ninja -C build`
 
-To clean the repository run `./bootstrap.sh clean`.
-```
+To clean the repository run `rm -r build`.
