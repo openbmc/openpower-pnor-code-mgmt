@@ -1,4 +1,5 @@
 option('tests', type: 'feature', description: 'Build tests.')
+option('oe-sdk', type: 'feature', description: 'Enable OE SDK')
 option('device-type', type: 'combo', choices: ['static', 'ubi', 'mmc'], description: 'Select which device type to support')
 option('vpnor', type: 'feature', description: 'Enable virtual PNOR support')
 option('verify-signature', type: 'feature', description: 'Enable image signature validation')
