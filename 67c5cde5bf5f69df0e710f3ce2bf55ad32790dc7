@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3fe5ebf9_7d262c25",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-06-22T19:13:01Z",
+      "side": 1,
+      "message": "The core dump (fixed in previous commit) was masking this issue since the process would exit (with error) allowing the dependencies to run.",
+      "revId": "67c5cde5bf5f69df0e710f3ce2bf55ad32790dc7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
