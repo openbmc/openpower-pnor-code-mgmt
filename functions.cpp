@@ -6,6 +6,7 @@
 
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
+#include <sdbusplus/exception.hpp>
 #include <sdbusplus/message.hpp>
 #include <sdeventplus/event.hpp>
 
@@ -385,13 +386,22 @@ std::shared_ptr<void> processHostFirmware(
     auto getManagedObjects = bus.new_method_call(
         "xyz.openbmc_project.EntityManager", "/",
         "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
-    auto reply = bus.call(getManagedObjects);
     std::map<std::string,
              std::map<std::string, std::variant<std::vector<std::string>>>>
         interfacesAndProperties;
     std::map<sdbusplus::message::object_path, decltype(interfacesAndProperties)>
         objects;
-    reply.read(objects);
+    try
+    {
+        auto reply = bus.call(getManagedObjects);
+        reply.read(objects);
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        // Error querying the EntityManager interface. Return the match to have
+        // the callback run if/when the interface appears in D-Bus.
+        return interfacesAddedMatch;
+    }
 
     // bind the extension map, host firmware directory, and error callback to
     // the maybeMakeLinks function.
