@@ -1,0 +1,12 @@
+[Unit]
+Description=Set POWER host firmware well-known names
+After=org.open_power.Software.Host.Updater.service
+After=obmc-flash-bios-init.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/openpower-update-manager process-host-firmware
+
+[Install]
+WantedBy=org.open_power.Software.Host.Updater.service
