@@ -16,6 +16,46 @@
       "revId": "67c5cde5bf5f69df0e710f3ce2bf55ad32790dc7",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c2f72e01_b2eb5fdc",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2021-06-24T07:43:44Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 19,
+        "startChar": 64,
+        "endLine": 19,
+        "endChar": 68
+      },
+      "revId": "67c5cde5bf5f69df0e710f3ce2bf55ad32790dc7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a67796df_eeb271a4",
+        "filename": "mmc/process-host-firmware.service",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2021-06-24T07:43:44Z",
+      "side": 1,
+      "message": "If this service specific to openpower, better change name to openpower_xxxx?",
+      "revId": "67c5cde5bf5f69df0e710f3ce2bf55ad32790dc7",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
