@@ -5,6 +5,8 @@
 #include "activation_mmc.hpp"
 #include "version.hpp"
 
+#include <filesystem>
+
 namespace openpower
 {
 namespace software
@@ -51,7 +53,36 @@ void ItemUpdaterMMC::processPNORImage()
 {}
 
 void ItemUpdaterMMC::reset()
-{}
+{
+    const std::vector<std::string> exclusionList = {"hostfw-a", "hostfw-b",
+                                                    "running-ro", "alternate"};
+    std::filesystem::path dirPath(std::string(MEDIA_DIR "hostfw/"));
+    const size_t dirLength = dirPath.generic_string().length();
+    // Delete all files in /media/hostfw/ except for those on exclusionList
+    for (const auto& p : std::filesystem::directory_iterator(dirPath))
+    {
+        if (std::find(exclusionList.begin(), exclusionList.end(),
+                      p.path().string().substr(dirLength, std::string::npos)) ==
+            exclusionList.end())
+        {
+            std::filesystem::remove_all(p);
+        }
+    }
+
+    // Recreate default files
+    auto bus = sdbusplus::bus::new_default();
+    constexpr auto initService = "obmc-flash-bios-init.service";
+    auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                      SYSTEMD_INTERFACE, "StartUnit");
+    method.append(initService, "replace");
+    bus.call_noreply(method);
+
+    constexpr auto patchService = "obmc-flash-bios-patch.service";
+    method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                 SYSTEMD_INTERFACE, "StartUnit");
+    method.append(patchService, "replace");
+    bus.call_noreply(method);
+}
 
 bool ItemUpdaterMMC::isVersionFunctional(const std::string& versionId)
 {
