@@ -1,10 +1,11 @@
 [Unit]
 Description=Update BIOS attr table with host firmware well-known names
 After=org.open_power.Software.Host.Updater.service
+After=obmc-flash-bios-init.service
 
 [Service]
 Type=oneshot
-RemainAfterExit=yes
+RemainAfterExit=no
 ExecStart=/usr/bin/openpower-update-manager update-bios-attr-table
 
 [Install]
