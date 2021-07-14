@@ -23,7 +23,9 @@ mmc_init() {
   # Mount the image that corresponds to the boot label as read-only to be used
   # to populate the running directory.
   boot_label="$(fw_printenv -n bootside)"
-  mount ${base_dir}/hostfw-"${boot_label}" ${ro_dir} -o ro
+  if ! grep -q "${ro_dir}" /proc/mounts; then
+    mount ${base_dir}/hostfw-"${boot_label}" ${ro_dir} -o ro
+  fi
 
   # Determine if the running dir contains the running version
   running_label=""
@@ -71,7 +73,9 @@ mmc_init() {
   if [ ! -d "${alternate_dir}" ]; then
     mkdir -p ${alternate_dir}
   fi
-  mount ${base_dir}/hostfw-${alternate_label} ${alternate_dir} -o ro
+  if ! grep -q "${alternate_dir}" /proc/mounts; then
+    mount ${base_dir}/hostfw-${alternate_label} ${alternate_dir} -o ro
+  fi
 }
 
 mmc_patch() {
@@ -108,9 +112,15 @@ mmc_patch() {
     mkdir -p "${hostfw_symlink_base}"
   fi
 
-  ln -s "${running_patch_dir}" "${symlink_base}/pnor"
-  ln -s "${running_patch_dir}" "${hostfw_symlink_base}/running"
-  ln -s "${alternate_patch_dir}" "${hostfw_symlink_base}/alternate"
+  if [ "$(readlink -f "${symlink_base}/pnor")" != "${running_patch_dir}" ]; then
+    ln -s "${running_patch_dir}" "${symlink_base}/pnor"
+  fi
+  if [ "$(readlink -f "${hostfw_symlink_base}/running")" != "${running_patch_dir}" ]; then
+    ln -s "${running_patch_dir}" "${hostfw_symlink_base}/running"
+  fi
+  if [ "$(readlink -f "${hostfw_symlink_base}/alternate")" != "${alternate_patch_dir}" ]; then
+    ln -s "${alternate_patch_dir}" "${hostfw_symlink_base}/alternate"
+  fi
 }
 
 case "$1" in
