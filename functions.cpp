@@ -220,16 +220,6 @@ void findLinks(const std::filesystem::path& hostFirmwareDirectory,
         return;
     }
 
-    // Create a symlink from HBB to the corresponding LID file if it exists
-    static const auto hbbLid = "81e0065a.lid";
-    auto hbbLidPath = hostFirmwareDirectory / hbbLid;
-    if (std::filesystem::exists(hbbLidPath))
-    {
-        static const auto hbbName = "HBB";
-        auto hbbLinkPath = hostFirmwareDirectory / hbbName;
-        makeCallback(linkCallback, hbbLid, hbbLinkPath, errorCallback);
-    }
-
     for (; directoryIterator != std::filesystem::end(directoryIterator);
          directoryIterator.increment(ec))
     {
@@ -309,6 +299,17 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
         for (const auto& a : attr)
         {
             biosAttrStr += a.first + "=" + a.second + ",";
+
+            // Create symlinks from the hostfw elements to their corresponding
+            // lid files if they don't exist
+            auto elementFilePath =
+                std::filesystem::path("/media/hostfw/running") / a.first;
+            if (!std::filesystem::exists(elementFilePath))
+            {
+                std::error_code ec;
+                auto lidName = a.second + ".lid";
+                std::filesystem::create_symlink(lidName, elementFilePath, ec);
+            }
         }
     }
     catch (std::exception& e)
