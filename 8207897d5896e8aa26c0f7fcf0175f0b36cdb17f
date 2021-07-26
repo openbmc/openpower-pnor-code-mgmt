@@ -1,0 +1,101 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3f8f67cb_528dd793",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000020
+      },
+      "writtenOn": "2021-07-26T18:49:51Z",
+      "side": 1,
+      "message": "Any documentation for this?",
+      "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e5513e3d_ef724b81",
+        "filename": "functions.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1000020
+      },
+      "writtenOn": "2021-07-26T18:49:51Z",
+      "side": 1,
+      "message": "try/catch works, another choice would be to do what bmcweb does, pass allow_exceptions \u003d false to the parser and check for is_discarded \n\nhttps://github.com/openbmc/bmcweb/blob/432a890cfca335e565b770b1604ed4e547c5a732/include/dbus_monitor.hpp#L122\n\nhttps://github.com/nlohmann/json/blob/6b74772fe8957ec88efbfb4eed4c7d79d3c0f57a/doc/mkdocs/docs/api/basic_json/parse.md\n\n.get throws so would need \n\n            const std::string* name \u003d\n                std::get_if\u003cstd::string\u003e(iter[\"element_name\"]);\n            if (value \u003d\u003d nullptr)\n            {\n...",
+      "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "729d5f21_be907c85",
+        "filename": "functions.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1000020
+      },
+      "writtenOn": "2021-07-26T18:49:51Z",
+      "side": 1,
+      "message": "const auto\u0026 ?",
+      "range": {
+        "startLine": 222,
+        "startChar": 13,
+        "endLine": 222,
+        "endChar": 19
+      },
+      "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ed2c38e6_49946a49",
+        "filename": "functions.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1000020
+      },
+      "writtenOn": "2021-07-26T18:49:51Z",
+      "side": 1,
+      "message": "nitpick: I review a lot of bmcweb code, we only use auto in a few places and here we would not\n\nAbove for the iterator and nlohmann::json I don\u0027t think it impacts readability, here though does \"const std::string\" make this more readable ? Same below for lid",
+      "range": {
+        "startLine": 224,
+        "startChar": 12,
+        "endLine": 224,
+        "endChar": 17
+      },
+      "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "f3832997_e52007ef",
+        "filename": "functions.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000020
+      },
+      "writtenOn": "2021-07-26T18:49:51Z",
+      "side": 1,
+      "message": "A comment or 2 explaining what this path should look like? \n\nE.g. Given MYLID.OPENBMC_2U_XML.iplTime ? \nGet attr[MYLID]\n\nA comment another place or 2 might help as well \n(I had to think about it / read the stem() documentation to figure out .stem().stem()",
+      "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
