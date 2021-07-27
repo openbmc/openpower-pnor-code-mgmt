@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "739dc36f_8ee006d4",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-07-27T21:26:10Z",
+      "side": 1,
+      "message": "It\u0027ll probably go under github.com/open-power/hostboot or some other subrepo now that the p10 branch has been created.",
+      "parentUuid": "3f8f67cb_528dd793",
+      "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "e5513e3d_ef724b81",
         "filename": "functions.cpp",
         "patchSetId": 2
@@ -33,6 +51,24 @@
       "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "34356a8d_34b95601",
+        "filename": "functions.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 218,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-07-27T21:26:10Z",
+      "side": 1,
+      "message": "Done. Ah good pointer. Regarding get_if, I didn\u0027t change it, it\u0027d need to be something like:\n\n        std::variant\u003cstd::string\u003e element \u003d iter[\"element_name\"];\n        const std::string* name \u003d\n            std::get_if\u003cstd::string\u003e(\u0026element);\n\nand accessing the elemnt \"iter[\"element_name\"];\" still throws if it doesn\u0027t exist. So seems if something doesn\u0027t exist, json will throw, so just added a small try/catch block.",
+      "parentUuid": "e5513e3d_ef724b81",
+      "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     },
     {
       "key": {
@@ -59,6 +95,30 @@
     },
     {
       "key": {
+        "uuid": "83f04ab9_27a23784",
+        "filename": "functions.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 222,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-07-27T21:26:10Z",
+      "side": 1,
+      "message": "Done. Apparently json doesn\u0027t like a const iterator to be used when accessing the elements, added a comment (which i need to fix, since initially the comment was for get_if() when i was trying to test that).",
+      "parentUuid": "729d5f21_be907c85",
+      "range": {
+        "startLine": 222,
+        "startChar": 13,
+        "endLine": 222,
+        "endChar": 19
+      },
+      "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "ed2c38e6_49946a49",
         "filename": "functions.cpp",
         "patchSetId": 2
@@ -82,6 +142,30 @@
     },
     {
       "key": {
+        "uuid": "d6bfdacf_d730a3a9",
+        "filename": "functions.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 224,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-07-27T21:26:10Z",
+      "side": 1,
+      "message": "Done. Makes sense, changed to std::string",
+      "parentUuid": "ed2c38e6_49946a49",
+      "range": {
+        "startLine": 224,
+        "startChar": 12,
+        "endLine": 224,
+        "endChar": 17
+      },
+      "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "f3832997_e52007ef",
         "filename": "functions.cpp",
         "patchSetId": 2
@@ -96,6 +180,24 @@
       "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c28cf85d_94f5dd85",
+        "filename": "functions.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 239,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-07-27T21:26:10Z",
+      "side": 1,
+      "message": "Done. Agree, added comments throughout.",
+      "parentUuid": "f3832997_e52007ef",
+      "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
