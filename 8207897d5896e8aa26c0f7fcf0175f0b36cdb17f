@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "5b5aabc7_cfd13199",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-07-29T16:25:27Z",
+      "side": 1,
+      "message": "Hostboot has started to document the lids in their p10 branch, example: https://github.com/open-power/hostboot/blob/master-p10/src/subtree/openbmc/pldm/oem/ibm/configurations/fileTable.json",
+      "parentUuid": "739dc36f_8ee006d4",
+      "revId": "8207897d5896e8aa26c0f7fcf0175f0b36cdb17f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "e5513e3d_ef724b81",
         "filename": "functions.cpp",
         "patchSetId": 2
