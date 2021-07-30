@@ -16,6 +16,24 @@
       "revId": "306e45f3a79da0e0d69dddaa0dcc362725fcc8ef",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "cb60261a_73d4acfb",
+        "filename": "functions.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 350,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-07-30T19:00:31Z",
+      "side": 1,
+      "message": "Done. Good point.",
+      "parentUuid": "58987ace_6c096e3f",
+      "revId": "306e45f3a79da0e0d69dddaa0dcc362725fcc8ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
