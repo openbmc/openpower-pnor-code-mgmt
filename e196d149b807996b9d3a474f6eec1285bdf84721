@@ -1,0 +1,106 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3d82e12b_4b1b7038",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-08-04T20:57:27Z",
+      "side": 1,
+      "message": "\"/media\" is defined by MEDIA_DIR.\nstd::filesystem::path instead of std::string?",
+      "revId": "e196d149b807996b9d3a474f6eec1285bdf84721",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "076f789f_4e9ae8b6",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 62,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-08-04T20:57:27Z",
+      "side": 1,
+      "message": "const auto\u0026",
+      "revId": "e196d149b807996b9d3a474f6eec1285bdf84721",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "dcec2bb4_4c2cd66b",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 64,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-08-04T20:57:27Z",
+      "side": 1,
+      "message": ".path() is available on the directory iterator so there\u0027s no need to create a new string. The path gives the full path so might need to append substr to remove the MEDIA_DIR from the beginning of the path and get the name of the dir/file only.",
+      "revId": "e196d149b807996b9d3a474f6eec1285bdf84721",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "179d5ca6_7191bb3b",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-08-04T20:57:27Z",
+      "side": 1,
+      "message": "If the operation fails, the user won\u0027t know unless they checked the journal. Should we use the remove_all() without the error_code and let the app throw if a failure occurs?",
+      "revId": "e196d149b807996b9d3a474f6eec1285bdf84721",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9ccd8e3b_24f0b331",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-08-04T20:57:27Z",
+      "side": 1,
+      "message": "obmc-flash-bios will need some updating to check if dirs/mounts are already present, because for example, the patch service seems to create a symlink to itself:\n\nroot@p10bmc:~# ls -l /media/hostfw/patch-a/\nlrwxrwxrwx    1 root     root            21 Aug  4 20:03 patch-a -\u003e /media/hostfw/patch-a\n\nSome of the journal msgs:\nAug 04 20:03:40 p10bmc obmc-flash-bios[3143]: mount: /media/hostfw/running-ro: /media/hostfw/hostfw-a is already mounted.\nAug 04 20:03:40 p10bmc obmc-flash-bios[3147]: ln: /usr/local/share/hostfw/running/patch-a: File exists",
+      "revId": "e196d149b807996b9d3a474f6eec1285bdf84721",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "8a653d02_4f089ed5",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-08-04T20:57:27Z",
+      "side": 1,
+      "message": "Two new services have just been added to the repo: process-host-firmware.service and update-bios-attr-table.service, need to run those as well.",
+      "revId": "e196d149b807996b9d3a474f6eec1285bdf84721",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
