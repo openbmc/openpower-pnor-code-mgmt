@@ -70,6 +70,24 @@
     },
     {
       "key": {
+        "uuid": "c7197745_d0ef6636",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 68,
+      "author": {
+        "id": 1001090
+      },
+      "writtenOn": "2021-08-17T01:33:31Z",
+      "side": 1,
+      "message": "Agree with this and previous notes, they are addressed in the next patch",
+      "parentUuid": "179d5ca6_7191bb3b",
+      "revId": "e196d149b807996b9d3a474f6eec1285bdf84721",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9ccd8e3b_24f0b331",
         "filename": "mmc/item_updater_mmc.cpp",
         "patchSetId": 3
