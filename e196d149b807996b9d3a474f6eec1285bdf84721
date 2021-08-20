@@ -191,6 +191,24 @@
       "revId": "e196d149b807996b9d3a474f6eec1285bdf84721",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e40c4d2b_2bd94fe2",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 90,
+      "author": {
+        "id": 1001090
+      },
+      "writtenOn": "2021-08-20T19:36:35Z",
+      "side": 1,
+      "message": "Addressed in patch 6",
+      "parentUuid": "8a653d02_4f089ed5",
+      "revId": "e196d149b807996b9d3a474f6eec1285bdf84721",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
