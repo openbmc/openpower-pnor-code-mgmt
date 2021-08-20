@@ -159,6 +159,24 @@
     },
     {
       "key": {
+        "uuid": "a4e8f480_ddd01b0b",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 78,
+      "author": {
+        "id": 1001090
+      },
+      "writtenOn": "2021-08-20T03:16:28Z",
+      "side": 1,
+      "message": "Fixed in patch 5. Tested it with journalctl running and it didn\u0027t give those journal msgs anymore.",
+      "parentUuid": "9ccd8e3b_24f0b331",
+      "revId": "e196d149b807996b9d3a474f6eec1285bdf84721",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "8a653d02_4f089ed5",
         "filename": "mmc/item_updater_mmc.cpp",
         "patchSetId": 3
