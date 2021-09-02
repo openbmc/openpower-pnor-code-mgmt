@@ -38,7 +38,6 @@ void EVP_MD_CTX_free(EVP_MD_CTX* ctx)
 namespace utils
 {
 
-using sdbusplus::exception::SdBusError;
 using namespace phosphor::logging;
 
 constexpr auto HIOMAPD_PATH = "/xyz/openbmc_project/Hiomapd";
@@ -68,7 +67,7 @@ std::string getService(sdbusplus::bus::bus& bus, const std::string& path,
         }
         return mapperResponse[0].first;
     }
-    catch (const sdbusplus::exception::SdBusError& ex)
+    catch (const sdbusplus::exception::exception& ex)
     {
         log<level::ERR>("Mapper call failed", entry("METHOD=%d", "GetObject"),
                         entry("PATH=%s", path.c_str()),
@@ -87,7 +86,7 @@ void hiomapdSuspend(sdbusplus::bus::bus& bus)
     {
         bus.call_noreply(method);
     }
-    catch (const SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Error in mboxd suspend call",
                         entry("ERROR=%s", e.what()));
@@ -106,7 +105,7 @@ void hiomapdResume(sdbusplus::bus::bus& bus)
     {
         bus.call_noreply(method);
     }
-    catch (const SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Error in mboxd suspend call",
                         entry("ERROR=%s", e.what()));

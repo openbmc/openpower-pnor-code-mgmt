@@ -233,7 +233,7 @@ bool ItemUpdater::isChassisOn()
             elog<InternalFailure>();
         }
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Error in Mapper call");
         elog<InternalFailure>();
@@ -253,7 +253,7 @@ bool ItemUpdater::isChassisOn()
         auto strParam = std::get<std::string>(currentChassisState);
         return (strParam != CHASSIS_STATE_OFF);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Error in fetching current Chassis State",
                         entry("MAPPERRESPONSE=%s",

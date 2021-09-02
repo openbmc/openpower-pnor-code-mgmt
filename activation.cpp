@@ -27,7 +27,6 @@ namespace updater
 namespace softwareServer = sdbusplus::xyz::openbmc_project::Software::server;
 
 using namespace phosphor::logging;
-using sdbusplus::exception::SdBusError;
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
@@ -48,7 +47,7 @@ void Activation::subscribeToSystemdSignals()
     {
         this->bus.call_noreply(method);
     }
-    catch (const SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         if (e.name() != nullptr &&
             strcmp("org.freedesktop.systemd1.AlreadySubscribed", e.name()) == 0)
@@ -118,7 +117,7 @@ void Activation::deleteImageManagerObject()
             return;
         }
     }
-    catch (const SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Error in Get Delete Object",
                         entry("VERSIONPATH=%s", path.c_str()));
@@ -148,7 +147,7 @@ void Activation::deleteImageManagerObject()
     {
         bus.call(method);
     }
-    catch (const SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         if (e.name() != nullptr && strcmp("System.Error.ELOOP", e.name()) == 0)
         {
@@ -193,7 +192,7 @@ bool Activation::checkApplyTimeImmediate()
                 return true;
             }
         }
-        catch (const SdBusError& e)
+        catch (const sdbusplus::exception::exception& e)
         {
             log<level::ERR>("Error in getting ApplyTime",
                             entry("ERROR=%s", e.what()));
@@ -221,7 +220,7 @@ void Activation::rebootHost()
     {
         auto reply = bus.call(method);
     }
-    catch (const SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ALERT>("Error in trying to reboot the Host. "
                           "The Host needs to be manually rebooted to complete "
@@ -287,7 +286,7 @@ bool Activation::fieldModeEnabled()
         reply.read(fieldMode);
         return std::get<bool>(fieldMode);
     }
-    catch (const SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Error in fieldModeEnabled getValue");
         elog<InternalFailure>();

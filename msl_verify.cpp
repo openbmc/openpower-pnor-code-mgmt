@@ -92,7 +92,7 @@ std::string MinimumShipLevel::getFunctionalVersion()
     {
         response.read(associations);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Failed to read software associations",
                         entry("ERROR=%s", e.what()),
@@ -122,7 +122,7 @@ std::string MinimumShipLevel::getFunctionalVersion()
                 response.read(functionalVersion);
                 return std::get<std::string>(functionalVersion);
             }
-            catch (const sdbusplus::exception::SdBusError& e)
+            catch (const sdbusplus::exception::exception& e)
             {
                 log<level::ERR>(
                     "Failed to read version property",
