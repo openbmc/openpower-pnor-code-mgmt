@@ -60,7 +60,7 @@ std::string getObject(sdbusplus::bus::bus& bus, const std::string& path)
             return std::string{};
         }
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         return std::string{};
     }
@@ -84,7 +84,7 @@ ManagedObjectType getManagedObjects(sdbusplus::bus::bus& bus,
         auto reply = bus.call(method);
         reply.read(objects);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         return ManagedObjectType{};
     }
@@ -407,7 +407,7 @@ void setBiosAttr(const std::filesystem::path& elementsJsonFilePath,
                       std::variant<PendingAttributesType>(pendingAttributes));
         bus.call(method);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         log<level::ERR>("Error setting the bios attribute",
                         entry("ERROR=%s", e.what()),
@@ -649,7 +649,7 @@ std::shared_ptr<void> processHostFirmware(
         auto reply = bus.call(getManagedObjects);
         reply.read(objects);
     }
-    catch (const sdbusplus::exception::SdBusError& e)
+    catch (const sdbusplus::exception::exception& e)
     {
         // Error querying the EntityManager interface. Return the match to have
         // the callback run if/when the interface appears in D-Bus.
