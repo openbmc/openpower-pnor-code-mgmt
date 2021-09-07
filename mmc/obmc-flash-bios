@@ -36,18 +36,22 @@ mmc_init() {
     # A line in the pnor.toc looks like this:
     # partition05=SECBOOT,0x00381000,0x003a5000,00,ECC,PRESERVED
     rm -f ${prsv_dir}/*
-    if [ -f ${running_dir}/pnor.toc ]; then
-      prsvs=$(grep PRESERVED ${running_dir}/pnor.toc)
+    if [ -f ${ro_dir}/pnor.toc ]; then
+      prsvs=$(grep PRESERVED ${ro_dir}/pnor.toc)
       for prsv in ${prsvs}; do
         prsv=${prsv##partition*=}
         prsv=$(echo "${prsv}" | cut -d "," -f 1)
-        cp -p ${running_dir}/"${prsv}" ${prsv_dir}
+        if [ -L "${running_dir}/${prsv}" ]; then
+          # Preserve the symlink target file
+          prsv="$(readlink "${running_dir}/${prsv}")"
+          cp -p ${running_dir}/"${prsv}" ${prsv_dir}
+        fi
       done
     fi
 
-    # Copy contents of running image to running dir
+    # Copy lid contents of running image to running dir
     rm -f ${running_dir}/*
-    cp -p ${ro_dir}/* ${running_dir}/
+    cp -p ${ro_dir}/*.lid ${running_dir}/
 
     # Restore the preserved partitions. Ignore error, there may be none.
     cp -p ${prsv_dir}/* ${running_dir}/ 2>/dev/null || true
