@@ -22,6 +22,30 @@
       "revId": "e34ecc2ebc06ce7397bb7c23f04d0f900ff76663",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "6c2885fa_5204546f",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 54,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-09-08T14:36:43Z",
+      "side": 1,
+      "message": "It won\u0027t break it since we have a service file that runs \"openpower-update-manager update-bios-attr-table\" that creates symlinks from partition file names (like HBD) to its corresponding lid file if the partition file doesn\u0027t exist, so when the symlinks are created, to applications it looks like the partition file still exists.\n\nThe only side effect is that on the first code update to this change, the preserved partitions will be wiped out, such as GUARD and NVRAM, to transition them from files to symlinks. From there on, the lid file corresponding to those partitions will be preserved instead of the actual partition file name.",
+      "parentUuid": "3089837d_de783322",
+      "range": {
+        "startLine": 54,
+        "startChar": 4,
+        "endLine": 54,
+        "endChar": 41
+      },
+      "revId": "e34ecc2ebc06ce7397bb7c23f04d0f900ff76663",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
     }
   ]
 }
