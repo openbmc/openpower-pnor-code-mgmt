@@ -68,6 +68,19 @@ void ItemUpdaterMMC::reset()
         }
     }
 
+    // Remove files related to the Hardware Management Console / BMC web app
+    std::filesystem::path consolePath("/var/lib/bmcweb/ibm-management-console");
+    if (std::filesystem::exists(consolePath))
+    {
+        std::filesystem::remove_all(consolePath);
+    }
+
+    std::filesystem::path bmcdataPath("/home/root/bmcweb_persistent_data.json");
+    if (std::filesystem::exists(bmcdataPath))
+    {
+        std::filesystem::remove(bmcdataPath);
+    }
+
     // Recreate default files.
     auto bus = sdbusplus::bus::new_default();
     constexpr auto initService = "obmc-flash-bios-init.service";
@@ -92,6 +105,18 @@ void ItemUpdaterMMC::reset()
     method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
                                  SYSTEMD_INTERFACE, "StartUnit");
     method.append(updateService, "replace");
+    bus.call_noreply(method);
+
+    constexpr auto resetService = "pldm-reset-phyp-nvram.service";
+    method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                 SYSTEMD_INTERFACE, "StartUnit");
+    method.append(resetService, "replace");
+    bus.call_noreply(method);
+
+    constexpr auto checksumService = "pldm-reset-phyp-nvram-cksum.service";
+    method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                 SYSTEMD_INTERFACE, "StartUnit");
+    method.append(checksumService, "replace");
     bus.call_noreply(method);
 }
 
