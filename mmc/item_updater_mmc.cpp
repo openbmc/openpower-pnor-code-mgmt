@@ -5,6 +5,7 @@
 #include "activation_mmc.hpp"
 #include "version.hpp"
 
+#include <iostream>
 #include <filesystem>
 
 namespace openpower
@@ -68,31 +69,42 @@ void ItemUpdaterMMC::reset()
         }
     }
 
+    // Remove files related to the Hardware Management Console / BMC web app
+    std::filesystem::path consolePath("/var/lib/bmcweb/ibm-management-console");
+    if (std::filesystem::exists(consolePath))
+    {
+        std::filesystem::remove_all(consolePath);
+    }
+
+    std::filesystem::path bmcdataPath("/home/root/bmcweb_persistent_data.json");
+    if (std::filesystem::exists(bmcdataPath))
+    {
+        std::filesystem::remove(bmcdataPath);
+    }
+
     // Recreate default files.
+    const std::string services[6] = {"obmc-flash-bios-init.service",
+                                     "obmc-flash-bios-patch.service",
+                                     "openpower-process-host-firmware.service",
+                                     "openpower-update-bios-attr-table.service",
+                                     "pldm-reset-phyp-nvram.service",
+                                     "pldm-reset-phyp-nvram-cksum.service"};
+
     auto bus = sdbusplus::bus::new_default();
-    constexpr auto initService = "obmc-flash-bios-init.service";
-    auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
-                                      SYSTEMD_INTERFACE, "StartUnit");
-    method.append(initService, "replace");
-    bus.call_noreply(method);
-
-    constexpr auto patchService = "obmc-flash-bios-patch.service";
-    method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
-                                 SYSTEMD_INTERFACE, "StartUnit");
-    method.append(patchService, "replace");
-    bus.call_noreply(method);
-
-    constexpr auto processService = "openpower-process-host-firmware.service";
-    method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
-                                 SYSTEMD_INTERFACE, "StartUnit");
-    method.append(processService, "replace");
-    bus.call_noreply(method);
-
-    constexpr auto updateService = "openpower-update-bios-attr-table.service";
-    method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
-                                 SYSTEMD_INTERFACE, "StartUnit");
-    method.append(updateService, "replace");
-    bus.call_noreply(method);
+    for (int i = 0; i < 6; i++)
+    {
+        const auto service = services[i];
+        auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
+                                          SYSTEMD_INTERFACE, "StartUnit");
+        method.append(service, "replace");
+        // Ignore errors if the service is not found - not all systems
+        // may have these services
+        try
+        {
+            bus.call_noreply(method);
+        }
+        catch (const std::exception& e) {}
+    }
 }
 
 bool ItemUpdaterMMC::isVersionFunctional(const std::string& versionId)
