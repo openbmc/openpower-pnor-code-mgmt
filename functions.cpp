@@ -357,6 +357,12 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
         }
     }
 
+    // Delete the last comma of the bios attribute string
+    if (biosAttrStr.back() == ',')
+    {
+        return biosAttrStr.substr(0, biosAttrStr.length() - 1);
+    }
+
     return biosAttrStr;
 }
 
