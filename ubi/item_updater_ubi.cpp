@@ -236,11 +236,17 @@ void ItemUpdaterUbi::reset()
         }
     }
 
-    // Clear the preserved partition.
+    // Clear the preserved partition, except for SECBOOT that contains keys
+    // provisioned for the system.
     if (std::filesystem::is_directory(PNOR_PRSV))
     {
         for (const auto& iter : std::filesystem::directory_iterator(PNOR_PRSV))
         {
+            auto secbootPartition = "SECBOOT";
+            if (iter.path().stem() == secbootPartition)
+            {
+                continue;
+            }
             std::filesystem::remove_all(iter);
         }
     }
