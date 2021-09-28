@@ -3,6 +3,7 @@ Description=Update BIOS attr table with host firmware well-known names
 After=org.open_power.Software.Host.Updater.service
 After=obmc-flash-bios-init.service
 After=openpower-process-host-firmware.service
+Before=mboxd.service
 
 [Service]
 Type=oneshot
