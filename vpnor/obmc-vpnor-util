@@ -15,6 +15,9 @@ clear_volatile() {
   # toc partition string format:
   # partition27=HB_VOLATILE,0x02ba9000,0x02bae000,00,ECC,VOLATILE,READWRITE
   tocFilePath="${PNOR_RO_ACTIVE_PATH}${PNOR_TOC_FILE}"
+  if [ ! -f "${tocFilePath}" ]; then
+    tocFilePath="${PNOR_RW_ACTIVE_PATH}${PNOR_TOC_FILE}"
+  fi
   mapfile -t volatiles < <(grep VOLATILE "${tocFilePath}" | grep -Eo '^partition([0-9]+)=([A-Za-z0-9_]+)')
   for (( index=0; index<${#volatiles[@]}; index++ )); do
     volatileName="$(echo "${volatiles[${index}]}" | awk -F '=' '{print $2}')"
@@ -28,6 +31,11 @@ clear_volatile() {
     if [ -f "${prsvVolatile}" ]; then
       echo "Clear $prsvVolatile"
       rm "${prsvVolatile}"
+    fi
+
+    if [ ! -f "${PNOR_RO_ACTIVE_PATH}${volatileName}" ]; then
+      cp -a "${PNOR_RO_ACTIVE_PATH}81e0066f.lid" "${PNOR_PRSV_ACTIVE_PATH}"
+      ln -s "81e0066f.lid" "${PNOR_PRSV_ACTIVE_PATH}${volatileName}"
     fi
   done
   # Always reset the sensor after clearing

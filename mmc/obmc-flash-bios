@@ -35,11 +35,11 @@ mmc_init() {
   fi
   if [ "${running_label}" != "${boot_label}" ]; then
     # Copy off the preserved partitions
-    # A line in the pnor.toc looks like this:
+    # A line in the pnor.toc (81e00994.lid) looks like this:
     # partition05=SECBOOT,0x00381000,0x003a5000,00,ECC,PRESERVED
     rm -f ${prsv_dir}/*
-    if [ -f ${ro_dir}/pnor.toc ]; then
-      prsvs=$(grep PRESERVED ${ro_dir}/pnor.toc)
+    if [ -f "${ro_dir}/81e00994.lid" ]; then
+      prsvs=$(grep PRESERVED "${ro_dir}/81e00994.lid")
       for prsv in ${prsvs}; do
         prsv=${prsv##partition*=}
         prsv=$(echo "${prsv}" | cut -d "," -f 1)

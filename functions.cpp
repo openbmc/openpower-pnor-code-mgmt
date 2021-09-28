@@ -220,6 +220,16 @@ void findLinks(const std::filesystem::path& hostFirmwareDirectory,
         return;
     }
 
+    // Create a symlink for pnor.toc
+    static const auto tocLid = "81e00994.lid";
+    auto tocLidPath = hostFirmwareDirectory / tocLid;
+    if (std::filesystem::exists(tocLidPath))
+    {
+        static const auto tocName = "pnor.toc";
+        auto tocLinkPath = hostFirmwareDirectory / tocName;
+        makeCallback(linkCallback, tocLid, tocLinkPath, errorCallback);
+    }
+
     for (; directoryIterator != std::filesystem::end(directoryIterator);
          directoryIterator.increment(ec))
     {
