@@ -60,7 +60,7 @@ bool restoreFromFile(const std::string& versionId, uint8_t& priority)
             varArchive(cereal::make_nvp("priority", priority));
             return true;
         }
-        catch (cereal::RapidJSONException& e)
+        catch (const cereal::RapidJSONException& e)
         {
             std::filesystem::remove(varPath);
         }
@@ -76,7 +76,7 @@ bool restoreFromFile(const std::string& versionId, uint8_t& priority)
             rwArchive(cereal::make_nvp("priority", priority));
             return true;
         }
-        catch (cereal::RapidJSONException& e)
+        catch (const cereal::RapidJSONException& e)
         {
             std::filesystem::remove(rwPath);
         }

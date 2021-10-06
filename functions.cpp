@@ -295,7 +295,7 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
             name = iter["element_name"].get<std::string>();
             lid = iter["short_lid_name"].get<std::string>();
         }
-        catch (std::exception& e)
+        catch (const std::exception& e)
         {
             // Possibly the element or lid name field was not found
             log<level::ERR>("Error reading JSON field",
