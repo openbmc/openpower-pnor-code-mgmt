@@ -73,6 +73,24 @@
     },
     {
       "key": {
+        "uuid": "ebb7b1d5_9dd74e80",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 70,
+      "author": {
+        "id": 1001090
+      },
+      "writtenOn": "2021-10-07T15:55:18Z",
+      "side": 1,
+      "message": "Added a comment about this to patchset 2.\n\nAlso added code to delete bmcweb_persistent_data.json.",
+      "parentUuid": "95e79faa_e31c8c08",
+      "revId": "0627881986a96aa52fe4853f23fa52f8707d8183",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b6633047_129e18a8",
         "filename": "mmc/item_updater_mmc.cpp",
         "patchSetId": 1
