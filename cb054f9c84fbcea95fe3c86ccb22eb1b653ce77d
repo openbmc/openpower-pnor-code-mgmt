@@ -52,6 +52,24 @@
       "revId": "cb054f9c84fbcea95fe3c86ccb22eb1b653ce77d",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9371e782_7a1eb8dd",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1001090
+      },
+      "writtenOn": "2021-10-11T21:01:43Z",
+      "side": 1,
+      "message": "Okay, now it only rewrites the file if one of two conditions are true: the file doesn\u0027t exist already, or we just did a bios reset",
+      "parentUuid": "b27f3d83_4669a98f",
+      "revId": "cb054f9c84fbcea95fe3c86ccb22eb1b653ce77d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
