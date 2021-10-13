@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6f4991ff_f36a5f9e",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-10-13T21:05:38Z",
+      "side": 1,
+      "message": "No need to specify the number \"6\", just have empty brackets \"[]\".",
+      "revId": "16b0614f32c07ecd95d9e7dd4c82f238a12bf62f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "53fe4492_605497a0",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-10-13T21:05:38Z",
+      "side": 1,
+      "message": "Let\u0027s use a range-based for loop:\nfor (const auto\u0026 service : services)",
+      "revId": "16b0614f32c07ecd95d9e7dd4c82f238a12bf62f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
