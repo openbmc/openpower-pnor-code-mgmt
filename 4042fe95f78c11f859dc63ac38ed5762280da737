@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "34794d68_ff7fc663",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 3
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2021-10-13T21:08:58Z",
+      "side": 1,
+      "message": "We should probably make \"/media/hostfw/reset-gpio-val\" a variable since it\u0027s used in multiple places.",
+      "revId": "4042fe95f78c11f859dc63ac38ed5762280da737",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
