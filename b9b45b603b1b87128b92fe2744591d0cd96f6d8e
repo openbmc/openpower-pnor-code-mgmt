@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3599b8bd_ad9b6c7a",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 4
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000021
+      },
+      "writtenOn": "2021-10-18T21:31:50Z",
+      "side": 1,
+      "message": "This actually does more than just check, it conditionally initiates the reset.",
+      "revId": "b9b45b603b1b87128b92fe2744591d0cd96f6d8e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "ee72c203_6fb6eb6d",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 4
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000021
+      },
+      "writtenOn": "2021-10-18T21:31:50Z",
+      "side": 1,
+      "message": "this should probably be conditional on the previous line success?",
+      "revId": "b9b45b603b1b87128b92fe2744591d0cd96f6d8e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
