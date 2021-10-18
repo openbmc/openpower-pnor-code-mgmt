@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "bba9b9e3_ab01bb93",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 86,
+      "author": {
+        "id": 1001090
+      },
+      "writtenOn": "2021-10-18T16:47:19Z",
+      "side": 1,
+      "message": "Sounds good, added in patchset 5",
+      "parentUuid": "6f4991ff_f36a5f9e",
+      "revId": "16b0614f32c07ecd95d9e7dd4c82f238a12bf62f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "53fe4492_605497a0",
         "filename": "mmc/item_updater_mmc.cpp",
         "patchSetId": 4
@@ -33,6 +51,24 @@
       "revId": "16b0614f32c07ecd95d9e7dd4c82f238a12bf62f",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "06ec50a2_e78dd0c3",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 94,
+      "author": {
+        "id": 1001090
+      },
+      "writtenOn": "2021-10-18T16:47:19Z",
+      "side": 1,
+      "message": "Added in patchset 5",
+      "parentUuid": "53fe4492_605497a0",
+      "revId": "16b0614f32c07ecd95d9e7dd4c82f238a12bf62f",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
