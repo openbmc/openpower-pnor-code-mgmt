@@ -1,0 +1,12 @@
+[Unit]
+Description=Perform a bios reset if the GPIO changed
+Before=pldmd.service
+After=org.open_power.Software.Host.Updater.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/obmc-flash-bios bios-reset-check
+
+[Install]
+WantedBy=multi-user.target

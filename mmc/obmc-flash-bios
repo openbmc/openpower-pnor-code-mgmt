@@ -1,5 +1,21 @@
 #!/bin/sh
 
+bios_reset_check() {
+  resetval=$(fw_printenv -n rwreset 2>/dev/nell)
+  if [ "$resetval" = "0" ] || [ "$resetval" = "1" ]; then
+    varstore="/media/hostfw/reset-gpio-val"
+    if [ -f "$varstore" ]; then
+      if [ "$resetval" != "$(cat $varstore)" ]; then
+        if busctl call org.open_power.Software.Host.Updater /xyz/openbmc_project/software xyz.openbmc_project.Common.FactoryReset Reset; then
+          echo "$resetval" > "$varstore"
+        fi
+      fi
+    else
+      echo "$resetval" > "$varstore"
+    fi
+  fi
+}
+
 mmc_init() {
   base_dir="/media/hostfw"
   ro_dir="${base_dir}/running-ro"
@@ -128,6 +144,9 @@ mmc_patch() {
 }
 
 case "$1" in
+  bios-reset-check)
+    bios_reset_check
+    ;;
   mmc-init)
     mmc_init
     ;;
@@ -135,7 +154,7 @@ case "$1" in
     mmc_patch
     ;;
   *)
-    echo "Invalid argument"
+    echo "Invalid argument:" "$1"
     exit 1
     ;;
 esac
