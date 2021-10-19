@@ -126,6 +126,7 @@ if get_option('device-type') == 'mmc'
     extra_unit_files += [
         'mmc/obmc-flash-bios-init.service',
         'mmc/obmc-flash-bios-patch.service',
+        'mmc/openpower-bios-factory-reset.service',
     ]
 endif
 
