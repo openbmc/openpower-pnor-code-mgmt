@@ -1,0 +1,55 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "6cef1a77_42aa2013",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000021
+      },
+      "writtenOn": "2021-10-20T22:44:01Z",
+      "side": 1,
+      "message": "This logic says \n (1) don\u0027t generate a BIOS reset on first update to this firmware.\n (2) don\u0027t generate a BIOS reset if BMC was reset via API (rwreset true)\n\nIs behavior 2 what is desired?  Do we need an additional optional trigger via API?",
+      "revId": "65d4a1274e26e48f249f6d0ce608d7e7fff70be5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b3db0ee2_fb6a4469",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 6
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1000021
+      },
+      "writtenOn": "2021-10-20T22:44:01Z",
+      "side": 1,
+      "message": "The service is called \"bios factory reset\".\nIf the check is satisfied the reset is actually triggered.\nAgain, I\u0027d like the action to be in the name.   If not just bios-reset then something like:\n\nconditional-bios-reset\nmaybe-bios-reset\nbios-reset-if-required",
+      "revId": "65d4a1274e26e48f249f6d0ce608d7e7fff70be5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "71fd144f_5a3a0610",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 6
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1000021
+      },
+      "writtenOn": "2021-10-20T22:44:01Z",
+      "side": 1,
+      "message": "Nit: there\u0027s no reason to have two quoted strings here.\n\necho 1\u003e\u00262  to send to stderr.",
+      "revId": "65d4a1274e26e48f249f6d0ce608d7e7fff70be5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
