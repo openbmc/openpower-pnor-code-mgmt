@@ -55,6 +55,24 @@
     },
     {
       "key": {
+        "uuid": "c4a79eee_3e4b4a30",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 4
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1001090
+      },
+      "writtenOn": "2021-10-20T16:32:48Z",
+      "side": 1,
+      "message": "What do y\u0027all think it should be changed to? Maybe conditional_bios_reset? Maybe perform_bios_reset? Except that it doesn\u0027t always perform it, because it doesn\u0027t always pass the conditional statements.",
+      "parentUuid": "aa591792_9f0829b3",
+      "revId": "b9b45b603b1b87128b92fe2744591d0cd96f6d8e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    },
+    {
+      "key": {
         "uuid": "ee72c203_6fb6eb6d",
         "filename": "mmc/obmc-flash-bios",
         "patchSetId": 4
