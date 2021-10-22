@@ -37,6 +37,24 @@
     },
     {
       "key": {
+        "uuid": "07c843ac_f71720dd",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000021
+      },
+      "writtenOn": "2021-10-22T19:38:18Z",
+      "side": 1,
+      "message": "Ok it\u0027d be nice to note the endpoint here",
+      "parentUuid": "e8f76a7b_562e8393",
+      "revId": "65d4a1274e26e48f249f6d0ce608d7e7fff70be5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b3db0ee2_fb6a4469",
         "filename": "mmc/obmc-flash-bios",
         "patchSetId": 6
