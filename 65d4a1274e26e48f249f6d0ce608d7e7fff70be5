@@ -19,6 +19,24 @@
     },
     {
       "key": {
+        "uuid": "e8f76a7b_562e8393",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 6
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1001090
+      },
+      "writtenOn": "2021-10-22T18:11:46Z",
+      "side": 1,
+      "message": "Yeah, per Adriana\u0027s comments elsewhere, behavior 2 is what we want. Because there\u0027s already an API for calling a BIOS reset, if both a BMC and a BIOS reset is wanted, someone can just call both APIs.",
+      "parentUuid": "6cef1a77_42aa2013",
+      "revId": "65d4a1274e26e48f249f6d0ce608d7e7fff70be5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "b3db0ee2_fb6a4469",
         "filename": "mmc/obmc-flash-bios",
         "patchSetId": 6
@@ -36,6 +54,24 @@
     },
     {
       "key": {
+        "uuid": "93392930_e60fc07d",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 6
+      },
+      "lineNbr": 148,
+      "author": {
+        "id": 1001090
+      },
+      "writtenOn": "2021-10-22T18:11:46Z",
+      "side": 1,
+      "message": "Okay, changed to bios-reset-if-needed",
+      "parentUuid": "b3db0ee2_fb6a4469",
+      "revId": "65d4a1274e26e48f249f6d0ce608d7e7fff70be5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "71fd144f_5a3a0610",
         "filename": "mmc/obmc-flash-bios",
         "patchSetId": 6
@@ -50,6 +86,24 @@
       "revId": "65d4a1274e26e48f249f6d0ce608d7e7fff70be5",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
       "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fc7ae155_6dbd8f13",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 6
+      },
+      "lineNbr": 157,
+      "author": {
+        "id": 1001090
+      },
+      "writtenOn": "2021-10-22T18:11:46Z",
+      "side": 1,
+      "message": "Sure, why not",
+      "parentUuid": "71fd144f_5a3a0610",
+      "revId": "65d4a1274e26e48f249f6d0ce608d7e7fff70be5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": false
     }
   ]
 }
