@@ -305,11 +305,15 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
         }
 
         // The elements with the ipl extension have higher priority. Therefore
-        // Use operator[] to overwrite value if an entry for it already exists.
-        // Ex: if the JSON contains an entry A.P10 followed by A.P10.iplTime,
-        // the lid value for the latter one will be overwrite the value of the
-        // first one.
+        // Use operator[] to overwrite value if an entry for it already exists,
+        // and create a second entry with key name element_RT to specify it as
+        // a runtime element.
+        // Ex: if the JSON contains an entry A.P10 with lid name X, it'll create
+        // and try A=X. If the JSON also contained an entry A.P10.iplTime with
+        // lid name Y, the A entry would be overwritten to be A=Y and a second
+        // entry A_RT=X would be created.
         constexpr auto iplExtension = ".iplTime";
+        constexpr auto runtimeSuffix = "_RT";
         std::filesystem::path path(name);
         if (path.extension() == iplExtension)
         {
@@ -329,7 +333,16 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
             // since stem() returns the base name if no periods are found.
             // Therefore both "element.P10" and "element.P10.iplTime" would
             // become "element".
-            attr[path.stem().stem()] = lid;
+            auto keyName = path.stem().stem();
+            auto attrIt = attr.find(keyName);
+            if (attrIt != attr.end())
+            {
+                // Copy the existing entry to a runtime entry
+                auto runtimeKeyName = keyName.string() + runtimeSuffix;
+                attr.insert({runtimeKeyName, attrIt->second});
+            }
+            // Overwrite the exsiting element with the ipl entry
+            attr[keyName] = lid;
             continue;
         }
 
@@ -340,7 +353,19 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
         if (std::find(extensions.begin(), extensions.end(), path.extension()) !=
             extensions.end())
         {
-            attr.insert({path.stem(), lid});
+            auto keyName = path.stem();
+            auto attrIt = attr.find(keyName);
+            if (attrIt != attr.end())
+            {
+                // The existing entry is an ipl entry, therefore create this
+                // entry as a runtime one.
+                auto runtimeKeyName = keyName.string() + runtimeSuffix;
+                attr.insert({runtimeKeyName, lid});
+            }
+            else
+            {
+                attr.insert({path.stem(), lid});
+            }
         }
     }
     for (const auto& a : attr)
