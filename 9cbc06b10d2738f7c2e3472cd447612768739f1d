@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "df47b5f3_1418f545",
+        "filename": "functions.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 342,
+      "author": {
+        "id": 1000392
+      },
+      "writtenOn": "2021-11-15T15:45:02Z",
+      "side": 1,
+      "message": "I do not understand why we would ever label a lid mapping as \"_RT\" here. Haven\u0027t we determined that this json entry has a suffix of \u0027.iplTime\u0027 for the element_name field ?",
+      "range": {
+        "startLine": 340,
+        "startChar": 0,
+        "endLine": 342,
+        "endChar": 62
+      },
+      "revId": "9cbc06b10d2738f7c2e3472cd447612768739f1d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4",
+      "unresolved": true
+    }
+  ]
+}
