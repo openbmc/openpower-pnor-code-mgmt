@@ -211,16 +211,12 @@ bool Signature::verifyFile(const std::filesystem::path& file,
 
     // Create RSA.
     auto publicRSA = createPublicRSA(publicKey);
-    if (publicRSA == nullptr)
+    if (!publicRSA)
     {
         log<level::ERR>("Failed to create RSA",
                         entry("FILE=%s", publicKey.c_str()));
         elog<InternalFailure>();
     }
-
-    // Assign key to RSA.
-    EVP_PKEY_Ptr pKeyPtr(EVP_PKEY_new(), ::EVP_PKEY_free);
-    EVP_PKEY_assign_RSA(pKeyPtr.get(), publicRSA);
 
     // Initializes a digest context.
     EVP_MD_CTX_Ptr rsaVerifyCtx(EVP_MD_CTX_new(), ::EVP_MD_CTX_free);
@@ -238,7 +234,7 @@ bool Signature::verifyFile(const std::filesystem::path& file,
     }
 
     auto result = EVP_DigestVerifyInit(rsaVerifyCtx.get(), nullptr, hashStruct,
-                                       nullptr, pKeyPtr.get());
+                                       nullptr, publicRSA.get());
 
     if (result <= 0)
     {
@@ -284,9 +280,9 @@ bool Signature::verifyFile(const std::filesystem::path& file,
     return true;
 }
 
-inline RSA* Signature::createPublicRSA(const std::filesystem::path& publicKey)
+inline EVP_PKEY_Ptr
+    Signature::createPublicRSA(const std::filesystem::path& publicKey)
 {
-    RSA* rsa = nullptr;
     auto size = std::filesystem::file_size(publicKey);
 
     // Read public key file
@@ -299,9 +295,8 @@ inline RSA* Signature::createPublicRSA(const std::filesystem::path& publicKey)
         elog<InternalFailure>();
     }
 
-    rsa = PEM_read_bio_RSA_PUBKEY(keyBio.get(), &rsa, nullptr, nullptr);
-
-    return rsa;
+    return {PEM_read_bio_PUBKEY(keyBio.get(), nullptr, nullptr, nullptr),
+            &::EVP_PKEY_free};
 }
 
 CustomMap Signature::mapFile(const std::filesystem::path& path, size_t size)
