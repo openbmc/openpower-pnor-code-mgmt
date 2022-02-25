@@ -52,6 +52,12 @@ void hiomapdResume(sdbusplus::bus::bus& bus);
  */
 void clearHMCManaged(sdbusplus::bus::bus& bus);
 
+/** @brief DeleteAll error logs
+ *
+ * @param[in] bus - The D-Bus bus object.
+ */
+void deleteAllErrorLogs(sdbusplus::bus::bus& bus);
+
 } // namespace utils
 
 #endif // OPENSSL_VERSION_NUMBER < 0x10100000L

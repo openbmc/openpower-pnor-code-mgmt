@@ -144,4 +144,24 @@ void clearHMCManaged(sdbusplus::bus::bus& bus)
     }
 }
 
+void deleteAllErrorLogs(sdbusplus::bus::bus& bus)
+{
+    constexpr auto loggingPath = "/xyz/openbmc_project/logging";
+    constexpr auto deleteAllIntf = "xyz.openbmc_project.Collection.DeleteAll";
+
+    auto service = getService(bus, loggingPath, deleteAllIntf);
+    auto method = bus.new_method_call(service.c_str(), loggingPath,
+                                      deleteAllIntf, "DeleteAll");
+
+    try
+    {
+        bus.call_noreply(method);
+    }
+    catch (const sdbusplus::exception::exception& e)
+    {
+        log<level::ERR>("Error deleting all error logs",
+                        entry("ERROR=%s", e.what()));
+    }
+}
+
 } // namespace utils

@@ -70,6 +70,9 @@ void ItemUpdaterMMC::reset()
         }
     }
 
+    // Delete all BMC error logs to avoid discrepancies with the host error logs
+    utils::deleteAllErrorLogs(bus);
+
     // Remove files related to the Hardware Management Console / BMC web app
 
     utils::clearHMCManaged(bus);
