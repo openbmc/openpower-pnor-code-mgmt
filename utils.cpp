@@ -112,4 +112,36 @@ void hiomapdResume(sdbusplus::bus::bus& bus)
     }
 }
 
+void clearHMCManaged(sdbusplus::bus::bus& bus)
+{
+    constexpr auto biosConfigPath = "/xyz/openbmc_project/bios_config/manager";
+    constexpr auto biosConfigIntf = "xyz.openbmc_project.BIOSConfig.Manager";
+    constexpr auto dbusAttrType =
+        "xyz.openbmc_project.BIOSConfig.Manager.AttributeType.Enumeration";
+    constexpr auto dbusAttrName = "pvm_hmc_managed";
+
+    using PendingAttributesType = std::vector<std::pair<
+        std::string, std::tuple<std::string, std::variant<std::string>>>>;
+    PendingAttributesType pendingAttributes;
+    pendingAttributes.emplace_back(std::make_pair(
+        dbusAttrName, std::make_tuple(dbusAttrType, "Disabled")));
+
+    try
+    {
+        auto service = getService(bus, biosConfigPath, biosConfigIntf);
+        auto method = bus.new_method_call(service.c_str(), biosConfigPath,
+                                          SYSTEMD_PROPERTY_INTERFACE, "Set");
+        method.append(biosConfigIntf, "PendingAttributes",
+                      std::variant<PendingAttributesType>(pendingAttributes));
+        bus.call(method);
+    }
+    catch (const sdbusplus::exception::exception& e)
+    {
+        log<level::ERR>("Error setting the bios attribute",
+                        entry("ERROR=%s", e.what()),
+                        entry("ATTRIBUTE=%s", dbusAttrName));
+        return;
+    }
+}
+
 } // namespace utils

@@ -3,6 +3,7 @@
 #include "item_updater_mmc.hpp"
 
 #include "activation_mmc.hpp"
+#include "utils.hpp"
 #include "version.hpp"
 
 #include <filesystem>
@@ -70,6 +71,9 @@ void ItemUpdaterMMC::reset()
     }
 
     // Remove files related to the Hardware Management Console / BMC web app
+
+    utils::clearHMCManaged(bus);
+
     std::filesystem::path consolePath("/var/lib/bmcweb/ibm-management-console");
     if (std::filesystem::exists(consolePath))
     {
@@ -90,7 +94,6 @@ void ItemUpdaterMMC::reset()
                                     "pldm-reset-phyp-nvram.service",
                                     "pldm-reset-phyp-nvram-cksum.service"};
 
-    auto bus = sdbusplus::bus::new_default();
     for (const auto& service : services)
     {
         auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,

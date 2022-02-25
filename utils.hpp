@@ -45,6 +45,13 @@ void hiomapdSuspend(sdbusplus::bus::bus& bus);
  */
 void hiomapdResume(sdbusplus::bus::bus& bus);
 
+/** @brief Set the Hardware Management Console Managed bios attribute to
+ *         Disabled to clear the indication that the system is HMC-managed.
+ *
+ * @param[in] bus - The D-Bus bus object.
+ */
+void clearHMCManaged(sdbusplus::bus::bus& bus);
+
 } // namespace utils
 
 #endif // OPENSSL_VERSION_NUMBER < 0x10100000L
