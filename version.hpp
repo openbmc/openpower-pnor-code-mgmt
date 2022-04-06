@@ -86,7 +86,8 @@ class Version : public VersionInherit
             ItemUpdater& parent, const std::string& versionId,
             const std::string& versionString, VersionPurpose versionPurpose,
             const std::string& filePath, eraseFunc callback) :
-        VersionInherit(bus, (objPath).c_str(), true),
+        VersionInherit(bus, (objPath).c_str(),
+                       VersionInherit::action::defer_emit),
         eraseCallback(callback), bus(bus), objPath(objPath), parent(parent),
         versionId(versionId), versionStr(versionString),
         chassisStateSignals(
