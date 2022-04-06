@@ -13,6 +13,7 @@
 #include <sdbusplus/exception.hpp>
 #include <sdbusplus/message.hpp>
 #include <sdeventplus/event.hpp>
+#include <xyz/openbmc_project/Common/error.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -35,37 +36,6 @@ using InterfacesPropertiesMap =
              std::map<std::string, std::variant<std::vector<std::string>>>>;
 using ManagedObjectType =
     std::map<sdbusplus::message::object_path, InterfacesPropertiesMap>;
-
-/**
- * @brief GetObject function to find the service given an object path.
- *        It is used to determine if a service is running, so there is no need
- *        to specify interfaces as a parameter to constrain the search.
- */
-std::string getObject(sdbusplus::bus::bus& bus, const std::string& path)
-{
-    auto method = bus.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
-                                      MAPPER_BUSNAME, "GetObject");
-    method.append(path);
-    std::vector<std::string> interfaces;
-    method.append(interfaces);
-
-    std::vector<std::pair<std::string, std::vector<std::string>>> response;
-
-    try
-    {
-        auto reply = bus.call(method);
-        reply.read(response);
-        if (response.empty())
-        {
-            return std::string{};
-        }
-    }
-    catch (const sdbusplus::exception::exception& e)
-    {
-        return std::string{};
-    }
-    return response[0].first;
-}
 
 /**
  * @brief Returns the managed objects for a given service
@@ -436,10 +406,11 @@ void setBiosAttr(const std::filesystem::path& elementsJsonFilePath,
         reply.read(response);
         if (response.empty())
         {
-            log<level::ERR>("Error reading mapper response",
-                            entry("PATH=%s", biosConfigPath),
-                            entry("INTERFACE=%s", biosConfigIntf));
-            return;
+            log<level::INFO>("Error reading mapper response",
+                             entry("PATH=%s", biosConfigPath),
+                             entry("INTERFACE=%s", biosConfigIntf));
+            throw sdbusplus::xyz::openbmc_project::Common::Error::
+                InternalFailure();
         }
         auto method = bus.new_method_call((response.begin()->first).c_str(),
                                           biosConfigPath,
@@ -450,10 +421,10 @@ void setBiosAttr(const std::filesystem::path& elementsJsonFilePath,
     }
     catch (const sdbusplus::exception::exception& e)
     {
-        log<level::ERR>("Error setting the bios attribute",
-                        entry("ERROR=%s", e.what()),
-                        entry("ATTRIBUTE=%s", dbusAttrName));
-        return;
+        log<level::INFO>("Error setting the bios attribute",
+                         entry("ERROR=%s", e.what()),
+                         entry("ATTRIBUTE=%s", dbusAttrName));
+        throw;
     }
 }
 
@@ -505,7 +476,14 @@ bool maybeCall(const std::map<std::string,
         std::get<std::vector<std::string>>(propertyIterator->second);
     if (callback)
     {
-        callback(ibmCompatibleSystem);
+        try
+        {
+            callback(ibmCompatibleSystem);
+        }
+        catch (const sdbusplus::exception::exception& e)
+        {
+            return false;
+        }
     }
 
     // IBMCompatibleSystem found and callback issued.
@@ -593,7 +571,14 @@ void maybeSetBiosAttr(
     if (getExtensionsForIbmCompatibleSystem(extensionMap, ibmCompatibleSystem,
                                             extensions))
     {
-        setBiosAttr(elementsJsonFilePath, extensions);
+        try
+        {
+            setBiosAttr(elementsJsonFilePath, extensions);
+        }
+        catch (const sdbusplus::exception::exception& e)
+        {
+            throw;
+        }
     }
 }
 
@@ -755,13 +740,14 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
         std::make_shared<decltype(elementsJsonFilePath)>(
             std::move(elementsJsonFilePath));
 
-    // Entity Manager is needed to get the list of supported extensions. Add a
-    // match to monitor interfaces added in case it's not running yet.
     auto maybeSetAttrWithArgsBound =
         std::bind(maybeSetBiosAttr, std::cref(*pExtensionMap),
                   std::cref(*pElementsJsonFilePath), std::placeholders::_1);
 
     std::vector<std::shared_ptr<void>> matches;
+
+    // Entity Manager is needed to get the list of supported extensions. Add a
+    // match to monitor interfaces added in case it's not running yet.
     matches.emplace_back(std::make_shared<sdbusplus::bus::match::match>(
         bus,
         sdbusplus::bus::match::rules::interfacesAdded() +
@@ -769,17 +755,15 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
                 "xyz.openbmc_project.EntityManager"),
         [pldmPath, pExtensionMap, pElementsJsonFilePath,
          maybeSetAttrWithArgsBound, &loop](auto& message) {
-            auto bus = sdbusplus::bus::new_default();
-            auto pldmObject = getObject(bus, pldmPath);
-            if (pldmObject.empty())
-            {
-                return;
-            }
             if (maybeCallMessage(message, maybeSetAttrWithArgsBound))
             {
                 loop.exit(0);
             }
         }));
+
+    // The BIOS attribute table can only be updated if PLDM is running because
+    // PLDM is the one that exposes this property. Add a match to monitor when
+    // the PLDM service starts.
     matches.emplace_back(std::make_shared<sdbusplus::bus::match::match>(
         bus,
         sdbusplus::bus::match::rules::nameOwnerChanged() +
@@ -810,14 +794,6 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
                 }
             }
         }));
-
-    // The BIOS attribute table can only be updated if PLDM is running because
-    // PLDM is the one that exposes this property. Return if it's not running.
-    auto pldmObject = getObject(bus, pldmPath);
-    if (pldmObject.empty())
-    {
-        return matches;
-    }
 
     InterfacesPropertiesMap interfacesAndProperties;
     auto objects = getManagedObjects(bus, entityManagerServiceName);

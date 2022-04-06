@@ -296,6 +296,7 @@ if not get_option('tests').disabled()
             'functions.cpp',
             dependencies: [
                 dependency('gtest', main: true),
+                dependency('phosphor-dbus-interfaces'),
                 dependency('sdbusplus'),
                 dependency('sdeventplus'),
             ],
