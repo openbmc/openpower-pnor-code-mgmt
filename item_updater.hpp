@@ -48,17 +48,13 @@ class GardReset : public GardResetInherit
      * @param[in] path   - The Dbus object path
      */
     GardReset(sdbusplus::bus::bus& bus, const std::string& path) :
-        GardResetInherit(bus, path.c_str(), true), bus(bus), path(path)
-    {
-        std::vector<std::string> interfaces({interface});
-        bus.emit_interfaces_added(path.c_str(), interfaces);
-    }
+        GardResetInherit(bus, path.c_str(),
+                         GardResetInherit::action::emit_interface_added),
+        bus(bus), path(path)
+    {}
 
     virtual ~GardReset()
-    {
-        std::vector<std::string> interfaces({interface});
-        bus.emit_interfaces_removed(path.c_str(), interfaces);
-    }
+    {}
 
   protected:
     // TODO Remove once openbmc/openbmc#1975 is resolved
