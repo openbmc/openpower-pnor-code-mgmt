@@ -34,6 +34,24 @@
       "parentUuid": "0839b57c_d1e7b243",
       "revId": "267c413f6d487341dbc674102dfea7eddc7d92c8",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5b080467_a3cc6ca7",
+        "filename": "item_updater.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 60,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-04-12T17:51:04Z",
+      "side": 0,
+      "message": "Looking at the file history this was added when the gard interface was initially created but no specific comment on the reason, so probably at that time it was found to be necessary.",
+      "parentUuid": "a823157e_21379462",
+      "revId": "267c413f6d487341dbc674102dfea7eddc7d92c8",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
