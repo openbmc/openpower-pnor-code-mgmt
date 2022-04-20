@@ -90,18 +90,22 @@ void ItemUpdaterMMC::reset()
     }
 
     // Recreate default files.
-    const std::string services[] = {"obmc-flash-bios-init.service",
-                                    "obmc-flash-bios-patch.service",
-                                    "openpower-process-host-firmware.service",
-                                    "openpower-update-bios-attr-table.service",
-                                    "pldm-reset-phyp-nvram.service",
-                                    "pldm-reset-phyp-nvram-cksum.service"};
+    // std::tuple<method, service_name>
+    const std::tuple<std::string, std::string> services[] = {
+        {"StartUnit", "obmc-flash-bios-init.service"},
+        {"StartUnit", "obmc-flash-bios-patch.service"},
+        {"StartUnit", "openpower-process-host-firmware.service"},
+        {"StartUnit", "openpower-update-bios-attr-table.service"},
+        {"StartUnit", "pldm-reset-phyp-nvram.service"},
+        {"StartUnit", "pldm-reset-phyp-nvram-cksum.service"},
+        {"RestartUnit", "org.open_power.HardwareIsolation.service"}};
 
     for (const auto& service : services)
     {
         auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
-                                          SYSTEMD_INTERFACE, "StartUnit");
-        method.append(service, "replace");
+                                          SYSTEMD_INTERFACE,
+                                          std::get<0>(service).c_str());
+        method.append(std::get<1>(service), "replace");
         // Ignore errors if the service is not found - not all systems
         // may have these services
         try
