@@ -61,8 +61,26 @@ mmc_init() {
         prsv=$(echo "${prsv}" | cut -d "," -f 1)
         if [ -L "${running_dir}/${prsv}" ]; then
           # Preserve the symlink target file
-          prsv="$(readlink "${running_dir}/${prsv}")"
-          cp -p ${running_dir}/"${prsv}" ${prsv_dir}
+          runsize="$(stat -c '%s' "${running_dir}/${prsv}")"
+          rosize="$(stat -c '%s' "${ro_dir}/${prsv}")"
+          if [ "$runsize" != "$rosize" ]; then
+              # Partition size may have changed or became corrupted
+              # So it will not be copied to the preserved directory
+              echo "PERSERVED PARTITION NOT COPIED "${running_dir}/${prsv}""
+              # Log write failure
+              busctl call xyz.openbmc_project.Logging \
+              /xyz/openbmc_project/logging \
+              xyz.openbmc_project.Logging.Create Create ssa{ss} \
+              xyz.openbmc_project.Common.Device.Error.WriteFailure \
+              xyz.openbmc_project.Logging.Entry.Level.Error 1 "CALLOUT_ERRNO" ""
+              #initiate dump
+              busctl call xyz.openbmc_project.Dump.Manager \
+              /xyz/openbmc_project/dump/bmc xyz.openbmc_project.Dump.Create \
+              CreateDump a{sv} 0
+          else
+              prsv="$(readlink "${running_dir}/${prsv}")"
+              cp -p ${running_dir}/"${prsv}" ${prsv_dir}
+          fi
         fi
       done
     fi
