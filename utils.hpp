@@ -52,6 +52,13 @@ void hiomapdResume(sdbusplus::bus::bus& bus);
  */
 void clearHMCManaged(sdbusplus::bus::bus& bus);
 
+/** @brief Set the Clear hypervisor NVRAM bios attribute to Enabled to indicate
+ *         to the hypervisor to clear its NVRAM.
+ *
+ * @param[in] bus - The D-Bus bus object.
+ */
+void setClearNvram(sdbusplus::bus::bus& bus);
+
 /** @brief DeleteAll error logs
  *
  * @param[in] bus - The D-Bus bus object.
