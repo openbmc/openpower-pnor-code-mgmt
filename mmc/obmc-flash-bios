@@ -22,6 +22,7 @@ mmc_init() {
   running_dir="${base_dir}/running"
   prsv_dir="${base_dir}/prsv"
   staging_dir="${base_dir}/staging"
+  nvram_dir="${base_dir}/nvram"
 
   if [ ! -d "${ro_dir}" ]; then
     mkdir -p "${ro_dir}"
@@ -34,6 +35,9 @@ mmc_init() {
   fi
   if [ ! -d "${staging_dir}" ]; then
     mkdir -p "${staging_dir}"
+  fi
+  if [ ! -d "${nvram_dir}" ]; then
+    mkdir -p "${nvram_dir}"
   fi
 
   # Mount the image that corresponds to the boot label as read-only to be used
