@@ -1,6 +1,8 @@
 [Unit]
 Description=Updates symlinks for active PNOR version
 Before=pldmd.service
+Before=pldm-create-phyp-nvram.service
+Before=pldm-create-phyp-nvram-cksum.service
 Before=mboxd.service
 Before=mboxd-reload@0.service
 After=org.open_power.Software.Host.Updater.service
