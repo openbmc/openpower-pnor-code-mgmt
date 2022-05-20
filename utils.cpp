@@ -112,19 +112,19 @@ void hiomapdResume(sdbusplus::bus::bus& bus)
     }
 }
 
-void clearHMCManaged(sdbusplus::bus::bus& bus)
+void setPendingAttributes(sdbusplus::bus::bus& bus, const std::string& attrName,
+                          const std::string& attrValue)
 {
     constexpr auto biosConfigPath = "/xyz/openbmc_project/bios_config/manager";
     constexpr auto biosConfigIntf = "xyz.openbmc_project.BIOSConfig.Manager";
     constexpr auto dbusAttrType =
         "xyz.openbmc_project.BIOSConfig.Manager.AttributeType.Enumeration";
-    constexpr auto dbusAttrName = "pvm_hmc_managed";
 
     using PendingAttributesType = std::vector<std::pair<
         std::string, std::tuple<std::string, std::variant<std::string>>>>;
     PendingAttributesType pendingAttributes;
-    pendingAttributes.emplace_back(std::make_pair(
-        dbusAttrName, std::make_tuple(dbusAttrType, "Disabled")));
+    pendingAttributes.emplace_back(
+        std::make_pair(attrName, std::make_tuple(dbusAttrType, attrValue)));
 
     try
     {
@@ -139,9 +139,20 @@ void clearHMCManaged(sdbusplus::bus::bus& bus)
     {
         log<level::ERR>("Error setting the bios attribute",
                         entry("ERROR=%s", e.what()),
-                        entry("ATTRIBUTE=%s", dbusAttrName));
+                        entry("ATTRIBUTE=%s", attrName.c_str()),
+                        entry("ATTRIBUTE_VALUE=%s", attrValue.c_str()));
         return;
     }
+}
+
+void clearHMCManaged(sdbusplus::bus::bus& bus)
+{
+    setPendingAttributes(bus, "pvm_hmc_managed", "Disabled");
+}
+
+void setClearNvram(sdbusplus::bus::bus& bus)
+{
+    setPendingAttributes(bus, "pvm_clear_nvram", "Enabled");
 }
 
 void deleteAllErrorLogs(sdbusplus::bus::bus& bus)

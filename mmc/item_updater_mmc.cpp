@@ -57,8 +57,9 @@ void ItemUpdaterMMC::processPNORImage()
 void ItemUpdaterMMC::reset()
 {
     // Do not reset read-only files needed for reset or ext4 default files
-    const std::vector<std::string> exclusionList = {
-        "alternate", "hostfw-a", "hostfw-b", "lost+found", "running-ro"};
+    const std::vector<std::string> exclusionList = {"alternate", "hostfw-a",
+                                                    "hostfw-b",  "lost+found",
+                                                    "nvram",     "running-ro"};
     std::filesystem::path dirPath(std::string(MEDIA_DIR "hostfw/"));
     // Delete all files in /media/hostfw/ except for those on exclusionList
     for (const auto& p : std::filesystem::directory_iterator(dirPath))
@@ -73,16 +74,16 @@ void ItemUpdaterMMC::reset()
     // Delete all BMC error logs to avoid discrepancies with the host error logs
     utils::deleteAllErrorLogs(bus);
 
+    // Set attribute to clear hypervisor NVRAM
+    utils::setClearNvram(bus);
+
     // Remove files related to the Hardware Management Console / BMC web app
-
     utils::clearHMCManaged(bus);
-
     std::filesystem::path consolePath("/var/lib/bmcweb/ibm-management-console");
     if (std::filesystem::exists(consolePath))
     {
         std::filesystem::remove_all(consolePath);
     }
-
     std::filesystem::path bmcdataPath("/home/root/bmcweb_persistent_data.json");
     if (std::filesystem::exists(bmcdataPath))
     {
@@ -96,8 +97,6 @@ void ItemUpdaterMMC::reset()
         {"StartUnit", "obmc-flash-bios-patch.service"},
         {"StartUnit", "openpower-process-host-firmware.service"},
         {"StartUnit", "openpower-update-bios-attr-table.service"},
-        {"StartUnit", "pldm-reset-phyp-nvram.service"},
-        {"StartUnit", "pldm-reset-phyp-nvram-cksum.service"},
         {"RestartUnit", "org.open_power.HardwareIsolation.service"}};
 
     for (const auto& service : services)
