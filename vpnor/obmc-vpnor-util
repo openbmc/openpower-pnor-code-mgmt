@@ -70,7 +70,7 @@ update_symlinks() {
   lowestPriority=255
   for element in "${array[@]}"; do
     #Remove the PNOR_RO_PREFIX from the path to get version ID.
-    versionId="${element#${PNOR_RO_PREFIX}}"
+    versionId="${element#"${PNOR_RO_PREFIX}"}"
 
     # Get the priority of active versions from persistence files.
     if [[ -f "${PERSISTENCE_PATH}${versionId}" ]]; then
