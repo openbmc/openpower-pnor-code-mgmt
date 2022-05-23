@@ -230,8 +230,9 @@ if [[ "${image_type}" == "squashfs" ]]; then
   cd "${pnor_dir}"
   # Set permissions of partition files to read only
   chmod 440 -- *
-  # shellcheck disable=SC2086 # Do not quote partitions since it lists multiple
-  # files and mksquashfs would assume to be a single file name within quotes
+  # shellcheck disable=SC2048,SC2086 # Do not quote partitions since it lists
+  # multiple files and mksquashfs would assume to be a single file name within
+  # quotes
   mksquashfs ${tocfile} ${partitions[*]} "${scratch_dir}"/pnor.xz.squashfs -all-root
   cd "${scratch_dir}"
   files_to_sign+=" pnor.xz.squashfs"
