@@ -1,0 +1,78 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "c16d76aa_110ef095",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-05-24T15:24:55Z",
+      "side": 1,
+      "message": "The prsv variable points to a symlink, so the size is 12 always. Probably need to move \"prsv\u003d\"$(readlink \"${running_dir}/${prsv}\")\"\" to be called before getting the sizes.",
+      "revId": "26cfa40490c03ffb3013f3f3499f5823d0f4a9f9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "77fba23a_0f19cb4c",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-05-24T15:24:55Z",
+      "side": 1,
+      "message": "We can remove this echo since we\u0027ll be creating a PEL and there would be a journal msg \"Created PEL xxx\"",
+      "revId": "26cfa40490c03ffb3013f3f3499f5823d0f4a9f9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1e259732_6456bc15",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-05-24T15:24:55Z",
+      "side": 1,
+      "message": "I\u0027m not sure this is a WriteFailure since we didn\u0027t fail to write. Let\u0027s go ahead and create a new string to put here, like \"xyz.openbmc_project.Software.Version.Error.HostFile\", that we can use as a generic error for host file errors, then add it to the phosphor-logging registry with example Description and Message \"\"A host file error occurred\" and Notes \"A host file had invalid contents and has been reset to default.\"",
+      "revId": "26cfa40490c03ffb3013f3f3499f5823d0f4a9f9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "225369a3_557853e5",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-05-24T15:24:55Z",
+      "side": 1,
+      "message": "These are the metadata entries, and a CALLOUT_ERRNO etnry with an empty string value is not applicable to this error. Let\u0027s add the file name and sizes instead, example:\n3 \"FILE_NAME\" \"$prsv\" \"CURRENT_FILE_SIZE\" \"$runsize\" \"EXPECTED_FILE_SIZE\" \"$rosize\"",
+      "range": {
+        "startLine": 75,
+        "startChar": 60,
+        "endLine": 75,
+        "endChar": 80
+      },
+      "revId": "26cfa40490c03ffb3013f3f3499f5823d0f4a9f9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
