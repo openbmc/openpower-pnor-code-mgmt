@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0b5ee335_d7940f21",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1001179
+      },
+      "writtenOn": "2022-05-24T20:39:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "c16d76aa_110ef095",
+      "revId": "26cfa40490c03ffb3013f3f3499f5823d0f4a9f9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "77fba23a_0f19cb4c",
@@ -31,6 +49,24 @@
       "writtenOn": "2022-05-24T15:24:55Z",
       "side": 1,
       "message": "We can remove this echo since we\u0027ll be creating a PEL and there would be a journal msg \"Created PEL xxx\"",
+      "revId": "26cfa40490c03ffb3013f3f3499f5823d0f4a9f9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "ab0ea197_25dfa81d",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1001179
+      },
+      "writtenOn": "2022-05-24T20:39:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "77fba23a_0f19cb4c",
       "revId": "26cfa40490c03ffb3013f3f3499f5823d0f4a9f9",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
@@ -52,6 +88,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "195bfbef_0fae3227",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 74,
+      "author": {
+        "id": 1001179
+      },
+      "writtenOn": "2022-05-24T20:39:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "1e259732_6456bc15",
+      "revId": "26cfa40490c03ffb3013f3f3499f5823d0f4a9f9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "225369a3_557853e5",
@@ -65,6 +119,30 @@
       "writtenOn": "2022-05-24T15:24:55Z",
       "side": 1,
       "message": "These are the metadata entries, and a CALLOUT_ERRNO etnry with an empty string value is not applicable to this error. Let\u0027s add the file name and sizes instead, example:\n3 \"FILE_NAME\" \"$prsv\" \"CURRENT_FILE_SIZE\" \"$runsize\" \"EXPECTED_FILE_SIZE\" \"$rosize\"",
+      "range": {
+        "startLine": 75,
+        "startChar": 60,
+        "endLine": 75,
+        "endChar": 80
+      },
+      "revId": "26cfa40490c03ffb3013f3f3499f5823d0f4a9f9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "877d2697_021a0f29",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 75,
+      "author": {
+        "id": 1001179
+      },
+      "writtenOn": "2022-05-24T20:39:54Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "225369a3_557853e5",
       "range": {
         "startLine": 75,
         "startChar": 60,
