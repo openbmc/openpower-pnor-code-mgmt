@@ -6,6 +6,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <iterator>
 #include <regex>
 
 namespace openpower
