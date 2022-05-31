@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e31b43ba_f28e24b1",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2022-05-31T16:39:14Z",
+      "side": 1,
+      "message": "This is a pretty trivially correct commit, and is holding up the rebase.  Is there anything holding up merging this?",
+      "revId": "6b9daf56f8cae3a1969ac386033e2a3c7849b9ef",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
