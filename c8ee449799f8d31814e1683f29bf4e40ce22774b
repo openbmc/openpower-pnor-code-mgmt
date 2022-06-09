@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "73b84602_c994cff9",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 1
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000926
+      },
+      "writtenOn": "2022-06-09T17:05:18Z",
+      "side": 1,
+      "message": "Hello! Please review this simple fix for the broken link in the documentation",
+      "revId": "c8ee449799f8d31814e1683f29bf4e40ce22774b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
