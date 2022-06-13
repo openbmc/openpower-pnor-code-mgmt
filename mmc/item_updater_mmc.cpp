@@ -8,6 +8,7 @@
 
 #include <filesystem>
 #include <iostream>
+#include <thread>
 
 namespace openpower
 {
@@ -114,6 +115,11 @@ void ItemUpdaterMMC::reset()
         catch (const std::exception& e)
         {}
     }
+
+    // Wait a few seconds for the service files and reset operations to finish,
+    // otherwise the BMC may be rebooted and cause corruption.
+    constexpr auto resetWait = std::chrono::seconds(5);
+    std::this_thread::sleep_for(resetWait);
 }
 
 bool ItemUpdaterMMC::isVersionFunctional(const std::string& versionId)
