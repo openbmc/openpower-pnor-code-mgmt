@@ -1,0 +1,61 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "1d24bcc8_fe0d9b3c",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-06-15T13:24:39Z",
+      "side": 1,
+      "message": "No need to put company-specific issue numbers in the public commits.",
+      "revId": "c24f15f3f9cfe0b1a48000aa9667589c124119c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "140d53de_f944e8e9",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-06-15T13:24:39Z",
+      "side": 1,
+      "message": "we can replace this company-specific build name with something like code updated to a version that changed the lid numbers.",
+      "range": {
+        "startLine": 18,
+        "startChar": 22,
+        "endLine": 18,
+        "endChar": 41
+      },
+      "revId": "c24f15f3f9cfe0b1a48000aa9667589c124119c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "93d5e60d_eeba1434",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 2
+      },
+      "lineNbr": 69,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-06-15T13:24:39Z",
+      "side": 1,
+      "message": "change tab to spaces",
+      "revId": "c24f15f3f9cfe0b1a48000aa9667589c124119c3",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
