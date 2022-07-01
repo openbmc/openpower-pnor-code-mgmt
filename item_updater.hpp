@@ -62,6 +62,7 @@ class GardReset : public GardResetInherit
     sdbusplus::bus::bus& bus;
     std::string path;
 
+  public:
     /**
      * @brief GARD factory reset - clears the PNOR GARD partition.
      */
