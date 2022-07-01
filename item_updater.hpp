@@ -56,16 +56,16 @@ class GardReset : public GardResetInherit
     virtual ~GardReset()
     {}
 
+    /**
+     * @brief GARD factory reset - clears the PNOR GARD partition.
+     */
+    virtual void reset() = 0;
+
   protected:
     // TODO Remove once openbmc/openbmc#1975 is resolved
     static constexpr auto interface = "xyz.openbmc_project.Common.FactoryReset";
     sdbusplus::bus_t& bus;
     std::string path;
-
-    /**
-     * @brief GARD factory reset - clears the PNOR GARD partition.
-     */
-    virtual void reset() = 0;
 };
 
 /** @class ItemUpdater
