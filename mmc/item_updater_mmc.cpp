@@ -78,6 +78,9 @@ void ItemUpdaterMMC::reset()
     // Set attribute to clear hypervisor NVRAM
     utils::setClearNvram(bus);
 
+    // reset the enabled property of dimms/cpu after factory reset
+    gardReset.reset();
+
     // Remove files related to the Hardware Management Console / BMC web app
     utils::clearHMCManaged(bus);
     std::filesystem::path consolePath("/var/lib/bmcweb/ibm-management-console");
@@ -141,8 +144,49 @@ bool ItemUpdaterMMC::freeSpace()
 void ItemUpdaterMMC::updateFunctionalAssociation(const std::string&)
 {}
 
+void GardResetMMC::enableDimmAndCpu()
+{
+    std::vector<std::string> intf;
+    intf.push_back("xyz.openbmc_project.Inventory.Item.Cpu");
+    intf.push_back("xyz.openbmc_project.Inventory.Item.Dimm");
+
+    std::vector<std::string> objs;
+    try
+    {
+        auto bus = sdbusplus::bus::new_default();
+        auto mapperCall = bus.new_method_call(
+            "xyz.openbmc_project.ObjectMapper",
+            "/xyz/openbmc_project/object_mapper",
+            "xyz.openbmc_project.ObjectMapper", "GetSubTreePaths");
+
+        mapperCall.append("/xyz/openbmc_project/inventory");
+        mapperCall.append(0);
+        mapperCall.append(intf);
+
+        auto response = bus.call(mapperCall);
+        response.read(objs);
+        for (auto& obj : objs)
+        {
+            auto method = bus.new_method_call(
+                "xyz.openbmc_project.Inventory.Manager", obj.c_str(),
+                "org.freedesktop.DBus.Properties", "Set");
+
+            std::variant<bool> propertyVal{true};
+            method.append("xyz.openbmc_project.Object.Enable", "Enabled",
+                          propertyVal);
+            bus.call_noreply(method);
+        }
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        // do nothing
+    }
+}
+
 void GardResetMMC::reset()
-{}
+{
+    (void)enableDimmAndCpu();
+}
 
 } // namespace updater
 } // namespace software

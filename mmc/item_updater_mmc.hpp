@@ -20,6 +20,17 @@ class GardResetMMC : public GardReset
      * @brief GARD factory reset - clears the PNOR GARD partition.
      */
     void reset() override;
+
+  private:
+    /**
+     * User not able to enable some of the guarded dimm/cpu after host 
+     * factory reset even thogh host cleared the guards in the guard 
+     * partition.
+     * BMC will not know host took a factory reset for it to clear the 
+     * disabled flag for the earlier guarded dimm/cpu.
+     * Modified to force enable all the cpu/dimm during host factory reset.
+     */
+    void enableDimmAndCpu();
 };
 
 /** @class ItemUpdaterMMC
