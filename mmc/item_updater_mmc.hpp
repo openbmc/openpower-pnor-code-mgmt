@@ -20,6 +20,29 @@ class GardResetMMC : public GardReset
      * @brief GARD factory reset - clears the PNOR GARD partition.
      */
     void reset() override;
+
+  private:
+    /**re
+     * User not able to enable some of the guarded dimm/core after host
+     * factory reset even thogh host cleared the guards in the guard
+     * partition.
+     * BMC will not know host took a factory reset for it to clear the
+     * disabled flag for the earlier guarded dimm/core.
+     * Modified to force enable all the dimm/core during host factory reset.
+     */
+    void enableInventoryItems();
+
+    /**
+     * Helper function to set enable to true for all the objects implmenting
+     * the inventory item type interface.
+     * @param[in] - service D-Bus service name
+     * @param[in] - intf find objects that implement this interface
+     * @param[in] - objPath find subtree objects from this object path
+     * @return none
+     */
+    void enableInventoryItemsHelper(const std::string& service,
+                                    const std::string& intf,
+                                    const std::string& objPath);
 };
 
 /** @class ItemUpdaterMMC
