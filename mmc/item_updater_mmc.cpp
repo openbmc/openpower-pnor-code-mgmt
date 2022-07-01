@@ -6,16 +6,22 @@
 #include "utils.hpp"
 #include "version.hpp"
 
+#include <fmt/core.h>
+
+#include <phosphor-logging/log.hpp>
+
 #include <filesystem>
 #include <iostream>
 #include <thread>
-
 namespace openpower
 {
 namespace software
 {
 namespace updater
 {
+
+using ::phosphor::logging::level;
+using ::phosphor::logging::log;
 
 // These functions are just a stub (empty) because the current eMMC
 // implementation uses the BMC updater (repo phosphor-bmc-code-mgmt) to write
@@ -77,6 +83,9 @@ void ItemUpdaterMMC::reset()
 
     // Set attribute to clear hypervisor NVRAM
     utils::setClearNvram(bus);
+
+    // reset the enabled property of dimms/cpu after factory reset
+    gardReset->reset();
 
     // Remove files related to the Hardware Management Console / BMC web app
     utils::clearHMCManaged(bus);
@@ -141,8 +150,62 @@ bool ItemUpdaterMMC::freeSpace()
 void ItemUpdaterMMC::updateFunctionalAssociation(const std::string&)
 {}
 
+void GardResetMMC::enableInventoryItems()
+{
+    (void)enableInventoryItemsHelper(
+        "xyz.openbmc_project.PLDM",
+        "xyz.openbmc_project.Inventory.Item.CpuCore",
+        "/xyz/openbmc_project/inventory/system/chassis/motherboard");
+
+    (void)enableInventoryItemsHelper("xyz.openbmc_project.Inventory.Manager",
+                                     "xyz.openbmc_project.Inventory.Item.Dimm",
+                                     "/xyz/openbmc_project/inventory");
+}
+
+void GardResetMMC::enableInventoryItemsHelper(const std::string& service,
+                                              const std::string& intf,
+                                              const std::string& objPath)
+{
+    const std::vector<std::string> intflist{intf};
+
+    std::vector<std::string> objs;
+    try
+    {
+        auto mapperCall = bus.new_method_call(
+            "xyz.openbmc_project.ObjectMapper",
+            "/xyz/openbmc_project/object_mapper",
+            "xyz.openbmc_project.ObjectMapper", "GetSubTreePaths");
+        mapperCall.append(objPath);
+        mapperCall.append(0);
+        mapperCall.append(intflist);
+
+        auto response = bus.call(mapperCall);
+        response.read(objs);
+        for (auto& obj : objs)
+        {
+            auto method =
+                bus.new_method_call(service.c_str(), obj.c_str(),
+                                    "org.freedesktop.DBus.Properties", "Set");
+            std::variant<bool> propertyVal{true};
+            method.append("xyz.openbmc_project.Object.Enable", "Enabled",
+                          propertyVal);
+            bus.call_noreply(method);
+        }
+    }
+    catch (const sdbusplus::exception::SdBusError& e)
+    {
+        log<level::ERR>(
+            fmt::format("Failed to enable specified inventory items ex({}) "
+                        "intf({}) objpath({})",
+                        e.what(), intf, objPath)
+                .c_str());
+    }
+}
 void GardResetMMC::reset()
-{}
+{
+    log<level::INFO>("GardResetMMC::reset");
+    (void)enableInventoryItems();
+}
 
 } // namespace updater
 } // namespace software

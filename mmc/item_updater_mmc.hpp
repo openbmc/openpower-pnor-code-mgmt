@@ -15,11 +15,32 @@ class GardResetMMC : public GardReset
     using GardReset::GardReset;
     virtual ~GardResetMMC() = default;
 
-  protected:
     /**
      * @brief GARD factory reset - clears the PNOR GARD partition.
      */
     void reset() override;
+
+  private:
+    /**
+     * @brief During host factory reset, host clears the guard records in the
+     * guard partition. BMC is not notified about host factory reset so
+     * it continues to disable the guarded items. Now modified to enable
+     * back CpuCore and DIMM items during factory reset.
+     */
+    void enableInventoryItems();
+
+    /**
+     * @brief Helper function to set enable flag for all the subtree objects
+     * implementing the specified interface.
+     *
+     * @param[in] - service D-Bus service name
+     * @param[in] - intf find objects that implement this interface
+     * @param[in] - objPath find subtree objects from this object path
+     * @return none
+     */
+    void enableInventoryItemsHelper(const std::string& service,
+                                    const std::string& intf,
+                                    const std::string& objPath);
 };
 
 /** @class ItemUpdaterMMC
@@ -28,7 +49,7 @@ class GardResetMMC : public GardReset
 class ItemUpdaterMMC : public ItemUpdater
 {
   public:
-    ItemUpdaterMMC(sdbusplus::bus_t& bus, const std::string& path) :
+    ItemUpdaterMMC(sdbusplus::bus::bus& bus, const std::string& path) :
         ItemUpdater(bus, path)
     {
         processPNORImage();
