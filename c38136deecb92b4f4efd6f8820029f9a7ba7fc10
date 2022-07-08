@@ -1,0 +1,113 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ec6cab87_237ab10d",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 3
+      },
+      "lineNbr": 10,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2022-07-08T11:06:44Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 10,
+        "startChar": 19,
+        "endLine": 10,
+        "endChar": 24
+      },
+      "revId": "c38136deecb92b4f4efd6f8820029f9a7ba7fc10",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4c6edafb_d6e03f06",
+        "filename": "mmc/item_updater_mmc.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 199,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2022-07-08T11:06:44Z",
+      "side": 1,
+      "message": "include \"intf) info here , will help for debug.,",
+      "range": {
+        "startLine": 199,
+        "startChar": 62,
+        "endLine": 199,
+        "endChar": 67
+      },
+      "revId": "c38136deecb92b4f4efd6f8820029f9a7ba7fc10",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "4c513953_b39f918d",
+        "filename": "mmc/item_updater_mmc.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2022-07-08T11:06:44Z",
+      "side": 1,
+      "message": "@brief?\nbettre to follow function prototype format.",
+      "range": {
+        "startLine": 25,
+        "startChar": 7,
+        "endLine": 25,
+        "endChar": 9
+      },
+      "revId": "c38136deecb92b4f4efd6f8820029f9a7ba7fc10",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ca2798e2_6201c1cb",
+        "filename": "mmc/item_updater_mmc.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 27,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2022-07-08T11:06:44Z",
+      "side": 1,
+      "message": "typo",
+      "range": {
+        "startLine": 27,
+        "startChar": 26,
+        "endLine": 27,
+        "endChar": 31
+      },
+      "revId": "c38136deecb92b4f4efd6f8820029f9a7ba7fc10",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "d4042d97_21e8350b",
+        "filename": "mmc/item_updater_mmc.hpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 35,
+      "author": {
+        "id": 1000086
+      },
+      "writtenOn": "2022-07-08T11:06:44Z",
+      "side": 1,
+      "message": "@brief is missing",
+      "revId": "c38136deecb92b4f4efd6f8820029f9a7ba7fc10",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
