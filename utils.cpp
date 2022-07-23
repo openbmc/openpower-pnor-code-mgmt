@@ -46,7 +46,7 @@ constexpr auto HIOMAPD_INTERFACE = "xyz.openbmc_project.Hiomapd.Control";
 using InternalFailure =
     sdbusplus::xyz::openbmc_project::Common::Error::InternalFailure;
 
-std::string getService(sdbusplus::bus::bus& bus, const std::string& path,
+std::string getService(sdbusplus::bus_t& bus, const std::string& path,
                        const std::string& intf)
 {
     auto mapper = bus.new_method_call(MAPPER_BUSNAME, MAPPER_PATH,
@@ -67,7 +67,7 @@ std::string getService(sdbusplus::bus::bus& bus, const std::string& path,
         }
         return mapperResponse[0].first;
     }
-    catch (const sdbusplus::exception::exception& ex)
+    catch (const sdbusplus::exception_t& ex)
     {
         log<level::ERR>("Mapper call failed", entry("METHOD=%d", "GetObject"),
                         entry("PATH=%s", path.c_str()),
@@ -76,7 +76,7 @@ std::string getService(sdbusplus::bus::bus& bus, const std::string& path,
     }
 }
 
-void hiomapdSuspend(sdbusplus::bus::bus& bus)
+void hiomapdSuspend(sdbusplus::bus_t& bus)
 {
     auto service = getService(bus, HIOMAPD_PATH, HIOMAPD_INTERFACE);
     auto method = bus.new_method_call(service.c_str(), HIOMAPD_PATH,
@@ -86,14 +86,14 @@ void hiomapdSuspend(sdbusplus::bus::bus& bus)
     {
         bus.call_noreply(method);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Error in mboxd suspend call",
                         entry("ERROR=%s", e.what()));
     }
 }
 
-void hiomapdResume(sdbusplus::bus::bus& bus)
+void hiomapdResume(sdbusplus::bus_t& bus)
 {
     auto service = getService(bus, HIOMAPD_PATH, HIOMAPD_INTERFACE);
     auto method = bus.new_method_call(service.c_str(), HIOMAPD_PATH,
@@ -105,14 +105,14 @@ void hiomapdResume(sdbusplus::bus::bus& bus)
     {
         bus.call_noreply(method);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Error in mboxd suspend call",
                         entry("ERROR=%s", e.what()));
     }
 }
 
-void setPendingAttributes(sdbusplus::bus::bus& bus, const std::string& attrName,
+void setPendingAttributes(sdbusplus::bus_t& bus, const std::string& attrName,
                           const std::string& attrValue)
 {
     constexpr auto biosConfigPath = "/xyz/openbmc_project/bios_config/manager";
@@ -135,7 +135,7 @@ void setPendingAttributes(sdbusplus::bus::bus& bus, const std::string& attrName,
                       std::variant<PendingAttributesType>(pendingAttributes));
         bus.call(method);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Error setting the bios attribute",
                         entry("ERROR=%s", e.what()),
@@ -145,17 +145,17 @@ void setPendingAttributes(sdbusplus::bus::bus& bus, const std::string& attrName,
     }
 }
 
-void clearHMCManaged(sdbusplus::bus::bus& bus)
+void clearHMCManaged(sdbusplus::bus_t& bus)
 {
     setPendingAttributes(bus, "pvm_hmc_managed", "Disabled");
 }
 
-void setClearNvram(sdbusplus::bus::bus& bus)
+void setClearNvram(sdbusplus::bus_t& bus)
 {
     setPendingAttributes(bus, "pvm_clear_nvram", "Enabled");
 }
 
-void deleteAllErrorLogs(sdbusplus::bus::bus& bus)
+void deleteAllErrorLogs(sdbusplus::bus_t& bus)
 {
     constexpr auto loggingPath = "/xyz/openbmc_project/logging";
     constexpr auto deleteAllIntf = "xyz.openbmc_project.Collection.DeleteAll";
@@ -168,7 +168,7 @@ void deleteAllErrorLogs(sdbusplus::bus::bus& bus)
     {
         bus.call_noreply(method);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Error deleting all error logs",
                         entry("ERROR=%s", e.what()));

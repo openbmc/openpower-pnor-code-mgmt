@@ -40,7 +40,7 @@ using ManagedObjectType =
 /**
  * @brief Returns the managed objects for a given service
  */
-ManagedObjectType getManagedObjects(sdbusplus::bus::bus& bus,
+ManagedObjectType getManagedObjects(sdbusplus::bus_t& bus,
                                     const std::string& service)
 {
     auto method = bus.new_method_call(service.c_str(), "/",
@@ -54,7 +54,7 @@ ManagedObjectType getManagedObjects(sdbusplus::bus::bus& bus,
         auto reply = bus.call(method);
         reply.read(objects);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         return ManagedObjectType{};
     }
@@ -419,7 +419,7 @@ void setBiosAttr(const std::filesystem::path& elementsJsonFilePath,
                       std::variant<PendingAttributesType>(pendingAttributes));
         bus.call(method);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::INFO>("Error setting the bios attribute",
                          entry("ERROR=%s", e.what()),
@@ -480,7 +480,7 @@ bool maybeCall(const std::map<std::string,
         {
             callback(ibmCompatibleSystem);
         }
-        catch (const sdbusplus::exception::exception& e)
+        catch (const sdbusplus::exception_t& e)
         {
             return false;
         }
@@ -506,7 +506,7 @@ bool maybeCall(const std::map<std::string,
  * @return true if message contained an instance of
  * xyz.openbmc_project.Configuration.IBMCompatibleSystem, false otherwise
  */
-bool maybeCallMessage(sdbusplus::message::message& message,
+bool maybeCallMessage(sdbusplus::message_t& message,
                       const MaybeCallCallbackType& callback)
 {
     std::map<std::string,
@@ -575,7 +575,7 @@ void maybeSetBiosAttr(
         {
             setBiosAttr(elementsJsonFilePath, extensions);
         }
-        catch (const sdbusplus::exception::exception& e)
+        catch (const sdbusplus::exception_t& e)
         {
             throw;
         }
@@ -613,7 +613,7 @@ void maybeSetBiosAttr(
  * pointer to an sdbusplus match object.
  */
 std::shared_ptr<void> processHostFirmware(
-    sdbusplus::bus::bus& bus,
+    sdbusplus::bus_t& bus,
     std::map<std::string, std::vector<std::string>> extensionMap,
     std::filesystem::path hostFirmwareDirectory,
     ErrorCallbackType errorCallback, sdeventplus::Event& loop)
@@ -631,7 +631,7 @@ std::shared_ptr<void> processHostFirmware(
 
     // register for a callback in case the IBMCompatibleSystem interface has
     // not yet been published by entity manager.
-    auto interfacesAddedMatch = std::make_shared<sdbusplus::bus::match::match>(
+    auto interfacesAddedMatch = std::make_shared<sdbusplus::bus::match_t>(
         bus,
         sdbusplus::bus::match::rules::interfacesAdded() +
             sdbusplus::bus::match::rules::sender(
@@ -675,7 +675,7 @@ std::shared_ptr<void> processHostFirmware(
         auto reply = bus.call(getManagedObjects);
         reply.read(objects);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         // Error querying the EntityManager interface. Return the match to have
         // the callback run if/when the interface appears in D-Bus.
@@ -726,7 +726,7 @@ std::shared_ptr<void> processHostFirmware(
  * @return nullptr
  */
 std::vector<std::shared_ptr<void>> updateBiosAttrTable(
-    sdbusplus::bus::bus& bus,
+    sdbusplus::bus_t& bus,
     std::map<std::string, std::vector<std::string>> extensionMap,
     std::filesystem::path elementsJsonFilePath, sdeventplus::Event& loop)
 {
@@ -748,7 +748,7 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
 
     // Entity Manager is needed to get the list of supported extensions. Add a
     // match to monitor interfaces added in case it's not running yet.
-    matches.emplace_back(std::make_shared<sdbusplus::bus::match::match>(
+    matches.emplace_back(std::make_shared<sdbusplus::bus::match_t>(
         bus,
         sdbusplus::bus::match::rules::interfacesAdded() +
             sdbusplus::bus::match::rules::sender(
@@ -764,7 +764,7 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
     // The BIOS attribute table can only be updated if PLDM is running because
     // PLDM is the one that exposes this property. Add a match to monitor when
     // the PLDM service starts.
-    matches.emplace_back(std::make_shared<sdbusplus::bus::match::match>(
+    matches.emplace_back(std::make_shared<sdbusplus::bus::match_t>(
         bus,
         sdbusplus::bus::match::rules::nameOwnerChanged() +
             sdbusplus::bus::match::rules::arg0namespace(

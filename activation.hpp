@@ -23,16 +23,16 @@ namespace updater
 
 using AssociationList =
     std::vector<std::tuple<std::string, std::string, std::string>>;
-using ActivationInherit = sdbusplus::server::object::object<
+using ActivationInherit = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Software::server::ExtendedVersion,
     sdbusplus::xyz::openbmc_project::Software::server::Activation,
     sdbusplus::xyz::openbmc_project::Association::server::Definitions>;
-using ActivationBlocksTransitionInherit = sdbusplus::server::object::object<
-    sdbusplus::xyz::openbmc_project::Software::server::
-        ActivationBlocksTransition>;
-using RedundancyPriorityInherit = sdbusplus::server::object::object<
+using ActivationBlocksTransitionInherit =
+    sdbusplus::server::object_t<sdbusplus::xyz::openbmc_project::Software::
+                                    server::ActivationBlocksTransition>;
+using RedundancyPriorityInherit = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Software::server::RedundancyPriority>;
-using ActivationProgressInherit = sdbusplus::server::object::object<
+using ActivationProgressInherit = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Software::server::ActivationProgress>;
 
 constexpr auto applyTimeImmediate =
@@ -69,7 +69,7 @@ class RedundancyPriority : public RedundancyPriorityInherit
      *  @param[in] parent - Parent object.
      *  @param[in] value  - The redundancyPriority value
      */
-    RedundancyPriority(sdbusplus::bus::bus& bus, const std::string& path,
+    RedundancyPriority(sdbusplus::bus_t& bus, const std::string& path,
                        Activation& parent, uint8_t value) :
         RedundancyPriorityInherit(bus, path.c_str(),
                                   action::emit_interface_added),
@@ -110,8 +110,7 @@ class ActivationBlocksTransition : public ActivationBlocksTransitionInherit
      * @param[in] bus    - The Dbus bus object
      * @param[in] path   - The Dbus object path
      */
-    ActivationBlocksTransition(sdbusplus::bus::bus& bus,
-                               const std::string& path) :
+    ActivationBlocksTransition(sdbusplus::bus_t& bus, const std::string& path) :
         ActivationBlocksTransitionInherit(bus, path.c_str(),
                                           action::emit_interface_added)
 
@@ -126,7 +125,7 @@ class ActivationProgress : public ActivationProgressInherit
      * @param[in] bus    - The Dbus bus object
      * @param[in] path   - The Dbus object path
      */
-    ActivationProgress(sdbusplus::bus::bus& bus, const std::string& path) :
+    ActivationProgress(sdbusplus::bus_t& bus, const std::string& path) :
         ActivationProgressInherit(bus, path.c_str(),
                                   action::emit_interface_added)
     {
@@ -152,7 +151,7 @@ class Activation : public ActivationInherit
      * @param[in] activationStatus - The status of Activation
      * @param[in] assocs - Association objects
      */
-    Activation(sdbusplus::bus::bus& bus, const std::string& path,
+    Activation(sdbusplus::bus_t& bus, const std::string& path,
                ItemUpdater& parent, const std::string& versionId,
                const std::string& extVersion,
                sdbusplus::xyz::openbmc_project::Software::server::Activation::
@@ -207,7 +206,7 @@ class Activation : public ActivationInherit
     void unsubscribeFromSystemdSignals();
 
     /** @brief Persistent sdbusplus DBus bus connection */
-    sdbusplus::bus::bus& bus;
+    sdbusplus::bus_t& bus;
 
     /** @brief Persistent DBus object path */
     std::string path;
@@ -253,7 +252,7 @@ class Activation : public ActivationInherit
      * @param[in]  msg       - Data associated with subscribed signal
      *
      */
-    virtual void unitStateChange(sdbusplus::message::message& msg) = 0;
+    virtual void unitStateChange(sdbusplus::message_t& msg) = 0;
 
     /**
      * @brief Deletes the version from Image Manager and the
