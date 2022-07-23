@@ -16,7 +16,7 @@ constexpr auto squashFSImage = "pnor.xz.squashfs";
 class RedundancyPriorityUbi : public RedundancyPriority
 {
   public:
-    RedundancyPriorityUbi(sdbusplus::bus::bus& bus, const std::string& path,
+    RedundancyPriorityUbi(sdbusplus::bus_t& bus, const std::string& path,
                           Activation& parent, uint8_t value) :
         RedundancyPriority(bus, path, parent, value)
     {
@@ -60,7 +60,7 @@ class ActivationUbi : public Activation
      *created as part of the activation process. **/
     bool ubiVolumesCreated = false;
 
-    void unitStateChange(sdbusplus::message::message& msg) override;
+    void unitStateChange(sdbusplus::message_t& msg) override;
     void startActivation() override;
     void finishActivation() override;
 };

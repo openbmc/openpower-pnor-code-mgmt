@@ -30,7 +30,7 @@ class GardResetStatic : public GardReset
 class ItemUpdaterStatic : public ItemUpdater
 {
   public:
-    ItemUpdaterStatic(sdbusplus::bus::bus& bus, const std::string& path) :
+    ItemUpdaterStatic(sdbusplus::bus_t& bus, const std::string& path) :
         ItemUpdater(bus, path)
     {
         processPNORImage();
