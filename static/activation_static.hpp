@@ -25,7 +25,7 @@ class ActivationStatic : public Activation
     Activations activation(Activations value) override;
 
   private:
-    void unitStateChange(sdbusplus::message::message& msg) override;
+    void unitStateChange(sdbusplus::message_t& msg) override;
     void startActivation() override;
     void finishActivation() override;
 

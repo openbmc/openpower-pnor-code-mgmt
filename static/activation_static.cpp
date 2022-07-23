@@ -109,7 +109,7 @@ void ActivationStatic::startActivation()
     activationProgress->progress(10);
 }
 
-void ActivationStatic::unitStateChange(sdbusplus::message::message& msg)
+void ActivationStatic::unitStateChange(sdbusplus::message_t& msg)
 {
     uint32_t newStateID{};
     sdbusplus::message::object_path newStateObjPath;

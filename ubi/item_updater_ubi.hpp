@@ -30,7 +30,7 @@ class GardResetUbi : public GardReset
 class ItemUpdaterUbi : public ItemUpdater
 {
   public:
-    ItemUpdaterUbi(sdbusplus::bus::bus& bus, const std::string& path) :
+    ItemUpdaterUbi(sdbusplus::bus_t& bus, const std::string& path) :
         ItemUpdater(bus, path)
     {
         processPNORImage();

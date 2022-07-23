@@ -21,10 +21,10 @@ class ItemUpdater;
 
 typedef std::function<void(std::string)> eraseFunc;
 
-using VersionInherit = sdbusplus::server::object::object<
+using VersionInherit = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Software::server::Version,
     sdbusplus::xyz::openbmc_project::Common::server::FilePath>;
-using DeleteInherit = sdbusplus::server::object::object<
+using DeleteInherit = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Object::server::Delete>;
 
 namespace sdbusRule = sdbusplus::bus::match::rules;
@@ -46,7 +46,7 @@ class Delete : public DeleteInherit
      *  @param[in] path   - The D-Bus object path
      *  @param[in] parent - Parent object.
      */
-    Delete(sdbusplus::bus::bus& bus, const std::string& path, Version& parent) :
+    Delete(sdbusplus::bus_t& bus, const std::string& path, Version& parent) :
         DeleteInherit(bus, path.c_str(), action::emit_interface_added),
         parent(parent)
     {}
@@ -82,7 +82,7 @@ class Version : public VersionInherit
      * @param[in] filePath       - The image filesystem path
      * @param[in] callback       - The eraseFunc callback
      */
-    Version(sdbusplus::bus::bus& bus, const std::string& objPath,
+    Version(sdbusplus::bus_t& bus, const std::string& objPath,
             ItemUpdater& parent, const std::string& versionId,
             const std::string& versionString, VersionPurpose versionPurpose,
             const std::string& filePath, eraseFunc callback) :
@@ -118,7 +118,7 @@ class Version : public VersionInherit
      *
      * @param[in]  msg       - Data associated with subscribed signal
      */
-    void updateDeleteInterface(sdbusplus::message::message& msg);
+    void updateDeleteInterface(sdbusplus::message_t& msg);
 
     /**
      * @brief Read the manifest file to get the value of the key.
@@ -163,7 +163,7 @@ class Version : public VersionInherit
 
   private:
     /** @brief Persistent sdbusplus DBus bus connection */
-    sdbusplus::bus::bus& bus;
+    sdbusplus::bus_t& bus;
 
     /** @brief Persistent DBus object path */
     std::string objPath;

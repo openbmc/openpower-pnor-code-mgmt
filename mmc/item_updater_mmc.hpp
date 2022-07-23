@@ -28,7 +28,7 @@ class GardResetMMC : public GardReset
 class ItemUpdaterMMC : public ItemUpdater
 {
   public:
-    ItemUpdaterMMC(sdbusplus::bus::bus& bus, const std::string& path) :
+    ItemUpdaterMMC(sdbusplus::bus_t& bus, const std::string& path) :
         ItemUpdater(bus, path)
     {
         processPNORImage();

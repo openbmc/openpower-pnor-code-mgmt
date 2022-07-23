@@ -12,6 +12,7 @@ namespace bus
 {
 class bus;
 } // namespace bus
+using bus_t = bus::bus;
 } // namespace sdbusplus
 
 namespace sdeventplus
@@ -43,10 +44,10 @@ bool maybeCall(
         std::map<std::string, std::variant<std::vector<std::string>>>>&,
     const MaybeCallCallbackType&);
 std::shared_ptr<void> processHostFirmware(
-    sdbusplus::bus::bus&, std::map<std::string, std::vector<std::string>>,
+    sdbusplus::bus_t&, std::map<std::string, std::vector<std::string>>,
     std::filesystem::path, ErrorCallbackType, sdeventplus::Event&);
 std::vector<std::shared_ptr<void>>
-    updateBiosAttrTable(sdbusplus::bus::bus&,
+    updateBiosAttrTable(sdbusplus::bus_t&,
                         std::map<std::string, std::vector<std::string>>,
                         std::filesystem::path, sdeventplus::Event&);
 } // namespace process_hostfirmware

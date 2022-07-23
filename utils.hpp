@@ -30,40 +30,40 @@ namespace utils
  * @return  Service name
  * @error   InternalFailure exception thrown
  */
-std::string getService(sdbusplus::bus::bus& bus, const std::string& path,
+std::string getService(sdbusplus::bus_t& bus, const std::string& path,
                        const std::string& intf);
 
 /** @brief Suspend hiomapd.
  *
  * @param[in] bus - The D-Bus bus object.
  */
-void hiomapdSuspend(sdbusplus::bus::bus& bus);
+void hiomapdSuspend(sdbusplus::bus_t& bus);
 
 /** @brief Resume hiomapd.
  *
  * @param[in] bus - The D-Bus bus object.
  */
-void hiomapdResume(sdbusplus::bus::bus& bus);
+void hiomapdResume(sdbusplus::bus_t& bus);
 
 /** @brief Set the Hardware Management Console Managed bios attribute to
  *         Disabled to clear the indication that the system is HMC-managed.
  *
  * @param[in] bus - The D-Bus bus object.
  */
-void clearHMCManaged(sdbusplus::bus::bus& bus);
+void clearHMCManaged(sdbusplus::bus_t& bus);
 
 /** @brief Set the Clear hypervisor NVRAM bios attribute to Enabled to indicate
  *         to the hypervisor to clear its NVRAM.
  *
  * @param[in] bus - The D-Bus bus object.
  */
-void setClearNvram(sdbusplus::bus::bus& bus);
+void setClearNvram(sdbusplus::bus_t& bus);
 
 /** @brief DeleteAll error logs
  *
  * @param[in] bus - The D-Bus bus object.
  */
-void deleteAllErrorLogs(sdbusplus::bus::bus& bus);
+void deleteAllErrorLogs(sdbusplus::bus_t& bus);
 
 } // namespace utils
 

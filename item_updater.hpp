@@ -18,13 +18,13 @@ namespace software
 namespace updater
 {
 
-using ItemUpdaterInherit = sdbusplus::server::object::object<
+using ItemUpdaterInherit = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Common::server::FactoryReset,
     sdbusplus::xyz::openbmc_project::Association::server::Definitions,
     sdbusplus::xyz::openbmc_project::Collection::server::DeleteAll>;
-using GardResetInherit = sdbusplus::server::object::object<
+using GardResetInherit = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Common::server::FactoryReset>;
-using ObjectEnable = sdbusplus::server::object::object<
+using ObjectEnable = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Object::server::Enable>;
 namespace MatchRules = sdbusplus::bus::match::rules;
 
@@ -47,7 +47,7 @@ class GardReset : public GardResetInherit
      * @param[in] bus    - The Dbus bus object
      * @param[in] path   - The Dbus object path
      */
-    GardReset(sdbusplus::bus::bus& bus, const std::string& path) :
+    GardReset(sdbusplus::bus_t& bus, const std::string& path) :
         GardResetInherit(bus, path.c_str(),
                          GardResetInherit::action::emit_interface_added),
         bus(bus), path(path)
@@ -59,7 +59,7 @@ class GardReset : public GardResetInherit
   protected:
     // TODO Remove once openbmc/openbmc#1975 is resolved
     static constexpr auto interface = "xyz.openbmc_project.Common.FactoryReset";
-    sdbusplus::bus::bus& bus;
+    sdbusplus::bus_t& bus;
     std::string path;
 
     /**
@@ -79,7 +79,7 @@ class ItemUpdater : public ItemUpdaterInherit
      * @param[in] bus    - The D-Bus bus object
      * @param[in] path   - The D-Bus path
      */
-    ItemUpdater(sdbusplus::bus::bus& bus, const std::string& path) :
+    ItemUpdater(sdbusplus::bus_t& bus, const std::string& path) :
         ItemUpdaterInherit(bus, path.c_str()), bus(bus),
         versionMatch(bus,
                      MatchRules::interfacesAdded() +
@@ -178,7 +178,7 @@ class ItemUpdater : public ItemUpdaterInherit
      *
      * @param[in]  msg       - Data associated with subscribed signal
      */
-    virtual void createActivation(sdbusplus::message::message& msg);
+    virtual void createActivation(sdbusplus::message_t& msg);
 
     /** @brief Create Activation object */
     virtual std::unique_ptr<Activation> createActivationObject(
@@ -201,7 +201,7 @@ class ItemUpdater : public ItemUpdaterInherit
     virtual bool validateImage(const std::string& path) = 0;
 
     /** @brief Persistent sdbusplus D-Bus bus connection. */
-    sdbusplus::bus::bus& bus;
+    sdbusplus::bus_t& bus;
 
     /** @brief Persistent map of Activation D-Bus objects and their
      * version id */

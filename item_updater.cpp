@@ -21,7 +21,7 @@ namespace fs = std::filesystem;
 using namespace sdbusplus::xyz::openbmc_project::Common::Error;
 using namespace phosphor::logging;
 
-void ItemUpdater::createActivation(sdbusplus::message::message& m)
+void ItemUpdater::createActivation(sdbusplus::message_t& m)
 {
     using SVersion = server::Version;
     using VersionPurpose = SVersion::VersionPurpose;
@@ -233,7 +233,7 @@ bool ItemUpdater::isChassisOn()
             elog<InternalFailure>();
         }
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Error in Mapper call");
         elog<InternalFailure>();
@@ -253,7 +253,7 @@ bool ItemUpdater::isChassisOn()
         auto strParam = std::get<std::string>(currentChassisState);
         return (strParam != CHASSIS_STATE_OFF);
     }
-    catch (const sdbusplus::exception::exception& e)
+    catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>("Error in fetching current Chassis State",
                         entry("MAPPERRESPONSE=%s",

@@ -16,7 +16,7 @@ auto ActivationMMC::activation(Activations value) -> Activations
 void ActivationMMC::startActivation()
 {}
 
-void ActivationMMC::unitStateChange(sdbusplus::message::message&)
+void ActivationMMC::unitStateChange(sdbusplus::message_t&)
 {}
 
 void ActivationMMC::finishActivation()
