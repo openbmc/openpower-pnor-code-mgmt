@@ -41,9 +41,11 @@ using ManagedObjectType =
  * @brief Returns the managed objects for a given service
  */
 ManagedObjectType getManagedObjects(sdbusplus::bus_t& bus,
-                                    const std::string& service)
+                                    const std::string& service,
+                                    const std::string& managerPath)
+
 {
-    auto method = bus.new_method_call(service.c_str(), "/",
+    auto method = bus.new_method_call(service.c_str(), managerPath.c_str(),
                                       "org.freedesktop.DBus.ObjectManager",
                                       "GetManagedObjects");
 
@@ -59,6 +61,12 @@ ManagedObjectType getManagedObjects(sdbusplus::bus_t& bus,
         return ManagedObjectType{};
     }
     return objects;
+}
+
+ManagedObjectType getManagedObjects(sdbusplus::bus_t& bus,
+                                    const std::string& service)
+{
+    return getManagedObjects(bus, service, "/");
 }
 
 /**
@@ -663,7 +671,7 @@ std::shared_ptr<void> processHostFirmware(
     // xyz.openbmc_project.Configuration.IBMCompatibleSystem), activate entity
     // manager if it isn't running and enumerate its objects
     auto getManagedObjects = bus.new_method_call(
-        "xyz.openbmc_project.EntityManager", "/",
+        "xyz.openbmc_project.EntityManager", "/xyz/openbmc_project/inventory",
         "org.freedesktop.DBus.ObjectManager", "GetManagedObjects");
     std::map<std::string,
              std::map<std::string, std::variant<std::vector<std::string>>>>
@@ -783,7 +791,8 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
 
             auto bus = sdbusplus::bus::new_default();
             InterfacesPropertiesMap interfacesAndProperties;
-            auto objects = getManagedObjects(bus, entityManagerServiceName);
+            auto objects = getManagedObjects(bus, entityManagerServiceName,
+                                             "/xyz/openbmc_project/inventory");
             for (const auto& pair : objects)
             {
                 std::tie(std::ignore, interfacesAndProperties) = pair;
@@ -796,7 +805,8 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
         }));
 
     InterfacesPropertiesMap interfacesAndProperties;
-    auto objects = getManagedObjects(bus, entityManagerServiceName);
+    auto objects = getManagedObjects(bus, entityManagerServiceName,
+                                     "/xyz/openbmc_project/inventory");
     for (const auto& pair : objects)
     {
         std::tie(std::ignore, interfacesAndProperties) = pair;
