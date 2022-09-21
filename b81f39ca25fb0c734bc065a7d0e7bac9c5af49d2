@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "7407656e_aa41a400",
+        "filename": "functions.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2022-09-21T17:18:28Z",
+      "side": 1,
+      "message": "Probably want to give this a different method name to avoid having two overloads with the same name.  Maybe \"getManagedObjectsFromRoot\"?\n\nAlternatively, should we just inline \"/\" into all the getManagedObjects calls?  I can\u0027t imagine there are that many.\n\nWait for the maintainers opinion here before you do a significant amount of work.  But just having one call, and updating all the call sites with \"/\" would be my preference.",
+      "range": {
+        "startLine": 66,
+        "startChar": 18,
+        "endLine": 66,
+        "endChar": 35
+      },
+      "revId": "b81f39ca25fb0c734bc065a7d0e7bac9c5af49d2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
