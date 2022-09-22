@@ -70,6 +70,30 @@
       },
       "revId": "b81f39ca25fb0c734bc065a7d0e7bac9c5af49d2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "ea814aa8_38d2e551",
+        "filename": "functions.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000153
+      },
+      "writtenOn": "2022-09-22T20:03:52Z",
+      "side": 1,
+      "message": "\u003e Overloading is my preference to reduce diffs.\n\nReducing the size of a diff is rarely something we optimize for in our coding standard, and in the past when this has come up, we\u0027ve preferred a larger diff that results in cleaner code over a smaller diff that results in more code.  Diffs will be read once in a while, the final result of the change will be read many more times.",
+      "parentUuid": "d19eac63_960d9a6e",
+      "range": {
+        "startLine": 66,
+        "startChar": 18,
+        "endLine": 66,
+        "endChar": 35
+      },
+      "revId": "b81f39ca25fb0c734bc065a7d0e7bac9c5af49d2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
