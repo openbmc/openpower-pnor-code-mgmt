@@ -94,6 +94,30 @@
       },
       "revId": "b81f39ca25fb0c734bc065a7d0e7bac9c5af49d2",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "86c09d66_9da494dd",
+        "filename": "functions.cpp",
+        "patchSetId": 3
+      },
+      "lineNbr": 66,
+      "author": {
+        "id": 1000682
+      },
+      "writtenOn": "2022-09-22T20:54:28Z",
+      "side": 1,
+      "message": "Done. I took another look, there\u0027s no other calls of getManagedObjects actually in this repo.\n\nAdriana, please help test this on openpower system since I don\u0027t have a system. Many thanks!",
+      "parentUuid": "ea814aa8_38d2e551",
+      "range": {
+        "startLine": 66,
+        "startChar": 18,
+        "endLine": 66,
+        "endChar": 35
+      },
+      "revId": "b81f39ca25fb0c734bc065a7d0e7bac9c5af49d2",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
