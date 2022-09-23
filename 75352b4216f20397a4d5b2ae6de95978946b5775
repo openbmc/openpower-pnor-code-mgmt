@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "1d932ef1_030baa2a",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2022-09-23T20:25:30Z",
+      "side": 1,
+      "message": "Tested on p10bmc hw with the corresponding EM and virtual-sensor change.",
+      "revId": "75352b4216f20397a4d5b2ae6de95978946b5775",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
