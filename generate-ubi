@@ -9,13 +9,13 @@ The PNOR SquashFS Tarball is generated from the generate-tar script.
 usage: generate-ubi [OPTION] <PNOR SquashFS Tarball>...
 
 Options:
-   -f, --file <file>      Specify destination file. Defaults to
-                          $(pwd)/<PNOR Tarball FILE, removing .squashfs.tar>.ubi.mtd
-                          (For example, "generate-ubi my.pnor.squashfs.tar"
-                          would generate $(pwd)/my.pnor.ubi.mtd output.)
-   -s, --size <MiB>       Specify the size of the PNOR UBI image in MiBs.
-                          Defaults to 128.
-   -h, --help             Display this help text and exit.
+-f, --file <file>      Specify destination file. Defaults to
+$(pwd)/<PNOR Tarball FILE, removing .squashfs.tar>.ubi.mtd
+(For example, "generate-ubi my.pnor.squashfs.tar"
+would generate $(pwd)/my.pnor.ubi.mtd output.)
+-s, --size <MiB>       Specify the size of the PNOR UBI image in MiBs.
+Defaults to 128.
+-h, --help             Display this help text and exit.
 '
 # 128MiB is the default image size
 image_size="128"
