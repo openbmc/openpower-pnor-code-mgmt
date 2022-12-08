@@ -1,185 +1,185 @@
 #!/bin/sh
 
 bios_reset_if_needed() {
-  resetval=$(fw_printenv -n rwreset 2>/dev/nell)
-  if [ "$resetval" = "0" ] || [ "$resetval" = "1" ]; then
-    varstore="/media/hostfw/reset-gpio-val"
-    if [ -f "$varstore" ]; then
-      if [ "$resetval" != "$(cat $varstore)" ]; then
-        if busctl call org.open_power.Software.Host.Updater /xyz/openbmc_project/software xyz.openbmc_project.Common.FactoryReset Reset; then
-          echo "$resetval" > "$varstore"
+    resetval=$(fw_printenv -n rwreset 2>/dev/nell)
+    if [ "$resetval" = "0" ] || [ "$resetval" = "1" ]; then
+        varstore="/media/hostfw/reset-gpio-val"
+        if [ -f "$varstore" ]; then
+            if [ "$resetval" != "$(cat $varstore)" ]; then
+                if busctl call org.open_power.Software.Host.Updater /xyz/openbmc_project/software xyz.openbmc_project.Common.FactoryReset Reset; then
+                    echo "$resetval" > "$varstore"
+                fi
+            fi
+        else
+            echo "$resetval" > "$varstore"
         fi
-      fi
-    else
-      echo "$resetval" > "$varstore"
     fi
-  fi
 }
 
 mmc_init() {
-  base_dir="/media/hostfw"
-  ro_dir="${base_dir}/running-ro"
-  running_dir="${base_dir}/running"
-  prsv_dir="${base_dir}/prsv"
-  staging_dir="${base_dir}/staging"
-  nvram_dir="${base_dir}/nvram"
+    base_dir="/media/hostfw"
+    ro_dir="${base_dir}/running-ro"
+    running_dir="${base_dir}/running"
+    prsv_dir="${base_dir}/prsv"
+    staging_dir="${base_dir}/staging"
+    nvram_dir="${base_dir}/nvram"
 
-  if [ ! -d "${ro_dir}" ]; then
-    mkdir -p "${ro_dir}"
-  fi
-  if [ ! -d "${running_dir}" ]; then
-    mkdir -p ${running_dir}
-  fi
-  if [ ! -d "${prsv_dir}" ]; then
-    mkdir -p "${prsv_dir}"
-  fi
-  if [ ! -d "${staging_dir}" ]; then
-    mkdir -p "${staging_dir}"
-  fi
-  if [ ! -d "${nvram_dir}" ]; then
-    mkdir -p "${nvram_dir}"
-  fi
-
-  # Mount the image that corresponds to the boot label as read-only to be used
-  # to populate the running directory.
-  boot_label="$(fw_printenv -n bootside)"
-  if ! grep -q "${ro_dir}" /proc/mounts; then
-    mount ${base_dir}/hostfw-"${boot_label}" ${ro_dir} -o ro
-  fi
-
-  # Determine if the running dir contains the running version
-  running_label=""
-  running_label_file="${running_dir}/partlabel"
-  if [ -f "${running_label_file}" ]; then
-    running_label=$(cat ${running_label_file})
-  fi
-  if [ "${running_label}" != "${boot_label}" ]; then
-    # Copy off the preserved partitions
-    # A line in the pnor.toc (81e00994.lid) looks like this:
-    # partition05=SECBOOT,0x00381000,0x003a5000,00,ECC,PRESERVED
-    rm -f ${prsv_dir}/*
-    if [ -f "${ro_dir}/81e00994.lid" ]; then
-      prsvs=$(grep PRESERVED "${ro_dir}/81e00994.lid")
-      for prsv in ${prsvs}; do
-        prsv=${prsv##partition*=}
-        prsv=$(echo "${prsv}" | cut -d "," -f 1)
-        if [ -L "${running_dir}/${prsv}" ]; then
-          # Preserve the symlink target file
-          prsv="$(readlink "${running_dir}/${prsv}")"
-          if [ -f "${running_dir}/${prsv}" ] && [ -f "${ro_dir}/${prsv}" ]; then
-            runsize="$(stat -c '%s' "${running_dir}/${prsv}")"
-            rosize="$(stat -c '%s' "${ro_dir}/${prsv}")"
-            if [ "$runsize" != "$rosize" ]; then
-                # Partition size may have changed or became corrupted
-                # So it will not be copied to the preserved directory
-                # Log PEL to indicate such
-                busctl call xyz.openbmc_project.Logging \
-                /xyz/openbmc_project/logging \
-                xyz.openbmc_project.Logging.Create Create "ssa{ss}" \
-                xyz.openbmc_project.Software.Version.Error.HostFile \
-                xyz.openbmc_project.Logging.Entry.Level.Error 3 "FILE_NAME" \
-                "${prsv}" "CURRENT_FILE_SIZE" "${runsize}" "EXPECTED_FILE_SIZE" \
-                "${rosize}"
-                # Initiate dump
-                busctl call xyz.openbmc_project.Dump.Manager \
-                /xyz/openbmc_project/dump/bmc xyz.openbmc_project.Dump.Create \
-                CreateDump "a{sv}" 0
-            else
-                cp -p ${running_dir}/"${prsv}" ${prsv_dir}
-            fi
-          fi
-        fi
-      done
+    if [ ! -d "${ro_dir}" ]; then
+        mkdir -p "${ro_dir}"
+    fi
+    if [ ! -d "${running_dir}" ]; then
+        mkdir -p ${running_dir}
+    fi
+    if [ ! -d "${prsv_dir}" ]; then
+        mkdir -p "${prsv_dir}"
+    fi
+    if [ ! -d "${staging_dir}" ]; then
+        mkdir -p "${staging_dir}"
+    fi
+    if [ ! -d "${nvram_dir}" ]; then
+        mkdir -p "${nvram_dir}"
     fi
 
-    # Copy lid contents of running image to running dir
-    rm -f ${running_dir}/*
-    cp -p ${ro_dir}/*.lid ${running_dir}/
+    # Mount the image that corresponds to the boot label as read-only to be used
+    # to populate the running directory.
+    boot_label="$(fw_printenv -n bootside)"
+    if ! grep -q "${ro_dir}" /proc/mounts; then
+        mount ${base_dir}/hostfw-"${boot_label}" ${ro_dir} -o ro
+    fi
 
-    # Restore the preserved partitions. Ignore error, there may be none.
-    cp -p ${prsv_dir}/* ${running_dir}/ 2>/dev/null || true
-    rm -f "${prsv_dir:?}/"*
+    # Determine if the running dir contains the running version
+    running_label=""
+    running_label_file="${running_dir}/partlabel"
+    if [ -f "${running_label_file}" ]; then
+        running_label=$(cat ${running_label_file})
+    fi
+    if [ "${running_label}" != "${boot_label}" ]; then
+        # Copy off the preserved partitions
+        # A line in the pnor.toc (81e00994.lid) looks like this:
+        # partition05=SECBOOT,0x00381000,0x003a5000,00,ECC,PRESERVED
+        rm -f ${prsv_dir}/*
+        if [ -f "${ro_dir}/81e00994.lid" ]; then
+            prsvs=$(grep PRESERVED "${ro_dir}/81e00994.lid")
+            for prsv in ${prsvs}; do
+                prsv=${prsv##partition*=}
+                prsv=$(echo "${prsv}" | cut -d "," -f 1)
+                if [ -L "${running_dir}/${prsv}" ]; then
+                    # Preserve the symlink target file
+                    prsv="$(readlink "${running_dir}/${prsv}")"
+                    if [ -f "${running_dir}/${prsv}" ] && [ -f "${ro_dir}/${prsv}" ]; then
+                        runsize="$(stat -c '%s' "${running_dir}/${prsv}")"
+                        rosize="$(stat -c '%s' "${ro_dir}/${prsv}")"
+                        if [ "$runsize" != "$rosize" ]; then
+                            # Partition size may have changed or became corrupted
+                            # So it will not be copied to the preserved directory
+                            # Log PEL to indicate such
+                            busctl call xyz.openbmc_project.Logging \
+                                /xyz/openbmc_project/logging \
+                                xyz.openbmc_project.Logging.Create Create "ssa{ss}" \
+                                xyz.openbmc_project.Software.Version.Error.HostFile \
+                                xyz.openbmc_project.Logging.Entry.Level.Error 3 "FILE_NAME" \
+                                "${prsv}" "CURRENT_FILE_SIZE" "${runsize}" "EXPECTED_FILE_SIZE" \
+                                "${rosize}"
+                            # Initiate dump
+                            busctl call xyz.openbmc_project.Dump.Manager \
+                                /xyz/openbmc_project/dump/bmc xyz.openbmc_project.Dump.Create \
+                                CreateDump "a{sv}" 0
+                        else
+                            cp -p ${running_dir}/"${prsv}" ${prsv_dir}
+                        fi
+                    fi
+                fi
+            done
+        fi
 
-    # Clean up the staging dir in case of a failed update
-    rm -rf "${staging_dir:?}/"*
+        # Copy lid contents of running image to running dir
+        rm -f ${running_dir}/*
+        cp -p ${ro_dir}/*.lid ${running_dir}/
 
-    # Save the label
-    echo "${boot_label}" > "${running_label_file}"
+        # Restore the preserved partitions. Ignore error, there may be none.
+        cp -p ${prsv_dir}/* ${running_dir}/ 2>/dev/null || true
+        rm -f "${prsv_dir:?}/"*
 
-  fi
+        # Clean up the staging dir in case of a failed update
+        rm -rf "${staging_dir:?}/"*
 
-  # Mount alternate dir
-  if [ "${boot_label}" = "a" ]; then
-    alternate_label="b"
-  else
-    alternate_label="a"
-  fi
-  alternate_dir="${base_dir}/alternate"
-  if [ ! -d "${alternate_dir}" ]; then
-    mkdir -p ${alternate_dir}
-  fi
-  if ! grep -q "${alternate_dir}" /proc/mounts; then
-    mount ${base_dir}/hostfw-${alternate_label} ${alternate_dir} -o ro
-  fi
+        # Save the label
+        echo "${boot_label}" > "${running_label_file}"
+
+    fi
+
+    # Mount alternate dir
+    if [ "${boot_label}" = "a" ]; then
+        alternate_label="b"
+    else
+        alternate_label="a"
+    fi
+    alternate_dir="${base_dir}/alternate"
+    if [ ! -d "${alternate_dir}" ]; then
+        mkdir -p ${alternate_dir}
+    fi
+    if ! grep -q "${alternate_dir}" /proc/mounts; then
+        mount ${base_dir}/hostfw-${alternate_label} ${alternate_dir} -o ro
+    fi
 }
 
 mmc_patch() {
-  # Patching is disabled if field mode is set
-  if [ "$(fw_printenv fieldmode 2>/dev/null)" = "fieldmode=true" ]; then
-    return 0
-  fi
+    # Patching is disabled if field mode is set
+    if [ "$(fw_printenv fieldmode 2>/dev/null)" = "fieldmode=true" ]; then
+        return 0
+    fi
 
-  boot_label="$(fw_printenv -n bootside)"
-  if [ "${boot_label}" = "a" ]; then
-    alternate_label="b"
-  else
-    alternate_label="a"
-  fi
+    boot_label="$(fw_printenv -n bootside)"
+    if [ "${boot_label}" = "a" ]; then
+        alternate_label="b"
+    else
+        alternate_label="a"
+    fi
 
-  # Create patch directories
-  patch_dir="/media/hostfw/patch-"
-  running_patch_dir="${patch_dir}${boot_label}"
-  if [ ! -d "${running_patch_dir}" ]; then
-    mkdir -p "${running_patch_dir}"
-  fi
-  alternate_patch_dir="${patch_dir}${alternate_label}"
-  if [ ! -d "${alternate_patch_dir}" ]; then
-    mkdir -p "${alternate_patch_dir}"
-  fi
+    # Create patch directories
+    patch_dir="/media/hostfw/patch-"
+    running_patch_dir="${patch_dir}${boot_label}"
+    if [ ! -d "${running_patch_dir}" ]; then
+        mkdir -p "${running_patch_dir}"
+    fi
+    alternate_patch_dir="${patch_dir}${alternate_label}"
+    if [ ! -d "${alternate_patch_dir}" ]; then
+        mkdir -p "${alternate_patch_dir}"
+    fi
 
-  # Create patch symlinks
-  symlink_base="/usr/local/share"
-  if [ ! -d "${symlink_base}" ]; then
-    mkdir -p "${symlink_base}"
-  fi
-  hostfw_symlink_base="${symlink_base}/hostfw"
-  if [ ! -d "${hostfw_symlink_base}" ]; then
-    mkdir -p "${hostfw_symlink_base}"
-  fi
+    # Create patch symlinks
+    symlink_base="/usr/local/share"
+    if [ ! -d "${symlink_base}" ]; then
+        mkdir -p "${symlink_base}"
+    fi
+    hostfw_symlink_base="${symlink_base}/hostfw"
+    if [ ! -d "${hostfw_symlink_base}" ]; then
+        mkdir -p "${hostfw_symlink_base}"
+    fi
 
-  if [ "$(readlink -f "${symlink_base}/pnor")" != "${running_patch_dir}" ]; then
-    ln -s "${running_patch_dir}" "${symlink_base}/pnor"
-  fi
-  if [ "$(readlink -f "${hostfw_symlink_base}/running")" != "${running_patch_dir}" ]; then
-    ln -s "${running_patch_dir}" "${hostfw_symlink_base}/running"
-  fi
-  if [ "$(readlink -f "${hostfw_symlink_base}/alternate")" != "${alternate_patch_dir}" ]; then
-    ln -s "${alternate_patch_dir}" "${hostfw_symlink_base}/alternate"
-  fi
+    if [ "$(readlink -f "${symlink_base}/pnor")" != "${running_patch_dir}" ]; then
+        ln -s "${running_patch_dir}" "${symlink_base}/pnor"
+    fi
+    if [ "$(readlink -f "${hostfw_symlink_base}/running")" != "${running_patch_dir}" ]; then
+        ln -s "${running_patch_dir}" "${hostfw_symlink_base}/running"
+    fi
+    if [ "$(readlink -f "${hostfw_symlink_base}/alternate")" != "${alternate_patch_dir}" ]; then
+        ln -s "${alternate_patch_dir}" "${hostfw_symlink_base}/alternate"
+    fi
 }
 
 case "$1" in
-  bios-reset-if-needed)
-    bios_reset_if_needed
-    ;;
-  mmc-init)
-    mmc_init
-    ;;
-  mmc-patch)
-    mmc_patch
-    ;;
-  *)
-    echo "Invalid argument: $1" >&2
-    exit 1
-    ;;
+    bios-reset-if-needed)
+        bios_reset_if_needed
+        ;;
+    mmc-init)
+        mmc_init
+        ;;
+    mmc-patch)
+        mmc_patch
+        ;;
+    *)
+        echo "Invalid argument: $1" >&2
+        exit 1
+        ;;
 esac

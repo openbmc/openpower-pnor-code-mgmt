@@ -11,23 +11,23 @@ Packages the image and MANIFEST together in a tarball
 usage: generate-tar [OPTION] <PNOR FILE>...
 
 Options:
-   -i, --image <squashfs|static>
-                          Generate SquashFS image or use static PNOR
-   -f, --file <file>      Specify destination file. Defaults to
-                          $(pwd)/<PNOR FILE>.pnor.<image_type>.tar[.gz] if
-                          unspecified.
-                          (For example,
-                          * "generate-tar -i squashfs my.pnor" would generate
-                          $(pwd)/my.pnor.squashfs.tar
-                          * "generate-tar -i static my.pnor" would generate
-                          $(pwd)/my.pnor.static.tar.gz)
-   -s, --sign <path>      Sign the image. The optional path argument specifies
-                          the private key file. Defaults to the bash variable
-                          PRIVATE_KEY_PATH if available, or else uses the
-                          open-source private key in this script.
-   -m, --machine <name>   Optionally specify the target machine name of this
-                          image.
-   -h, --help             Display this help text and exit.
+-i, --image <squashfs|static>
+Generate SquashFS image or use static PNOR
+-f, --file <file>      Specify destination file. Defaults to
+$(pwd)/<PNOR FILE>.pnor.<image_type>.tar[.gz] if
+unspecified.
+(For example,
+    * "generate-tar -i squashfs my.pnor" would generate
+    $(pwd)/my.pnor.squashfs.tar
+    * "generate-tar -i static my.pnor" would generate
+$(pwd)/my.pnor.static.tar.gz)
+-s, --sign <path>      Sign the image. The optional path argument specifies
+the private key file. Defaults to the bash variable
+PRIVATE_KEY_PATH if available, or else uses the
+open-source private key in this script.
+-m, --machine <name>   Optionally specify the target machine name of this
+image.
+-h, --help             Display this help text and exit.
 '
 
 private_key=$'-----BEGIN PRIVATE KEY-----
