@@ -3,8 +3,6 @@ Description=OpenPower Software Update Manager
 Wants=xyz.openbmc_project.Software.Version.service
 Before=xyz.openbmc_project.Software.Version.service
 Before=mboxd.service
-Wants=obmc-mapper.target
-After=obmc-mapper.target
 
 [Service]
 ExecStart=/usr/bin/openpower-update-manager
