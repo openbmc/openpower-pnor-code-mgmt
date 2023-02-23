@@ -61,6 +61,7 @@ int main(int argc, char* argv[])
 
     using namespace std::string_literals;
     std::map<std::string, std::vector<std::string>> extensionMap{{
+        {"ibm,bonnell"s, {".BONNELL_XML"s, ".P10"s}},
         {"ibm,everest"s, {".EVEREST_XML"s, ".P10"s}},
         {"ibm,rainier-2u"s, {".RAINIER_2U_XML"s, ".P10"s}},
         {"ibm,rainier-4u"s, {".RAINIER_4U_XML"s, ".P10"s}},
