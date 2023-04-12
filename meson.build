@@ -11,7 +11,7 @@ project(
     ],
     license: 'Apache-2.0',
     version: '1.0',
-    meson_version: '>=0.57.0',
+    meson_version: '>=0.58.0',
 )
 
 if(get_option('buildtype') == 'minsize')
@@ -218,7 +218,7 @@ unit_files = [
 ] + extra_unit_files
 
 systemd_system_unit_dir = dependency('systemd').get_variable(
-    pkgconfig: 'systemdsystemunitdir',
+    'systemdsystemunitdir',
     pkgconfig_define: ['prefix', get_option('prefix')])
 foreach u : unit_files
     configure_file(
@@ -231,7 +231,7 @@ foreach u : unit_files
 endforeach
 
 dbus_system_bus_services_dir = dependency('dbus-1').get_variable(
-    pkgconfig: 'system_bus_services_dir',
+    'system_bus_services_dir',
     pkgconfig_define: ['prefix', get_option('prefix')])
 dbus_policy_dir = run_command(
     'realpath',
