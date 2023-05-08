@@ -10,4 +10,4 @@ RemainAfterExit=no
 ExecStart=/usr/bin/obmc-vpnor-util clearvolatile
 
 [Install]
-RequiredBy=obmc-host-startmin@%i.target
+#RequiredBy=obmc-host-startmin@%i.target
