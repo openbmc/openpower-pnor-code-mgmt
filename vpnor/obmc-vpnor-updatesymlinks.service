@@ -16,4 +16,4 @@ ExecStart=/usr/bin/obmc-vpnor-util updatesymlinks
 
 [Install]
 WantedBy=pldmd.service
-WantedBy=mboxd.service mboxd-reload@.service
+#WantedBy=mboxd.service mboxd-reload@.service
