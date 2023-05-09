@@ -18,6 +18,24 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "691a80a6_fbfb4229",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 20,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2023-05-09T21:24:23Z",
+      "side": 1,
+      "message": "Yeah, let me update the commit message. I\u0027ll handle this in the bump.",
+      "parentUuid": "c2d6e7aa_5665f18e",
+      "revId": "daba7c5b8f3bc29d369b7b77111d5e3800f1b839",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "260cbb0f_24ed1649",
@@ -31,6 +49,24 @@
       "writtenOn": "2023-05-09T20:27:20Z",
       "side": 1,
       "message": "Could you break the dependency up into 2 lines so we still have mboxd.service as a dependency?",
+      "revId": "daba7c5b8f3bc29d369b7b77111d5e3800f1b839",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "b85f648a_353e6869",
+        "filename": "vpnor/obmc-vpnor-updatesymlinks.service",
+        "patchSetId": 2
+      },
+      "lineNbr": 19,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2023-05-09T21:24:23Z",
+      "side": 1,
+      "message": "Whoops, I didn\u0027t even notice there were 2 services there!",
+      "parentUuid": "260cbb0f_24ed1649",
       "revId": "daba7c5b8f3bc29d369b7b77111d5e3800f1b839",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
