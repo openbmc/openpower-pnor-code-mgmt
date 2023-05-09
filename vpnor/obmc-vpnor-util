@@ -127,17 +127,17 @@ function update_symlinks() {
     if [[ $(readlink -f "${PNOR_RO_ACTIVE_PATH}") != "${roTarget}" ]]; then
         rm -f ${PNOR_RO_ACTIVE_PATH}
         rm -rf ${PNOR_PATCH_LOCATION}*
-        ln -sfv ${roTarget} ${PNOR_RO_ACTIVE_PATH}
+        ln -sfv "${roTarget}" ${PNOR_RO_ACTIVE_PATH}
     fi
 
     if [[ $(readlink -f "${PNOR_RW_ACTIVE_PATH}") != "${rwTarget}" ]]; then
         rm -f ${PNOR_RW_ACTIVE_PATH}
-        ln -sfv ${rwTarget} ${PNOR_RW_ACTIVE_PATH}
+        ln -sfv "${rwTarget}" ${PNOR_RW_ACTIVE_PATH}
     fi
 
     if [[ $(readlink -f "${PNOR_PRSV_ACTIVE_PATH}") != "${prsvTarget}" ]]; then
         rm -f ${PNOR_PRSV_ACTIVE_PATH}
-        ln -sfv ${prsvTarget} ${PNOR_PRSV_ACTIVE_PATH}
+        ln -sfv "${prsvTarget}" ${PNOR_PRSV_ACTIVE_PATH}
     fi
 }
 
