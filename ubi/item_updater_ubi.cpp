@@ -147,8 +147,8 @@ void ItemUpdaterUbi::processPNORImage()
             auto versionPtr = std::make_unique<Version>(
                 bus, path, *this, id, version, purpose, "",
                 std::bind(&ItemUpdaterUbi::erase, this, std::placeholders::_1));
-            versionPtr->deleteObject =
-                std::make_unique<Delete>(bus, path, *versionPtr);
+            versionPtr->deleteObject = std::make_unique<Delete>(bus, path,
+                                                                *versionPtr);
             versions.insert(std::make_pair(id, std::move(versionPtr)));
         }
         else if (0 == iter.path().native().compare(0, PNOR_RW_PREFIX_LEN,

@@ -29,7 +29,7 @@ namespace utils
 {
 
 template <typename... Ts>
-std::string concat_string(Ts const&... ts)
+std::string concat_string(const Ts&... ts)
 {
     std::stringstream s;
     ((s << ts << " "), ...) << std::endl;
@@ -39,7 +39,7 @@ std::string concat_string(Ts const&... ts)
 // Helper function to run pflash command
 // Returns return code and the stdout
 template <typename... Ts>
-std::pair<int, std::string> pflash(Ts const&... ts)
+std::pair<int, std::string> pflash(const Ts&... ts)
 {
     std::array<char, 512> buffer;
     std::string cmd = concat_string("pflash", ts...);
@@ -79,8 +79,8 @@ std::string getPNORVersion()
     fs::path versionFile = tmpDir;
     versionFile /= "version";
 
-    auto [rc, r] =
-        pflash("-P VERSION -r", versionFile.string(), "2>&1 > /dev/null");
+    auto [rc, r] = pflash("-P VERSION -r", versionFile.string(),
+                          "2>&1 > /dev/null");
     if (rc != 0)
     {
         log<level::ERR>("Failed to read VERSION", entry("RETURNCODE=%d", rc));
@@ -162,14 +162,14 @@ std::vector<PartClear> getPartsToClear(const std::string& info)
             {
                 continue;
             }
-            line = line.substr(pos); // Skiping "ID=xx"
+            line = line.substr(pos);           // Skiping "ID=xx"
 
             pos = line.find_first_not_of(' '); // After spaces
             if (pos == std::string::npos)
             {
                 continue;
             }
-            line = line.substr(pos); // Skipping spaces
+            line = line.substr(pos);       // Skipping spaces
 
             pos = line.find_first_of(' '); // The end of part name
             if (pos == std::string::npos)
@@ -326,8 +326,7 @@ bool ItemUpdaterStatic::isVersionFunctional(const std::string& versionId)
     return versionId == functionalVersionId;
 }
 
-void ItemUpdaterStatic::freePriority(uint8_t, const std::string&)
-{}
+void ItemUpdaterStatic::freePriority(uint8_t, const std::string&) {}
 
 void ItemUpdaterStatic::deleteAll()
 {

@@ -41,8 +41,7 @@ struct CustomFd
      *
      *  @param[in] fd - File descriptor
      */
-    explicit CustomFd(int fd) : fd(fd)
-    {}
+    explicit CustomFd(int fd) : fd(fd) {}
 
     ~CustomFd()
     {

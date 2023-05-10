@@ -58,8 +58,7 @@ bool ItemUpdaterMMC::validateImage(const std::string&)
     return true;
 }
 
-void ItemUpdaterMMC::processPNORImage()
-{}
+void ItemUpdaterMMC::processPNORImage() {}
 
 void ItemUpdaterMMC::reset()
 {
@@ -136,19 +135,16 @@ bool ItemUpdaterMMC::isVersionFunctional(const std::string& versionId)
     return versionId == functionalVersionId;
 }
 
-void ItemUpdaterMMC::freePriority(uint8_t, const std::string&)
-{}
+void ItemUpdaterMMC::freePriority(uint8_t, const std::string&) {}
 
-void ItemUpdaterMMC::deleteAll()
-{}
+void ItemUpdaterMMC::deleteAll() {}
 
 bool ItemUpdaterMMC::freeSpace()
 {
     return true;
 }
 
-void ItemUpdaterMMC::updateFunctionalAssociation(const std::string&)
-{}
+void ItemUpdaterMMC::updateFunctionalAssociation(const std::string&) {}
 void GardResetMMC::enableInventoryItems()
 {
     (void)enableInventoryItemsHelper(
@@ -182,9 +178,9 @@ void GardResetMMC::enableInventoryItemsHelper(const std::string& service,
         response.read(objs);
         for (auto& obj : objs)
         {
-            auto method =
-                bus.new_method_call(service.c_str(), obj.c_str(),
-                                    "org.freedesktop.DBus.Properties", "Set");
+            auto method = bus.new_method_call(service.c_str(), obj.c_str(),
+                                              "org.freedesktop.DBus.Properties",
+                                              "Set");
             std::variant<bool> propertyVal{true};
             method.append("xyz.openbmc_project.Object.Enable", "Enabled",
                           propertyVal);

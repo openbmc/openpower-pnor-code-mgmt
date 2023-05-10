@@ -171,7 +171,7 @@ bool MinimumShipLevel::verify()
     auto rc = 0;
     std::string tmpMin{};
 
-    for (auto const& min : mins)
+    for (const auto& min : mins)
     {
         tmpMin = min;
 
