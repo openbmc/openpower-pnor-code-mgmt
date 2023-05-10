@@ -167,8 +167,8 @@ bool Signature::systemLevelVerify()
     for (const auto& keyType : keyTypes)
     {
         auto keyHashPair = getKeyHashFileNames(keyType);
-        auto keyValues =
-            Version::getValue(keyHashPair.first, {{hashFunctionTag, " "}});
+        auto keyValues = Version::getValue(keyHashPair.first,
+                                           {{hashFunctionTag, " "}});
         auto hashFunc = keyValues.at(hashFunctionTag);
 
         try
@@ -200,7 +200,6 @@ bool Signature::verifyFile(const std::filesystem::path& file,
                            const std::filesystem::path& publicKey,
                            const std::string& hashFunc)
 {
-
     // Check existence of the files in the system.
     if (!(std::filesystem::exists(file) && std::filesystem::exists(sigFile)))
     {
@@ -301,7 +300,6 @@ inline EVP_PKEY_Ptr
 
 CustomMap Signature::mapFile(const std::filesystem::path& path, size_t size)
 {
-
     CustomFd fd(open(path.c_str(), O_RDONLY));
 
     return CustomMap(mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd(), 0),

@@ -90,16 +90,15 @@ int main(int argc, char* argv[])
         app.add_subcommand("update-bios-attr-table",
                            "Update the bios attribute table with the host "
                            "firmware data details.")
-            ->callback([&bus, &loop, &subcommandContext, extensionMap]() {
-                auto elementsJsonFilePath = "/usr/share/hostfw/elements.json"s;
-                auto subcommands =
-                    functions::process_hostfirmware::updateBiosAttrTable(
-                        bus, extensionMap, std::move(elementsJsonFilePath),
-                        loop);
-                for (const auto& subcommand : subcommands)
-                {
-                    subcommandContext.push_back(subcommand);
-                }
+            ->callback(
+                [&bus, &loop, &subcommandContext, extensionMap]() {
+        auto elementsJsonFilePath = "/usr/share/hostfw/elements.json"s;
+        auto subcommands = functions::process_hostfirmware::updateBiosAttrTable(
+            bus, extensionMap, std::move(elementsJsonFilePath), loop);
+        for (const auto& subcommand : subcommands)
+        {
+            subcommandContext.push_back(subcommand);
+        }
             }));
 
     CLI11_PARSE(app, argc, argv);

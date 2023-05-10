@@ -24,7 +24,6 @@ uint8_t RedundancyPriorityUbi::priority(uint8_t value)
 
 auto ActivationUbi::activation(Activations value) -> Activations
 {
-
     if (value != softwareServer::Activation::Activations::Active)
     {
         redundancyPriority.reset(nullptr);
@@ -119,8 +118,8 @@ void ActivationUbi::startActivation()
     }
 
     constexpr auto ubimountService = "obmc-flash-bios-ubimount@";
-    auto ubimountServiceFile =
-        std::string(ubimountService) + versionId + ".service";
+    auto ubimountServiceFile = std::string(ubimountService) + versionId +
+                               ".service";
     auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
                                       SYSTEMD_INTERFACE, "StartUnit");
     method.append(ubimountServiceFile, "replace");
@@ -139,8 +138,8 @@ void ActivationUbi::unitStateChange(sdbusplus::message_t& msg)
     // Read the msg and populate each variable
     msg.read(newStateID, newStateObjPath, newStateUnit, newStateResult);
 
-    auto ubimountServiceFile =
-        "obmc-flash-bios-ubimount@" + versionId + ".service";
+    auto ubimountServiceFile = "obmc-flash-bios-ubimount@" + versionId +
+                               ".service";
 
     if (newStateUnit == ubimountServiceFile && newStateResult == "done")
     {
@@ -169,8 +168,8 @@ void ActivationUbi::finishActivation()
     // Set Redundancy Priority before setting to Active
     if (!redundancyPriority)
     {
-        redundancyPriority =
-            std::make_unique<RedundancyPriorityUbi>(bus, path, *this, 0);
+        redundancyPriority = std::make_unique<RedundancyPriorityUbi>(bus, path,
+                                                                     *this, 0);
     }
 
     activationProgress->progress(100);

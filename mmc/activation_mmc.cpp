@@ -13,14 +13,11 @@ auto ActivationMMC::activation(Activations value) -> Activations
     return softwareServer::Activation::activation(value);
 }
 
-void ActivationMMC::startActivation()
-{}
+void ActivationMMC::startActivation() {}
 
-void ActivationMMC::unitStateChange(sdbusplus::message_t&)
-{}
+void ActivationMMC::unitStateChange(sdbusplus::message_t&) {}
 
-void ActivationMMC::finishActivation()
-{}
+void ActivationMMC::finishActivation() {}
 
 } // namespace updater
 } // namespace software

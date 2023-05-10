@@ -112,13 +112,13 @@ TEST(TestItemUpdaterStatic, getPartsToClearNotOK)
     // Verify the it does not crash on malformed texts
     constexpr auto info =
         "0x0308a000..0x0308f000(actual=0x00005000)"
-        "[E-----F-CV]\n" // missing ID and name with F
+        "[E-----F-CV]\n"  // missing ID and name with F
         "ID=27 HB_VOLATILE 0x0308a000..0x0308f000 (actual=0x00005000) "
-        "E-----F-CV]\n" // missing [
+        "E-----F-CV]\n"   // missing [
         "ID=22   ATTR_PERM 0x02d20000..0x02d28000 (actual=0x00008000) "
-        "[E-----F-C-]\n" // The only valid one
+        "[E-----F-C-]\n"  // The only valid one
         "ID=28        MEMD 0x0308f000..0x0309d000 (actual=0x0000e000) "
-        "[----]\n" // missing flags
+        "[----]\n"        // missing flags
         "SBKT 0x0309d000..0x030a1000 (actual=0x00004000) "
         "[EL--R-----]\n"; // missing ID
 

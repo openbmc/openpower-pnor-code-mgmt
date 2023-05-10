@@ -30,7 +30,6 @@ using EVP_MD_CTX_Ptr =
 
 std::string Version::getId(const std::string& version)
 {
-
     if (version.empty())
     {
         log<level::ERR>("Error version is empty");

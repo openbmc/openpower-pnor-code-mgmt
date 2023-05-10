@@ -12,7 +12,6 @@ using EVP_MD_CTX_Ptr =
 /** @brief Make sure we correctly get the Id from getId()*/
 TEST(VersionTest, TestGetId)
 {
-
     auto version = "test-id";
     unsigned char digest[EVP_MAX_MD_SIZE];
     unsigned int digest_count = 0;
@@ -49,8 +48,8 @@ TEST(VersionTest, GetVersions)
         "\tsbe-cf61dc3\n"
         "\thcode-hw123119a.930";
 
-    const auto& [version, extendedVersion] =
-        Version::getVersions(versionString);
+    const auto& [version,
+                 extendedVersion] = Version::getVersions(versionString);
     EXPECT_EQ(version, "open-power-romulus-v2.2-rc1-48-g268344f-dirty");
     EXPECT_EQ(extendedVersion, "buildroot-2018.11.1-7-g5d7cc8c,"
                                "skiboot-v6.2,"

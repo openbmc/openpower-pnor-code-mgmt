@@ -53,8 +53,7 @@ class GardReset : public GardResetInherit
         bus(bus), path(path)
     {}
 
-    virtual ~GardReset()
-    {}
+    virtual ~GardReset() {}
 
     /**
      * @brief GARD factory reset - clears the PNOR GARD partition.

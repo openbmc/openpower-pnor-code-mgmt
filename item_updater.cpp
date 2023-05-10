@@ -114,8 +114,8 @@ void ItemUpdater::createActivation(sdbusplus::message_t& m)
             path, versionId, extendedVersion, activationState, associations);
         activations.emplace(versionId, std::move(activation));
 
-        auto versionPtr =
-            createVersionObject(path, versionId, version, purpose, filePath);
+        auto versionPtr = createVersionObject(path, versionId, version, purpose,
+                                              filePath);
         versions.emplace(versionId, std::move(versionPtr));
     }
     return;
