@@ -201,14 +201,13 @@ executable(
     install: true
 )
 
+fs = import('fs')
 foreach s : extra_scripts
-    configure_file(
-        input: s,
-        copy: true,
+    fs.copyfile(
+        s,
         install: true,
         install_mode: 'rwxr-xr-x',
-        install_dir: get_option('bindir'),
-        output: '@BASENAME@'
+        install_dir: get_option('bindir')
     )
 endforeach
 
@@ -221,12 +220,10 @@ systemd_system_unit_dir = dependency('systemd').get_variable(
     'systemdsystemunitdir',
     pkgconfig_define: ['prefix', get_option('prefix')])
 foreach u : unit_files
-    configure_file(
-        input: u,
-        copy: true,
+    fs.copyfile(
+        u,
         install: true,
-        install_dir: systemd_system_unit_dir,
-        output: '@BASENAME@.service'
+        install_dir: systemd_system_unit_dir
     )
 endforeach
 
