@@ -16,6 +16,24 @@
       "message": "Any testing here?",
       "revId": "24bfa1989a1be48cf5032e7e02b2fbcb3fe26b93",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "0433e192_de0607f3",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 1
+      },
+      "lineNbr": 11,
+      "author": {
+        "id": 1000397
+      },
+      "writtenOn": "2023-08-29T00:23:23Z",
+      "side": 1,
+      "message": "I have tested that all service files are installed in the `/lib/systemd/system` directory.",
+      "parentUuid": "6301e3e2_d1783585",
+      "revId": "24bfa1989a1be48cf5032e7e02b2fbcb3fe26b93",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
