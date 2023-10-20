@@ -658,7 +658,7 @@ std::shared_ptr<void> processHostFirmware(
             // subcommand to exit.
             loop.exit(0);
         }
-        });
+    });
 
     // now that we'll get a callback in the event of an InterfacesAdded signal
     // (potentially containing
@@ -761,7 +761,7 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
         {
             loop.exit(0);
         }
-        }));
+    }));
 
     // The BIOS attribute table can only be updated if PLDM is running because
     // PLDM is the one that exposes this property. Add a match to monitor when
@@ -795,7 +795,7 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
                 loop.exit(0);
             }
         }
-        }));
+    }));
 
     InterfacesPropertiesMap interfacesAndProperties;
     auto objects = getManagedObjects(bus, entityManagerServiceName,

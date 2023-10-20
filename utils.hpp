@@ -13,8 +13,8 @@
 
 extern "C"
 {
-    EVP_MD_CTX* EVP_MD_CTX_new(void);
-    void EVP_MD_CTX_free(EVP_MD_CTX* ctx);
+EVP_MD_CTX* EVP_MD_CTX_new(void);
+void EVP_MD_CTX_free(EVP_MD_CTX* ctx);
 }
 
 namespace utils
