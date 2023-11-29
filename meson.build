@@ -30,9 +30,9 @@ extra_sources = []
 extra_unit_files = []
 extra_scripts = []
 
-build_vpnor = get_option('vpnor').enabled()
-build_pldm = get_option('pldm').enabled()
-build_verify_signature = get_option('verify-signature').enabled()
+build_vpnor = get_option('vpnor').allowed()
+build_pldm = get_option('pldm').allowed()
+build_verify_signature = get_option('verify-signature').allowed()
 
 if not cxx.has_header('CLI/CLI.hpp')
       error('Could not find CLI.hpp')
@@ -240,7 +240,7 @@ install_data(
 
 if not get_option('tests').disabled()
     oe_sdk = get_option('oe-sdk')
-    if oe_sdk.enabled()
+    if oe_sdk.allowed()
         # Setup OE SYSROOT
         OECORE_TARGET_SYSROOT = run_command('sh', '-c', 'echo $OECORE_TARGET_SYSROOT').stdout().strip()
         if OECORE_TARGET_SYSROOT == ''
