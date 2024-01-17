@@ -182,7 +182,7 @@ TEST(MaybeCall, match)
     std::map<std::string,
              std::map<std::string, std::variant<std::vector<std::string>>>>
         interfaces{{
-            {"xyz.openbmc_project.Configuration.IBMCompatibleSystem"s,
+            {"xyz.openbmc_project.Inventory.Decorator.Compatible"s,
              {{"Names"s, std::vector<std::string>{"foo"s}}}},
         }};
     auto found = functions::process_hostfirmware::maybeCall(
@@ -199,7 +199,7 @@ TEST(MaybeCall, missingNames)
     std::map<std::string,
              std::map<std::string, std::variant<std::vector<std::string>>>>
         interfaces{{
-            {"xyz.openbmc_project.Configuration.IBMCompatibleSystem"s, {}},
+            {"xyz.openbmc_project.Inventory.Decorator.Compatible"s, {}},
         }};
     auto found = functions::process_hostfirmware::maybeCall(
         interfaces, std::move(callback));
@@ -212,7 +212,7 @@ TEST(MaybeCall, emptyCallbackFound)
     std::map<std::string,
              std::map<std::string, std::variant<std::vector<std::string>>>>
         interfaces{{
-            {"xyz.openbmc_project.Configuration.IBMCompatibleSystem"s,
+            {"xyz.openbmc_project.Inventory.Decorator.Compatible"s,
              {{"Names"s, std::vector<std::string>{"foo"s}}}},
         }};
     auto found = functions::process_hostfirmware::maybeCall(
