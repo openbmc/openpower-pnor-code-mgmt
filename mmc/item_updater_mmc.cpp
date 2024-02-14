@@ -6,11 +6,10 @@
 #include "utils.hpp"
 #include "version.hpp"
 
-#include <fmt/core.h>
-
 #include <phosphor-logging/log.hpp>
 
 #include <filesystem>
+#include <format>
 #include <iostream>
 #include <thread>
 
@@ -190,7 +189,7 @@ void GardResetMMC::enableInventoryItemsHelper(const std::string& service,
     catch (const sdbusplus::exception_t& e)
     {
         log<level::ERR>(
-            fmt::format("Failed to enable specified inventory items ex({}) "
+            std::format("Failed to enable specified inventory items ex({}) "
                         "intf({}) objpath({})",
                         e.what(), intf, objPath)
                 .c_str());
