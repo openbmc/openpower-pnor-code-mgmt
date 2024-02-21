@@ -33,7 +33,7 @@
 
 owners:
 - anoo@us.ibm.com
-- gmills@linux.vnet.ibm.com
+- gunnar@gmills.xyz
 
 reviewers:
 - ojayanth@in.ibm.com
@@ -45,7 +45,7 @@ openbmc:
   email: anoo@us.ibm.com
   discord: anoo
 - name: Gunnar Mills
-  email: gmills@linux.vnet.ibm.com
+  email: gunnar@gmills.xyz
   discord: GunnarM
 - name: Jayanth Othayoth
   email: ojayanth@in.ibm.com
