@@ -1,0 +1,13 @@
+[Unit]
+Description=Recover Host%i PHAL devtree and lid files
+After=obmc-host-reset-running@%i.target
+Before=phal-import-devtree@0.service
+After=openpower-update-bios-attr-table.service
+
+[Service]
+RemainAfterExit=yes
+Type=oneshot
+ExecStart=/usr/bin/recover_lid_files
+
+[Install]
+WantedBy=multi-user.target
