@@ -1,0 +1,45 @@
+#!/bin/sh
+
+base_dir="/var/lib/phosphor-software-manager/hostfw"
+ro_dir="/media/hostfw/running-ro"
+running_dir="${base_dir}/running"
+file_recovered=0
+
+if [ -f "${ro_dir}/81e00994.lid" ]; then
+    #look for the DEVTREE and the preserved files
+    filesList=$(grep 'PRESERVED\|DEVTREE' "${ro_dir}/81e00994.lid")
+    for eachFile in ${filesList}; do
+        eachFile=${eachFile##partition*=}
+        eachFile=$(echo "${eachFile}" | cut -d "," -f 1)
+        #check if it is a symbolic link
+        if [ -L "${running_dir}/${eachFile}" ]; then
+            # get the symlink target file
+            eachFile="$(readlink "${running_dir}/${eachFile}")"
+            if [ -f "${running_dir}/${eachFile}" ] && [ -f "${ro_dir}/${eachFile}" ]; then
+                runsize="$(stat -c '%s' "${running_dir}/${eachFile}")"
+                rosize="$(stat -c '%s' "${ro_dir}/${eachFile}")"
+                # Partition size may have changed or became corrupted
+                # restoring the file from the readonly copy
+                if [ "$runsize" != "$rosize" ]; then
+                    cp -p ${ro_dir}/"${eachFile}" ${running_dir}/"${eachFile}"
+                    # Log PEL to indicate such
+                    busctl call xyz.openbmc_project.Logging \
+                        /xyz/openbmc_project/logging \
+                        xyz.openbmc_project.Logging.Create Create "ssa{ss}" \
+                        xyz.openbmc_project.Common.File.Error.FileRecoveredOnBmcReboot \
+                        xyz.openbmc_project.Logging.Entry.Level.Informational 3 "FILE_NAME" \
+                        "${eachFile}" "CURRENT_FILE_SIZE" "${runsize}" "EXPECTED_FILE_SIZE" \
+                        "${rosize}"
+                    file_recovered=1
+                fi
+            fi
+        fi
+    done
+    #one or more files could be recovered. So trigger dump outside the while loop
+    if [ $file_recovered -eq 1 ]; then
+        # Initiate dump
+        busctl call xyz.openbmc_project.Dump.Manager \
+            /xyz/openbmc_project/dump/bmc xyz.openbmc_project.Dump.Create \
+            CreateDump "a{sv}" 0
+    fi
+fi
