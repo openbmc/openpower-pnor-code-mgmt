@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "edc4779d_ff81cbb2",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 11
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2024-04-18T18:41:47Z",
+      "side": 1,
+      "message": "First I thought we could add this logic to the mmc/obmc-flash-bios script which is doing something similar but I see you\u0027d like this to depend on the phal service.",
+      "revId": "9923bc0ab1a97471edafdf767aeddc4d8f44b6c5",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
