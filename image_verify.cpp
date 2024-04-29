@@ -34,8 +34,8 @@ constexpr auto hashFunctionTag = "HashType";
 Signature::Signature(const std::filesystem::path& imageDirPath,
                      const std::string& pnorFileName,
                      const std::filesystem::path& signedConfPath) :
-    imageDirPath(imageDirPath),
-    pnorFileName(pnorFileName), signedConfPath(signedConfPath)
+    imageDirPath(imageDirPath), pnorFileName(pnorFileName),
+    signedConfPath(signedConfPath)
 {
     std::filesystem::path file(imageDirPath / MANIFEST_FILE);
 
