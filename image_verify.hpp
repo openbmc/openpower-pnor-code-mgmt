@@ -208,10 +208,10 @@ class Signature
     /** @brief Path of public key and hash function files */
     std::filesystem::path signedConfPath;
 
-    /** @brief key type defined in mainfest file */
+    /** @brief key type defined in manifest file */
     Key_t keyType;
 
-    /** @brief Hash type defined in mainfest file */
+    /** @brief Hash type defined in manifest file */
     Hash_t hashType;
 };
 

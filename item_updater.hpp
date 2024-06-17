@@ -35,7 +35,7 @@ constexpr auto GARD_PATH = "/org/open_power/control/gard";
 constexpr static auto volatilePath = "/org/open_power/control/volatile";
 
 /** @class GardReset
- *  @brief OpenBMC GARD factory reset implementation.
+ *  @brief OpenBMC GUARD factory reset implementation.
  *  @details An implementation of xyz.openbmc_project.Common.FactoryReset under
  *  /org/openpower/control/gard.
  */
@@ -56,7 +56,7 @@ class GardReset : public GardResetInherit
     virtual ~GardReset() {}
 
     /**
-     * @brief GARD factory reset - clears the PNOR GARD partition.
+     * @brief GUARD factory reset - clears the PNOR GUARD partition.
      */
     virtual void reset() = 0;
 

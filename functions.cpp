@@ -104,7 +104,7 @@ void makeCallback(const std::function<void(Sig...)>& callback, Args&&... args)
  * extensions.
  * @param[in] ibmCompatibleSystem The names property of an instance of
  * xyz.openbmc_project.Inventory.Decorator.Compatible
- * @param[out] extentions the host firmware blob file extensions
+ * @param[out] extensions the host firmware blob file extensions
  * @return true if an entry was found, otherwise false
  */
 bool getExtensionsForIbmCompatibleSystem(
@@ -165,14 +165,14 @@ void writeLink(const std::filesystem::path& linkTarget,
  * @brief Find host firmware blob files that need well-known names
  *
  * The IBM host firmware runtime looks for data and/or additional code while
- * bootstraping in files with well-known names. findLinks uses the provided
+ * bootstrapping in files with well-known names. findLinks uses the provided
  * extensions argument to find host firmware blob files that require a
  * well-known name. When a blob is found, issue the provided callback
  * (typically a function that will write a symlink).
  *
  * @param[in] hostFirmwareDirectory The directory in which findLinks should
  * look for host firmware blob files that need well-known names.
- * @param[in] extentions The extensions of the firmware blob files denote a
+ * @param[in] extensions The extensions of the firmware blob files denote a
  * host firmware blob file requires a well-known name.
  * @param[in] errorCallback A callback made in the event of filesystem errors.
  * @param[in] linkCallback A callback made when host firmware blob files
@@ -313,7 +313,7 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
                 auto runtimeKeyName = keyName.string() + runtimeSuffix;
                 attr.insert({runtimeKeyName, attrIt->second});
             }
-            // Overwrite the exsiting element with the ipl entry
+            // Overwrite the existing element with the ipl entry
             attr[keyName] = lid;
             continue;
         }
@@ -378,7 +378,7 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
  * for this system.
  *
  * @param[in] elementsJsonFilePath - The path to the host firmware json file.
- * @param[in] extentions - The extensions of the firmware blob files.
+ * @param[in] extensions - The extensions of the firmware blob files.
  */
 void setBiosAttr(const std::filesystem::path& elementsJsonFilePath,
                  const std::vector<std::string>& extensions)
@@ -520,7 +520,7 @@ bool maybeCallMessage(sdbusplus::message_t& message,
  *
  * Using the provided extensionMap and
  * xyz.openbmc_project.Inventory.Decorator.Compatible, determine if well-known
- * names for host firmare blob files are necessary and if so, create them.
+ * names for host firmware blob files are necessary and if so, create them.
  *
  * @param[in] extensionMap a map of
  * xyz.openbmc_project.Inventory.Decorator.Compatible to host firmware blob file
@@ -615,7 +615,7 @@ std::shared_ptr<void> processHostFirmware(
     ErrorCallbackType errorCallback, sdeventplus::Event& loop)
 {
     // ownership of extensionMap, hostFirmwareDirectory and errorCallback can't
-    // be transfered to the match callback because they are needed in the non
+    // be transferred to the match callback because they are needed in the non
     // async part of this function below, so they need to be moved to the heap.
     auto pExtensionMap =
         std::make_shared<decltype(extensionMap)>(std::move(extensionMap));

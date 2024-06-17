@@ -16,7 +16,7 @@ class GardResetMMC : public GardReset
     virtual ~GardResetMMC() = default;
 
     /**
-     * @brief GARD factory reset - clears the PNOR GARD partition.
+     * @brief GUARD factory reset - clears the PNOR GUARD partition.
      */
     void reset() override;
 

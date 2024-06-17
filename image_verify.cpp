@@ -122,7 +122,7 @@ bool Signature::verify()
             return false;
         }
 
-        log<level::DEBUG>("Successfully completed Signature vaildation.");
+        log<level::DEBUG>("Successfully completed Signature validation.");
 
         return true;
     }

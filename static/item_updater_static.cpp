@@ -162,7 +162,7 @@ std::vector<PartClear> getPartsToClear(const std::string& info)
             {
                 continue;
             }
-            line = line.substr(pos);           // Skiping "ID=xx"
+            line = line.substr(pos);           // Skipping "ID=xx"
 
             pos = line.find_first_not_of(' '); // After spaces
             if (pos == std::string::npos)
@@ -359,7 +359,7 @@ void ItemUpdaterStatic::updateFunctionalAssociation(
 
 void GardResetStatic::reset()
 {
-    // Clear gard partition
+    // Clear guard partition
     utils::hiomapdSuspend(bus);
 
     utils::pnorClear("GUARD");

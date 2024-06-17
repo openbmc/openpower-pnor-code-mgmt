@@ -419,7 +419,7 @@ std::string ItemUpdaterUbi::determineId(const std::string& symlinkPath)
 
 void GardResetUbi::reset()
 {
-    // The GARD partition is currently misspelled "GUARD." This file path will
+    // The GUARD partition is currently misspelled "GUARD." This file path will
     // need to be updated in the future.
     auto path = std::filesystem::path(PNOR_PRSV_ACTIVE_PATH);
     path /= "GUARD";

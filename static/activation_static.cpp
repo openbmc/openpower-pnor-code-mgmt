@@ -156,7 +156,7 @@ void ActivationStatic::finishActivation()
     // Create updateable association as this
     // can be re-programmed.
     parent.createUpdateableAssociation(path);
-    // Create functional assocaition
+    // Create functional association
     parent.updateFunctionalAssociation(versionId);
 
     Activation::activation(Activation::Activations::Active);

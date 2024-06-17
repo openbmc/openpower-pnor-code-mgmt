@@ -195,7 +195,7 @@ bool MinimumShipLevel::verify()
     if (rc < 0)
     {
         log<level::ERR>(
-            "PNOR Mininum Ship Level NOT met",
+            "PNOR Minimum Ship Level NOT met",
             entry("MIN_VERSION=%s", tmpMin.c_str()),
             entry("ACTUAL_VERSION=%s", actual.c_str()),
             entry("VERSION_PURPOSE=%s",
