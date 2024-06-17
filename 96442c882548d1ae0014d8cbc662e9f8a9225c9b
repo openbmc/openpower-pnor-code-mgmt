@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "13ed71b9_2d58bde1",
+        "filename": "static/item_updater_static.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000020
+      },
+      "writtenOn": "2024-06-17T13:24:28Z",
+      "side": 1,
+      "message": "I see both GARD and GUARD.\nI think gard comes from a proprietary product that had 4 letters for each component? \nAnyway, I don\u0027t see why we need to call it gard.",
+      "range": {
+        "startLine": 22,
+        "startChar": 14,
+        "endLine": 22,
+        "endChar": 20
+      },
+      "revId": "96442c882548d1ae0014d8cbc662e9f8a9225c9b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
