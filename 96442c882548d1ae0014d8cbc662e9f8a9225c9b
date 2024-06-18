@@ -22,6 +22,30 @@
       },
       "revId": "96442c882548d1ae0014d8cbc662e9f8a9225c9b",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "a8bc5510_51e3ec4c",
+        "filename": "static/item_updater_static.hpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 22,
+      "author": {
+        "id": 1000206
+      },
+      "writtenOn": "2024-06-18T09:29:07Z",
+      "side": 1,
+      "message": "yes , you are correct it came from the component name - the correct name is actually `GUARD`, itseems we have even written functions \u0026 rest API with name `gard` and never bothered to fix it till now.\n\nI have only changed the ones that are in comments, did not attempt to fix the code base",
+      "parentUuid": "13ed71b9_2d58bde1",
+      "range": {
+        "startLine": 22,
+        "startChar": 14,
+        "endLine": 22,
+        "endChar": 20
+      },
+      "revId": "96442c882548d1ae0014d8cbc662e9f8a9225c9b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
