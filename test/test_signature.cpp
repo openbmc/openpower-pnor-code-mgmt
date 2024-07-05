@@ -65,7 +65,7 @@ class SignatureTest : public testing::Test
         command("echo \"pnor.xz.squashfs file \" > " + pnorFile);
 
         std::string pkeyFile = extractPath.string() + "/" + "private.pem";
-        command("openssl genrsa  -out " + pkeyFile + " 2048");
+        command("openssl genrsa  -out " + pkeyFile + " 4096");
 
         std::string pubkeyFile = extractPath.string() + "/" + "publickey";
         command("openssl rsa -in " + pkeyFile + " -outform PEM " +
