@@ -22,6 +22,30 @@
       },
       "revId": "b4813bdf01a2da7f709516b1b20e5a0b0a81ef22",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "9b1e286c_ef8b4873",
+        "filename": "item_updater_main.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 65,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2024-08-06T15:50:23Z",
+      "side": 1,
+      "message": "Yeah, it\u0027s how the json file defines the lids, currently there are no P11, just P10, example:\n\n\"element_name\": \"OCC.P10\",\n\"short_lid_name\": \"81e00430\",\n\n\"element_name\": \"DEVTREE.EVEREST_XML\",\n\"short_lid_name\": \"81e0067f\",",
+      "parentUuid": "cad020ec_a5321a33",
+      "range": {
+        "startLine": 65,
+        "startChar": 33,
+        "endLine": 65,
+        "endChar": 37
+      },
+      "revId": "b4813bdf01a2da7f709516b1b20e5a0b0a81ef22",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
