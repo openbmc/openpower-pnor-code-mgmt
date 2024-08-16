@@ -34,8 +34,8 @@ constexpr auto hashFunctionTag = "HashType";
 Signature::Signature(const std::filesystem::path& imageDirPath,
                      const std::string& pnorFileName,
                      const std::filesystem::path& signedConfPath) :
-    imageDirPath(imageDirPath),
-    pnorFileName(pnorFileName), signedConfPath(signedConfPath)
+    imageDirPath(imageDirPath), pnorFileName(pnorFileName),
+    signedConfPath(signedConfPath)
 {
     std::filesystem::path file(imageDirPath / MANIFEST_FILE);
 
@@ -167,8 +167,8 @@ bool Signature::systemLevelVerify()
     for (const auto& keyType : keyTypes)
     {
         auto keyHashPair = getKeyHashFileNames(keyType);
-        auto keyValues = Version::getValue(keyHashPair.first,
-                                           {{hashFunctionTag, " "}});
+        auto keyValues =
+            Version::getValue(keyHashPair.first, {{hashFunctionTag, " "}});
         auto hashFunc = keyValues.at(hashFunctionTag);
 
         try

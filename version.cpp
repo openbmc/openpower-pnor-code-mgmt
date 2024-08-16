@@ -52,9 +52,8 @@ std::string Version::getId(const std::string& version)
     return mdString;
 }
 
-std::map<std::string, std::string>
-    Version::getValue(const std::string& filePath,
-                      std::map<std::string, std::string> keys)
+std::map<std::string, std::string> Version::getValue(
+    const std::string& filePath, std::map<std::string, std::string> keys)
 {
     if (filePath.empty())
     {

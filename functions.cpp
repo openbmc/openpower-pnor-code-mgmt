@@ -184,8 +184,8 @@ void findLinks(const std::filesystem::path& hostFirmwareDirectory,
                const LinkCallbackType& linkCallback)
 {
     std::error_code ec;
-    std::filesystem::directory_iterator directoryIterator(hostFirmwareDirectory,
-                                                          ec);
+    std::filesystem::directory_iterator directoryIterator(
+        hostFirmwareDirectory, ec);
     if (ec)
     {
         makeCallback(errorCallback, hostFirmwareDirectory, ec);
@@ -348,8 +348,8 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
 
         // Create symlinks from the hostfw elements to their corresponding
         // lid files if they don't exist
-        auto elementFilePath = std::filesystem::path("/media/hostfw/running") /
-                               a.first;
+        auto elementFilePath =
+            std::filesystem::path("/media/hostfw/running") / a.first;
         if (!std::filesystem::exists(elementFilePath))
         {
             std::error_code ec;
@@ -445,11 +445,12 @@ void setBiosAttr(const std::filesystem::path& elementsJsonFilePath,
  * @return true if interfacesAndProperties contained an instance of
  * xyz.openbmc_project.Inventory.Decorator.Compatible, false otherwise
  */
-bool maybeCall(const std::map<std::string,
-                              std::map<std::string,
-                                       std::variant<std::vector<std::string>>>>&
-                   interfacesAndProperties,
-               const MaybeCallCallbackType& callback)
+bool maybeCall(
+    const std::map<
+        std::string,
+        std::map<std::string, std::variant<std::vector<std::string>>>>&
+        interfacesAndProperties,
+    const MaybeCallCallbackType& callback)
 {
     using namespace std::string_literals;
 
@@ -634,23 +635,23 @@ std::shared_ptr<void> processHostFirmware(
                 "xyz.openbmc_project.EntityManager"),
         [pExtensionMap, pHostFirmwareDirectory, pErrorCallback,
          &loop](auto& message) {
-        // bind the extension map, host firmware directory, and error
-        // callback to the maybeMakeLinks function.
-        auto maybeMakeLinksWithArgsBound =
-            std::bind(maybeMakeLinks, std::cref(*pExtensionMap),
-                      std::cref(*pHostFirmwareDirectory), std::placeholders::_1,
-                      std::cref(*pErrorCallback));
+            // bind the extension map, host firmware directory, and error
+            // callback to the maybeMakeLinks function.
+            auto maybeMakeLinksWithArgsBound =
+                std::bind(maybeMakeLinks, std::cref(*pExtensionMap),
+                          std::cref(*pHostFirmwareDirectory),
+                          std::placeholders::_1, std::cref(*pErrorCallback));
 
-        // if the InterfacesAdded message contains an an instance of
-        // xyz.openbmc_project.Inventory.Decorator.Compatible, check to see if
-        // links are necessary on this system and if so, create them.
-        if (maybeCallMessage(message, maybeMakeLinksWithArgsBound))
-        {
-            // The Compatible interface was found and the links were created if
-            // applicable. Instruct the event loop / subcommand to exit.
-            loop.exit(0);
-        }
-    });
+            // if the InterfacesAdded message contains an an instance of
+            // xyz.openbmc_project.Inventory.Decorator.Compatible, check to see
+            // if links are necessary on this system and if so, create them.
+            if (maybeCallMessage(message, maybeMakeLinksWithArgsBound))
+            {
+                // The Compatible interface was found and the links were created
+                // if applicable. Instruct the event loop / subcommand to exit.
+                loop.exit(0);
+            }
+        });
 
     // now that we'll get a callback in the event of an InterfacesAdded signal
     // (potentially containing
@@ -748,11 +749,11 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
                 "xyz.openbmc_project.EntityManager"),
         [pldmPath, pExtensionMap, pElementsJsonFilePath,
          maybeSetAttrWithArgsBound, &loop](auto& message) {
-        if (maybeCallMessage(message, maybeSetAttrWithArgsBound))
-        {
-            loop.exit(0);
-        }
-    }));
+            if (maybeCallMessage(message, maybeSetAttrWithArgsBound))
+            {
+                loop.exit(0);
+            }
+        }));
 
     // The BIOS attribute table can only be updated if PLDM is running because
     // PLDM is the one that exposes this property. Add a match to monitor when
@@ -764,29 +765,30 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
                 "xyz.openbmc_project.PLDM"),
         [pExtensionMap, pElementsJsonFilePath, maybeSetAttrWithArgsBound,
          &loop](auto& message) {
-        std::string name;
-        std::string oldOwner;
-        std::string newOwner;
-        message.read(name, oldOwner, newOwner);
+            std::string name;
+            std::string oldOwner;
+            std::string newOwner;
+            message.read(name, oldOwner, newOwner);
 
-        if (newOwner.empty())
-        {
-            return;
-        }
-
-        auto bus = sdbusplus::bus::new_default();
-        InterfacesPropertiesMap interfacesAndProperties;
-        auto objects = getManagedObjects(bus, entityManagerServiceName,
-                                         "/xyz/openbmc_project/inventory");
-        for (const auto& pair : objects)
-        {
-            std::tie(std::ignore, interfacesAndProperties) = pair;
-            if (maybeCall(interfacesAndProperties, maybeSetAttrWithArgsBound))
+            if (newOwner.empty())
             {
-                loop.exit(0);
+                return;
             }
-        }
-    }));
+
+            auto bus = sdbusplus::bus::new_default();
+            InterfacesPropertiesMap interfacesAndProperties;
+            auto objects = getManagedObjects(bus, entityManagerServiceName,
+                                             "/xyz/openbmc_project/inventory");
+            for (const auto& pair : objects)
+            {
+                std::tie(std::ignore, interfacesAndProperties) = pair;
+                if (maybeCall(interfacesAndProperties,
+                              maybeSetAttrWithArgsBound))
+                {
+                    loop.exit(0);
+                }
+            }
+        }));
 
     InterfacesPropertiesMap interfacesAndProperties;
     auto objects = getManagedObjects(bus, entityManagerServiceName,

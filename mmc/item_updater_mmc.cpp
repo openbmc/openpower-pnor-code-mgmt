@@ -62,9 +62,9 @@ void ItemUpdaterMMC::processPNORImage() {}
 void ItemUpdaterMMC::reset()
 {
     // Do not reset read-only files needed for reset or ext4 default files
-    const std::vector<std::string> exclusionList = {"alternate", "hostfw-a",
-                                                    "hostfw-b",  "lost+found",
-                                                    "nvram",     "running-ro"};
+    const std::vector<std::string> exclusionList = {
+        "alternate",  "hostfw-a", "hostfw-b",
+        "lost+found", "nvram",    "running-ro"};
     std::filesystem::path dirPath(std::string(MEDIA_DIR "hostfw/"));
     // Delete all files in /media/hostfw/ except for those on exclusionList
     for (const auto& p : std::filesystem::directory_iterator(dirPath))
@@ -177,9 +177,9 @@ void GardResetMMC::enableInventoryItemsHelper(const std::string& service,
         response.read(objs);
         for (auto& obj : objs)
         {
-            auto method = bus.new_method_call(service.c_str(), obj.c_str(),
-                                              "org.freedesktop.DBus.Properties",
-                                              "Set");
+            auto method =
+                bus.new_method_call(service.c_str(), obj.c_str(),
+                                    "org.freedesktop.DBus.Properties", "Set");
             std::variant<bool> propertyVal{true};
             method.append("xyz.openbmc_project.Object.Enable", "Enabled",
                           propertyVal);

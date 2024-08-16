@@ -116,8 +116,8 @@ void removeFile(const std::string& versionId)
     auto bus = sdbusplus::bus::new_default();
 
     // Clear the environment variable pnor-[versionId].
-    std::string serviceFile = "obmc-flash-bmc-setenv@pnor\\x2d" + versionId +
-                              ".service";
+    std::string serviceFile =
+        "obmc-flash-bmc-setenv@pnor\\x2d" + versionId + ".service";
     auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
                                       SYSTEMD_INTERFACE, "StartUnit");
     method.append(serviceFile, "replace");

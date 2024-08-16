@@ -83,13 +83,12 @@ class ItemUpdaterMMC : public ItemUpdater
         AssociationList& assocs) override;
 
     /** @brief Create Version object */
-    std::unique_ptr<Version>
-        createVersionObject(const std::string& objPath,
-                            const std::string& versionId,
-                            const std::string& versionString,
-                            sdbusplus::xyz::openbmc_project::Software::server::
-                                Version::VersionPurpose versionPurpose,
-                            const std::string& filePath) override;
+    std::unique_ptr<Version> createVersionObject(
+        const std::string& objPath, const std::string& versionId,
+        const std::string& versionString,
+        sdbusplus::xyz::openbmc_project::Software::server::Version::
+            VersionPurpose versionPurpose,
+        const std::string& filePath) override;
 
     /** @brief Validate if image is valid or not */
     bool validateImage(const std::string& path);

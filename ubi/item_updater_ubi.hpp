@@ -70,13 +70,12 @@ class ItemUpdaterUbi : public ItemUpdater
             Activations activationStatus,
         AssociationList& assocs) override;
 
-    std::unique_ptr<Version>
-        createVersionObject(const std::string& objPath,
-                            const std::string& versionId,
-                            const std::string& versionString,
-                            sdbusplus::xyz::openbmc_project::Software::server::
-                                Version::VersionPurpose versionPurpose,
-                            const std::string& filePath) override;
+    std::unique_ptr<Version> createVersionObject(
+        const std::string& objPath, const std::string& versionId,
+        const std::string& versionString,
+        sdbusplus::xyz::openbmc_project::Software::server::Version::
+            VersionPurpose versionPurpose,
+        const std::string& filePath) override;
 
     bool validateImage(const std::string& path) override;
 

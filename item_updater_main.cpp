@@ -87,28 +87,30 @@ int main(int argc, char* argv[])
         app.add_subcommand("process-host-firmware",
                            "Point the host firmware at its data.")
             ->callback([&bus, &loop, &subcommandContext, extensionMap]() {
-        auto hostFirmwareDirectory = "/media/hostfw/running"s;
-        auto logCallback = [](const auto& path, auto& ec) {
-            std::cerr << path << ": " << ec.message() << "\n";
-        };
-        subcommandContext.push_back(
-            functions::process_hostfirmware::processHostFirmware(
-                bus, extensionMap, std::move(hostFirmwareDirectory),
-                std::move(logCallback), loop));
-    }));
+                auto hostFirmwareDirectory = "/media/hostfw/running"s;
+                auto logCallback = [](const auto& path, auto& ec) {
+                    std::cerr << path << ": " << ec.message() << "\n";
+                };
+                subcommandContext.push_back(
+                    functions::process_hostfirmware::processHostFirmware(
+                        bus, extensionMap, std::move(hostFirmwareDirectory),
+                        std::move(logCallback), loop));
+            }));
     static_cast<void>(
         app.add_subcommand("update-bios-attr-table",
                            "Update the bios attribute table with the host "
                            "firmware data details.")
             ->callback([&bus, &loop, &subcommandContext, extensionMap]() {
-        auto elementsJsonFilePath = "/usr/share/hostfw/elements.json"s;
-        auto subcommands = functions::process_hostfirmware::updateBiosAttrTable(
-            bus, extensionMap, std::move(elementsJsonFilePath), loop);
-        for (const auto& subcommand : subcommands)
-        {
-            subcommandContext.push_back(subcommand);
-        }
-    }));
+                auto elementsJsonFilePath = "/usr/share/hostfw/elements.json"s;
+                auto subcommands =
+                    functions::process_hostfirmware::updateBiosAttrTable(
+                        bus, extensionMap, std::move(elementsJsonFilePath),
+                        loop);
+                for (const auto& subcommand : subcommands)
+                {
+                    subcommandContext.push_back(subcommand);
+                }
+            }));
 
     CLI11_PARSE(app, argc, argv);
 

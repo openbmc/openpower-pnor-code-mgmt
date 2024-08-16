@@ -71,8 +71,8 @@ class SignatureTest : public testing::Test
         command("openssl rsa -in " + pkeyFile + " -outform PEM " +
                 "-pubout -out " + pubkeyFile);
 
-        std::string pubKeyConfFile = signedConfPNORPath.string() + "/" +
-                                     "publickey";
+        std::string pubKeyConfFile =
+            signedConfPNORPath.string() + "/" + "publickey";
         command("cp " + pubkeyFile + " " + signedConfPNORPath.string());
         command(opensslCmd + pkeyFile + " -out " + pnorFile + ".sig " +
                 pnorFile);

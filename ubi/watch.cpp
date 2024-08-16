@@ -27,8 +27,7 @@ using namespace phosphor::logging;
 
 Watch::Watch(sd_event* loop,
              std::function<void(const std::string&)> functionalCallback) :
-    functionalCallback(functionalCallback),
-    fd(inotifyInit())
+    functionalCallback(functionalCallback), fd(inotifyInit())
 
 {
     // Create PNOR_ACTIVE_PATH if doesn't exist.

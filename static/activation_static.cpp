@@ -98,8 +98,8 @@ void ActivationStatic::startActivation()
     std::replace(pnorFileEscaped.begin(), pnorFileEscaped.end(), '/', '-');
 
     constexpr auto updatePNORService = "openpower-pnor-update@";
-    pnorUpdateUnit = std::string(updatePNORService) + pnorFileEscaped +
-                     ".service";
+    pnorUpdateUnit =
+        std::string(updatePNORService) + pnorFileEscaped + ".service";
     auto method = bus.new_method_call(SYSTEMD_BUSNAME, SYSTEMD_PATH,
                                       SYSTEMD_INTERFACE, "StartUnit");
     method.append(pnorUpdateUnit, "replace");
@@ -139,8 +139,8 @@ void ActivationStatic::finishActivation()
     // Set Redundancy Priority before setting to Active
     if (!redundancyPriority)
     {
-        redundancyPriority = std::make_unique<RedundancyPriority>(bus, path,
-                                                                  *this, 0);
+        redundancyPriority =
+            std::make_unique<RedundancyPriority>(bus, path, *this, 0);
     }
 
     activationProgress->progress(100);

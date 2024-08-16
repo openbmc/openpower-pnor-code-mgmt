@@ -269,8 +269,8 @@ bool Activation::validateSignature(const std::string& pnorFileName)
 
 bool Activation::fieldModeEnabled()
 {
-    auto fieldModeSvc = utils::getService(bus, FIELDMODE_PATH,
-                                          FIELDMODE_INTERFACE);
+    auto fieldModeSvc =
+        utils::getService(bus, FIELDMODE_PATH, FIELDMODE_INTERFACE);
 
     auto method = bus.new_method_call(fieldModeSvc.c_str(), FIELDMODE_PATH,
                                       "org.freedesktop.DBus.Properties", "Get");

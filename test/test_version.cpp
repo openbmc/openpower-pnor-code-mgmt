@@ -48,18 +48,19 @@ TEST(VersionTest, GetVersions)
         "\tsbe-cf61dc3\n"
         "\thcode-hw123119a.930";
 
-    const auto& [version,
-                 extendedVersion] = Version::getVersions(versionString);
+    const auto& [version, extendedVersion] =
+        Version::getVersions(versionString);
     EXPECT_EQ(version, "open-power-romulus-v2.2-rc1-48-g268344f-dirty");
-    EXPECT_EQ(extendedVersion, "buildroot-2018.11.1-7-g5d7cc8c,"
-                               "skiboot-v6.2,"
-                               "hostboot-3f1f218-pea87ca7,"
-                               "occ-12c8088,"
-                               "linux-4.19.13-openpower1-p8031295,"
-                               "petitboot-1.9.2,"
-                               "machine-xml-7410460,"
-                               "hostboot-binaries-hw121518a.930,"
-                               "capp-ucode-p9-dd2-v4,"
-                               "sbe-cf61dc3,"
-                               "hcode-hw123119a.930");
+    EXPECT_EQ(extendedVersion,
+              "buildroot-2018.11.1-7-g5d7cc8c,"
+              "skiboot-v6.2,"
+              "hostboot-3f1f218-pea87ca7,"
+              "occ-12c8088,"
+              "linux-4.19.13-openpower1-p8031295,"
+              "petitboot-1.9.2,"
+              "machine-xml-7410460,"
+              "hostboot-binaries-hw121518a.930,"
+              "capp-ucode-p9-dd2-v4,"
+              "sbe-cf61dc3,"
+              "hcode-hw123119a.930");
 }

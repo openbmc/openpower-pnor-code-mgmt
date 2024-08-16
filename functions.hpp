@@ -46,9 +46,8 @@ bool maybeCall(
 std::shared_ptr<void> processHostFirmware(
     sdbusplus::bus_t&, std::map<std::string, std::vector<std::string>>,
     std::filesystem::path, ErrorCallbackType, sdeventplus::Event&);
-std::vector<std::shared_ptr<void>>
-    updateBiosAttrTable(sdbusplus::bus_t&,
-                        std::map<std::string, std::vector<std::string>>,
-                        std::filesystem::path, sdeventplus::Event&);
+std::vector<std::shared_ptr<void>> updateBiosAttrTable(
+    sdbusplus::bus_t&, std::map<std::string, std::vector<std::string>>,
+    std::filesystem::path, sdeventplus::Event&);
 } // namespace process_hostfirmware
 } // namespace functions

@@ -79,8 +79,8 @@ std::string getPNORVersion()
     fs::path versionFile = tmpDir;
     versionFile /= "version";
 
-    auto [rc, r] = pflash("-P VERSION -r", versionFile.string(),
-                          "2>&1 > /dev/null");
+    auto [rc, r] =
+        pflash("-P VERSION -r", versionFile.string(), "2>&1 > /dev/null");
     if (rc != 0)
     {
         log<level::ERR>("Failed to read VERSION", entry("RETURNCODE=%d", rc));
@@ -267,9 +267,9 @@ void ItemUpdaterStatic::processPNORImage()
     if (activationState == server::Activation::Activations::Active)
     {
         // Create an association to the host inventory item
-        associations.emplace_back(std::make_tuple(ACTIVATION_FWD_ASSOCIATION,
-                                                  ACTIVATION_REV_ASSOCIATION,
-                                                  HOST_INVENTORY_PATH));
+        associations.emplace_back(
+            std::make_tuple(ACTIVATION_FWD_ASSOCIATION,
+                            ACTIVATION_REV_ASSOCIATION, HOST_INVENTORY_PATH));
 
         // Create an active association since this image is active
         createActiveAssociation(path);
@@ -280,10 +280,10 @@ void ItemUpdaterStatic::processPNORImage()
     createUpdateableAssociation(path);
 
     // Create Activation instance for this version.
-    activations.insert(std::make_pair(
-        id, std::make_unique<ActivationStatic>(bus, path, *this, id,
-                                               extendedVersion, activationState,
-                                               associations)));
+    activations.insert(
+        std::make_pair(id, std::make_unique<ActivationStatic>(
+                               bus, path, *this, id, extendedVersion,
+                               activationState, associations)));
 
     // If Active, create RedundancyPriority instance for this version.
     if (activationState == server::Activation::Activations::Active)

@@ -129,9 +129,8 @@ class Version : public VersionInherit
      *
      * @return The map of keys with filled values.
      **/
-    static std::map<std::string, std::string>
-        getValue(const std::string& filePath,
-                 std::map<std::string, std::string> keys);
+    static std::map<std::string, std::string> getValue(
+        const std::string& filePath, std::map<std::string, std::string> keys);
 
     /**
      * @brief Get version and extended version from VERSION partition string.

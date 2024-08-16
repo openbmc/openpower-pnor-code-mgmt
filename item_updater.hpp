@@ -188,13 +188,12 @@ class ItemUpdater : public ItemUpdaterInherit
         AssociationList& assocs) = 0;
 
     /** @brief Create Version object */
-    virtual std::unique_ptr<Version>
-        createVersionObject(const std::string& objPath,
-                            const std::string& versionId,
-                            const std::string& versionString,
-                            sdbusplus::xyz::openbmc_project::Software::server::
-                                Version::VersionPurpose versionPurpose,
-                            const std::string& filePath) = 0;
+    virtual std::unique_ptr<Version> createVersionObject(
+        const std::string& objPath, const std::string& versionId,
+        const std::string& versionString,
+        sdbusplus::xyz::openbmc_project::Software::server::Version::
+            VersionPurpose versionPurpose,
+        const std::string& filePath) = 0;
 
     /** @brief Validate if image is valid or not */
     virtual bool validateImage(const std::string& path) = 0;
