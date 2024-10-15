@@ -37,6 +37,8 @@ using InterfacesPropertiesMap =
 using ManagedObjectType =
     std::map<sdbusplus::message::object_path, InterfacesPropertiesMap>;
 
+constexpr auto tocName = "pnor.toc";
+
 /**
  * @brief Returns the managed objects for a given service
  */
@@ -197,7 +199,6 @@ void findLinks(const std::filesystem::path& hostFirmwareDirectory,
     auto tocLidPath = hostFirmwareDirectory / tocLid;
     if (std::filesystem::exists(tocLidPath))
     {
-        static const auto tocName = "pnor.toc";
         auto tocLinkPath = hostFirmwareDirectory / tocName;
         makeCallback(linkCallback, tocLid, tocLinkPath, errorCallback);
     }
@@ -346,14 +347,27 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
         // "element1=lid1,element2=lid2,elementN=lidN,"
         biosAttrStr += a.first + "=" + a.second + ",";
 
-        // Create symlinks from the hostfw elements to their corresponding
-        // lid files if they don't exist
+        std::error_code ec;
+        auto lidName = a.second + ".lid";
         auto elementFilePath =
             std::filesystem::path("/media/hostfw/running") / a.first;
+
+        // Remove the symlink if the target does not match so that it gets
+        // recreated. Ignore pnor.toc, this symlink is manually created by the
+        // function findLinks().
+        if ((a.first != tocName) &&
+            std::filesystem::is_symlink(elementFilePath, ec))
+        {
+            if (std::filesystem::read_symlink(elementFilePath, ec) != lidName)
+            {
+                std::filesystem::remove(elementFilePath, ec);
+            }
+        }
+
+        // Create symlinks from the hostfw elements to their corresponding
+        // lid files if they don't exist
         if (!std::filesystem::exists(elementFilePath))
         {
-            std::error_code ec;
-            auto lidName = a.second + ".lid";
             std::filesystem::create_symlink(lidName, elementFilePath, ec);
             if (ec)
             {
