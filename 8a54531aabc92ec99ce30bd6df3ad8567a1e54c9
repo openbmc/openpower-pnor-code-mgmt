@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "e853e02a_752442e7",
+        "filename": "functions.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 363,
+      "author": {
+        "id": 1001592
+      },
+      "writtenOn": "2024-10-22T06:05:40Z",
+      "side": 1,
+      "message": "Can we add a journal trace to indicate that there was a mismatch and the file is removed. This might help in understanding if we lost any data.",
+      "revId": "8a54531aabc92ec99ce30bd6df3ad8567a1e54c9",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
