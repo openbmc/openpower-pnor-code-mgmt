@@ -72,7 +72,7 @@ class ItemUpdaterStatic : public ItemUpdater
         const std::string& filePath) override;
 
     /** @brief Validate if image is valid or not */
-    bool validateImage(const std::string& path);
+    bool validateImage(const std::string& path) override;
 
     /** @brief Host factory reset - clears PNOR partitions for each
      * Activation D-Bus object */
