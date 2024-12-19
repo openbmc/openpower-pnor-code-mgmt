@@ -743,7 +743,6 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
     std::map<std::string, std::vector<std::string>> extensionMap,
     std::filesystem::path elementsJsonFilePath, sdeventplus::Event& loop)
 {
-    constexpr auto pldmPath = "/xyz/openbmc_project/pldm";
     constexpr auto entityManagerServiceName =
         "xyz.openbmc_project.EntityManager";
 
@@ -766,8 +765,8 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
         sdbusplus::bus::match::rules::interfacesAdded() +
             sdbusplus::bus::match::rules::sender(
                 "xyz.openbmc_project.EntityManager"),
-        [pldmPath, pExtensionMap, pElementsJsonFilePath,
-         maybeSetAttrWithArgsBound, &loop](auto& message) {
+        [pExtensionMap, pElementsJsonFilePath, maybeSetAttrWithArgsBound,
+         &loop](auto& message) {
             if (maybeCallMessage(message, maybeSetAttrWithArgsBound))
             {
                 loop.exit(0);
