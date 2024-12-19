@@ -117,7 +117,7 @@ class ItemUpdater : public ItemUpdaterInherit
     /**
      * @brief Erases any non-active pnor versions.
      */
-    virtual void deleteAll() = 0;
+    virtual void deleteAll() override = 0;
 
     /** @brief Brings the total number of active PNOR versions to
      *         ACTIVE_PNOR_MAX_ALLOWED -1. This function is intended to be
