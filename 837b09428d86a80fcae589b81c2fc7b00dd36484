@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "47e4a1f2_c4a2665b",
+        "filename": "vpnor/obmc-vpnor-util",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1001634
+      },
+      "writtenOn": "2025-01-15T21:26:23Z",
+      "side": 1,
+      "message": "What is a difference between RW_ACTIVE, RO_ACTIVE and PRSV_ACTIVE paths? Looks like we are still removing the file so want to make sure I understood it.",
+      "revId": "837b09428d86a80fcae589b81c2fc7b00dd36484",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
