@@ -23,19 +23,20 @@ function clear_volatile() {
         volatileName="$(echo "${volatiles[${index}]}" | awk -F '=' '{print $2}')"
 
         rwVolatile="${PNOR_RW_ACTIVE_PATH}${volatileName}"
-        if [ -f "${rwVolatile}" ]; then
-            echo "Clear $rwVolatile"
-            rm "${rwVolatile}"
-        fi
-        prsvVolatile="${PNOR_PRSV_ACTIVE_PATH}${volatileName}"
-        if [ -f "${prsvVolatile}" ]; then
-            echo "Clear $prsvVolatile"
-            rm "${prsvVolatile}"
-        fi
 
         if [ ! -f "${PNOR_RO_ACTIVE_PATH}${volatileName}" ]; then
+            echo "Clear ${volatileName} lid 81e0066f.lid"
             cp -a "${PNOR_RO_ACTIVE_PATH}81e0066f.lid" "${PNOR_PRSV_ACTIVE_PATH}"
-            ln -s "81e0066f.lid" "${PNOR_PRSV_ACTIVE_PATH}${volatileName}"
+        else
+            if [ -f "${rwVolatile}" ]; then
+                echo "Clear $rwVolatile"
+                rm "${rwVolatile}"
+            fi
+            prsvVolatile="${PNOR_PRSV_ACTIVE_PATH}${volatileName}"
+            if [ -f "${prsvVolatile}" ]; then
+                echo "Clear $prsvVolatile"
+                rm "${prsvVolatile}"
+            fi
         fi
     done
     # Always reset the sensor after clearing
