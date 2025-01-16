@@ -16,6 +16,24 @@
       "message": "What is a difference between RW_ACTIVE, RO_ACTIVE and PRSV_ACTIVE paths? Looks like we are still removing the file so want to make sure I understood it.",
       "revId": "837b09428d86a80fcae589b81c2fc7b00dd36484",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "434141d1_80620830",
+        "filename": "vpnor/obmc-vpnor-util",
+        "patchSetId": 2
+      },
+      "lineNbr": 33,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2025-01-16T19:33:17Z",
+      "side": 1,
+      "message": "For the original PNOR support there are 3 directories:\n\n-RO: Contains the default partition files, installed during a code update\n-RW: Writable directory, one per fw side, so if a partition is written to the current RW and a code update occurs, the changes are not active anymore because the changes are now part of the backup side RW directory.\n-PRSV: Writable directory, only one, so any changes in this directory are preserved across side switches and code updates.\n\nThe table of contents specify the property for each partition RW or PRSV, so that mboxd writes changes to the appropriate directory.\nDuring a clear volatile action, the volatile file from the RW and PRSV directories are erased (no need to parse the table of contents since even if it says RW, a previous version may had created a volatile file in PRSV, so let\u0027s delete any possible copy that was created).\n\nFor the emmc where mboxd was mostly replaced by pldm, and partition files are now symlinks to lid files:\n\n-RO: Contains lid files, so partition files no longer exist here.\n-RW: Symlinks to lid files\n-PRSV: This directory is mounted to the same as RW, therefore there\u0027s only one writable directory in emmc.\n\nOn emmc systems, where there are no partition files in RO, we cp the lid file. It\u0027s only in non-emmc systems where the previous logic of erasing the file still remains.",
+      "parentUuid": "47e4a1f2_c4a2665b",
+      "revId": "837b09428d86a80fcae589b81c2fc7b00dd36484",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
