@@ -1,0 +1,9 @@
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+1: Ninad Palsule <ninad@linux.ibm.com>
+Code-Review+2: Adriana Kobylak <anoo@us.ibm.com>
+Submitted-by: Adriana Kobylak <anoo@us.ibm.com>
+Submitted-at: Fri, 17 Jan 2025 15:16:45 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/openpower-pnor-code-mgmt/+/77262
+Comments-Total: 3
+Project: openbmc/openpower-pnor-code-mgmt
+Branch: refs/heads/master
