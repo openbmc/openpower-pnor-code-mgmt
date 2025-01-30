@@ -240,7 +240,7 @@ install_data(
     'dbus/org.open_power.Software.Host.Updater.conf',
     install_dir: dbus_policy_dir)
 
-if not get_option('tests').disabled()
+if get_option('tests').allowed()
     oe_sdk = get_option('oe-sdk')
     if oe_sdk.allowed()
         # Setup OE SYSROOT
