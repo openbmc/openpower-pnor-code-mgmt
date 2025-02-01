@@ -279,8 +279,8 @@ bool Signature::verifyFile(const std::filesystem::path& file,
     return true;
 }
 
-inline EVP_PKEY_Ptr
-    Signature::createPublicRSA(const std::filesystem::path& publicKey)
+inline EVP_PKEY_Ptr Signature::createPublicRSA(
+    const std::filesystem::path& publicKey)
 {
     auto size = std::filesystem::file_size(publicKey);
 
