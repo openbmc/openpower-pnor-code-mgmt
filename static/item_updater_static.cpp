@@ -350,8 +350,8 @@ bool ItemUpdaterStatic::freeSpace()
     return true;
 }
 
-void
-    ItemUpdaterStatic::updateFunctionalAssociation(const std::string& versionId)
+void ItemUpdaterStatic::updateFunctionalAssociation(
+    const std::string& versionId)
 {
     functionalVersionId = versionId;
     ItemUpdater::updateFunctionalAssociation(versionId);

@@ -52,8 +52,8 @@ class ActivationUbi : public Activation
      */
     Activations activation(Activations value) override;
 
-    RequestedActivations
-        requestedActivation(RequestedActivations value) override;
+    RequestedActivations requestedActivation(
+        RequestedActivations value) override;
 
   private:
     /** @brief Tracks whether the read-only & read-write volumes have been

@@ -184,8 +184,8 @@ class Activation : public ActivationInherit
      *
      *  @return Success or exception thrown
      */
-    RequestedActivations
-        requestedActivation(RequestedActivations value) override;
+    RequestedActivations requestedActivation(
+        RequestedActivations value) override;
 
     /**
      * @brief subscribe to the systemd signals

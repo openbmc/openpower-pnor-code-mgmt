@@ -139,8 +139,8 @@ class Version : public VersionInherit
      *
      * @return The pair contains the version and extended version.
      **/
-    static std::pair<std::string, std::string>
-        getVersions(const std::string& versionPart);
+    static std::pair<std::string, std::string> getVersions(
+        const std::string& versionPart);
 
     /**
      * @brief Calculate the version id from the version string.

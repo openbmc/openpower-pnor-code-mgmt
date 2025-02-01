@@ -97,8 +97,8 @@ std::map<std::string, std::string> Version::getValue(
     return keys;
 }
 
-std::pair<std::string, std::string>
-    Version::getVersions(const std::string& versionPart)
+std::pair<std::string, std::string> Version::getVersions(
+    const std::string& versionPart)
 {
     // versionPart contains strings like below:
     // open-power-romulus-v2.2-rc1-48-g268344f-dirty
