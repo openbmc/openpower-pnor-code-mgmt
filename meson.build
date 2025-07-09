@@ -218,7 +218,7 @@ unit_files = [
 ] + extra_unit_files
 
 systemd_system_unit_dir = dependency('systemd').get_variable(
-    'systemdsystemunitdir',
+    'systemd_system_unit_dir',
     pkgconfig_define: ['prefix', get_option('prefix')],
 )
 foreach u : unit_files
