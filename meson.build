@@ -202,6 +202,10 @@ executable(
     install: true,
 )
 
+executable('hbb-lid-mmio',
+    ['hbb-lid-mmio.cpp'],
+    install: true)
+
 fs = import('fs')
 foreach s : extra_scripts
     fs.copyfile(
@@ -215,6 +219,7 @@ endforeach
 unit_files = [
     'op-pnor-msl.service',
     'org.open_power.Software.Host.Updater.service',
+    'hbb-lid-mmio.service',
 ] + extra_unit_files
 
 systemd_system_unit_dir = dependency('systemd').get_variable(
