@@ -1,0 +1,11 @@
+[Unit]
+Description=HBB Lid Inject
+After=openpower-update-bios-attr-table.service
+Wants=openpower-update-bios-attr-table.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/hbb-lid-mmio
+
+[Install]
+WantedBy=pldmd.service
