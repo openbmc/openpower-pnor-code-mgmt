@@ -19,3 +19,5 @@ option(
     description: 'Enable image signature validation',
 )
 option('msl', type: 'string', description: 'Minimum Ship Level')
+option('firmware-path', type: 'string', value: '/media/hostfw/running/', description: 'Firmware path')
+option('firmware-patch-path', type: 'string', value: '/usr/local/share/hostfw/running/', description: 'Firmware patch path')
