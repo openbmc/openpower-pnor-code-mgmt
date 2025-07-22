@@ -33,6 +33,8 @@ extra_scripts = []
 build_vpnor = get_option('vpnor').allowed()
 build_pldm = get_option('pldm').allowed()
 build_verify_signature = get_option('verify-signature').allowed()
+firmware_path = get_option('firmware-path')
+firmware_patch_path = get_option('firmware-patch-path')
 
 if not cxx.has_header('CLI/CLI.hpp')
     error('Could not find CLI.hpp')
@@ -108,6 +110,8 @@ subs.set_quoted('UPDATEABLE_FWD_ASSOCIATION', 'updateable')
 subs.set_quoted('UPDATEABLE_REV_ASSOCIATION', 'software_version')
 subs.set_quoted('VERSION_IFACE', 'xyz.openbmc_project.Software.Version')
 subs.set('WANT_SIGNATURE_VERIFY', build_verify_signature)
+subs.set_quoted('FIRMWARE_PATH', firmware_path)
+subs.set_quoted('FIRMWARE_PATCH_PATH', firmware_patch_path)
 configure_file(output: 'config.h', configuration: subs)
 
 if get_option('device-type') == 'ubi'
@@ -216,6 +220,11 @@ unit_files = [
     'op-pnor-msl.service',
     'org.open_power.Software.Host.Updater.service',
 ] + extra_unit_files
+
+if get_option('expose-hbb-pci').allowed()
+    executable('hbb-lid-mmio', ['hbb-lid-mmio.cpp'], install: true)
+    unit_files += ['hbb-lid-mmio.service']
+endif
 
 systemd_system_unit_dir = dependency('systemd').get_variable(
     'systemd_system_unit_dir',
