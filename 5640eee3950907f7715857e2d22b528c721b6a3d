@@ -1,0 +1,44 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "feed028b_2d3f18a7",
+        "filename": "hbb-lid-mmio.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 130,
+      "author": {
+        "id": 1000206
+      },
+      "writtenOn": "2025-07-23T14:20:24Z",
+      "side": 1,
+      "message": "if(!mem)",
+      "range": {
+        "startLine": 130,
+        "startChar": 8,
+        "endLine": 130,
+        "endChar": 27
+      },
+      "revId": "5640eee3950907f7715857e2d22b528c721b6a3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "a6833e88_ab0e493a",
+        "filename": "hbb-lid-mmio.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 167,
+      "author": {
+        "id": 1000206
+      },
+      "writtenOn": "2025-07-23T14:20:24Z",
+      "side": 1,
+      "message": "I am still a little confused on how the data retains on the IO space ..when the app quits.",
+      "revId": "5640eee3950907f7715857e2d22b528c721b6a3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
