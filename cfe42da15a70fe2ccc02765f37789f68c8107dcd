@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "150701b0_677c3457",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 7
+      },
+      "lineNbr": 9,
+      "author": {
+        "id": 1000020
+      },
+      "writtenOn": "2025-07-23T03:22:47Z",
+      "side": 1,
+      "message": "Can you add more to the commit msg?\nWhy do we need this commit? \nCan you explain what HBB is ? \nIt would be good to state what MMIO (Memory-mapped I/O (MMIO)) is at least once.\nCan you expand on \"Static address space for host system\" ?",
+      "range": {
+        "startLine": 9,
+        "startChar": 9,
+        "endLine": 9,
+        "endChar": 13
+      },
+      "revId": "cfe42da15a70fe2ccc02765f37789f68c8107dcd",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
