@@ -95,6 +95,30 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "80e5bd91_0343182f",
+        "filename": "hbb-lid-mmio.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000155
+      },
+      "writtenOn": "2025-07-23T14:53:45Z",
+      "side": 1,
+      "message": "Can\u0027t be a hardcoded path, needs to take into account /usr/local/share/hostfw/running/ for patches.  Also, everything else now uses the lid number versus the name.  It is only due to the mbox code that we have to make a second copy with the pnor partition name instead.",
+      "parentUuid": "3ab82864_1034e182",
+      "range": {
+        "startLine": 17,
+        "startChar": 27,
+        "endLine": 17,
+        "endChar": 76
+      },
+      "revId": "14861003aecdb8c5d616d9509c042a54c988795e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "a72fcf6c_0aa53a8d",
         "filename": "hbb-lid-mmio.cpp",
         "patchSetId": 4
