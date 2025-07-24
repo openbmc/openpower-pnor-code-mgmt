@@ -3,6 +3,23 @@
     {
       "unresolved": true,
       "key": {
+        "uuid": "f40d0bce_a25e6410",
+        "filename": "hbb-lid-mmio.cpp",
+        "patchSetId": 8
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000009
+      },
+      "writtenOn": "2025-07-24T00:18:34Z",
+      "side": 1,
+      "message": "As of `a933d3dc1968 (\"Add linux-next specific files for 20250723\")` from https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/ there\u0027s no mention of the string `bmc-device`:\n\n```\n[I] 0 andrew@heihei ~/s/k/l/origin ((a933d3dc))\u003e pwd\n/home/andrew/src/kernel.org/linux/origin\n[I] 0 andrew@heihei ~/s/k/l/origin ((a933d3dc))\u003e git grep bmc-device\n[I] 0 andrew@heihei ~/s/k/l/origin ((a933d3dc)) [1]\u003e \n```\n\nWe don\u0027t accept userspace changes in other repositories without a corresponding upstream driver (e.g. `dbus-sensors`).\n\nPlease do the work to get the driver upstream, then change can be revisited.",
+      "revId": "5640eee3950907f7715857e2d22b528c721b6a3d",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
         "uuid": "feed028b_2d3f18a7",
         "filename": "hbb-lid-mmio.cpp",
         "patchSetId": 8
