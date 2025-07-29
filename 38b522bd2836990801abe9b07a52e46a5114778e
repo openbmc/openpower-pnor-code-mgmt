@@ -1,0 +1,38 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "88055083_97cbda9b",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 2
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000020
+      },
+      "writtenOn": "2025-07-29T23:27:34Z",
+      "side": 1,
+      "message": "You could add a bit more here.. E.g. \n\n\"\nAdd Balcones  XML based on P10. \n\nhttps://github.com/openbmc/entity-manager/commit/df8ed5f4e915eecb2b21e6f380b4c431271cd10d added it to EM \n\nTested: Verified the symlinks were created on a Balcones system.\"",
+      "revId": "38b522bd2836990801abe9b07a52e46a5114778e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "5cab81fe_a2828012",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 2
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000020
+      },
+      "writtenOn": "2025-07-29T23:27:34Z",
+      "side": 1,
+      "message": "Seems reasonable to me, what has happened for past systems, maybe a bit more in the commit msg .",
+      "revId": "38b522bd2836990801abe9b07a52e46a5114778e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
