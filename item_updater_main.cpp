@@ -61,6 +61,8 @@ int main(int argc, char* argv[])
 
     using namespace std::string_literals;
     std::map<std::string, std::vector<std::string>> extensionMap{{
+        {"com.ibm.Hardware.Chassis.Model.Balcones"s,
+         {".BALCONES_XML"s, ".P10"s}},
         {"com.ibm.Hardware.Chassis.Model.BlueRidge2U"s,
          {".BLUERIDGE_2U_XML"s, ".P10"s}},
         {"com.ibm.Hardware.Chassis.Model.BlueRidge4U"s,
