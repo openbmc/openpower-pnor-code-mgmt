@@ -24,6 +24,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "2271bafc_27dd48f8",
+        "filename": "/COMMIT_MSG",
+        "patchSetId": 4
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1002523
+      },
+      "writtenOn": "2025-09-10T09:56:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "3dfeba4b_9dd9d1d3",
+      "range": {
+        "startLine": 7,
+        "startChar": 0,
+        "endLine": 7,
+        "endChar": 26
+      },
+      "revId": "14861003aecdb8c5d616d9509c042a54c988795e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "0483139a_647c55c0",
@@ -47,6 +71,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "0a31f8af_f5d52971",
+        "filename": "hbb-lid-mmio.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 15,
+      "author": {
+        "id": 1002523
+      },
+      "writtenOn": "2025-09-10T09:56:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "0483139a_647c55c0",
+      "range": {
+        "startLine": 15,
+        "startChar": 0,
+        "endLine": 15,
+        "endChar": 41
+      },
+      "revId": "14861003aecdb8c5d616d9509c042a54c988795e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "402caa35_16f77943",
@@ -60,6 +108,30 @@
       "writtenOn": "2025-07-23T14:20:24Z",
       "side": 1,
       "message": "remove comment ?",
+      "range": {
+        "startLine": 16,
+        "startChar": 0,
+        "endLine": 16,
+        "endChar": 49
+      },
+      "revId": "14861003aecdb8c5d616d9509c042a54c988795e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "e3d573f4_b6ed4f03",
+        "filename": "hbb-lid-mmio.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 16,
+      "author": {
+        "id": 1002523
+      },
+      "writtenOn": "2025-09-10T09:56:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "402caa35_16f77943",
       "range": {
         "startLine": 16,
         "startChar": 0,
@@ -117,6 +189,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "1944c7d1_96ffd6f1",
+        "filename": "hbb-lid-mmio.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1002523
+      },
+      "writtenOn": "2025-09-10T09:56:34Z",
+      "side": 1,
+      "message": "Done, it will first check for the patch firmware path and fallback to global firmware path",
+      "parentUuid": "80e5bd91_0343182f",
+      "range": {
+        "startLine": 17,
+        "startChar": 27,
+        "endLine": 17,
+        "endChar": 76
+      },
+      "revId": "14861003aecdb8c5d616d9509c042a54c988795e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "a72fcf6c_0aa53a8d",
@@ -140,6 +236,30 @@
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     },
     {
+      "unresolved": false,
+      "key": {
+        "uuid": "3cb14585_50ed6188",
+        "filename": "hbb-lid-mmio.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 43,
+      "author": {
+        "id": 1002523
+      },
+      "writtenOn": "2025-09-10T09:56:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "a72fcf6c_0aa53a8d",
+      "range": {
+        "startLine": 43,
+        "startChar": 12,
+        "endLine": 43,
+        "endChar": 24
+      },
+      "revId": "14861003aecdb8c5d616d9509c042a54c988795e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
       "unresolved": true,
       "key": {
         "uuid": "96f3d482_29bb6c70",
@@ -153,6 +273,30 @@
       "writtenOn": "2025-07-23T14:20:24Z",
       "side": 1,
       "message": "give some readable name.",
+      "range": {
+        "startLine": 143,
+        "startChar": 55,
+        "endLine": 143,
+        "endChar": 56
+      },
+      "revId": "14861003aecdb8c5d616d9509c042a54c988795e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": false,
+      "key": {
+        "uuid": "c67f97cb_74eeb3bc",
+        "filename": "hbb-lid-mmio.cpp",
+        "patchSetId": 4
+      },
+      "lineNbr": 143,
+      "author": {
+        "id": 1002523
+      },
+      "writtenOn": "2025-09-10T09:56:34Z",
+      "side": 1,
+      "message": "Done",
+      "parentUuid": "96f3d482_29bb6c70",
       "range": {
         "startLine": 143,
         "startChar": 55,
