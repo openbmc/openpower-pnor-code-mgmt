@@ -16,6 +16,23 @@ bios_reset_if_needed() {
     fi
 }
 
+mmc_get_primary_label() {
+    # Get root device /dev/mmcblkpX
+    rootmatch=" on / "
+    root="$(mount | grep "${rootmatch}")"
+    # shellcheck disable=SC2295
+    root="${root%${rootmatch}*}"
+
+    # Find the device label
+    if [ "$(readlink -f /dev/disk/by-partlabel/rofs-a)" = "${root}" ]; then
+        echo "a"
+    elif [ "$(readlink -f /dev/disk/by-partlabel/rofs-b)" = "${root}" ]; then
+        echo "b"
+    else
+        echo ""
+    fi
+}
+
 mmc_init() {
     base_dir="/media/hostfw"
     ro_dir="${base_dir}/running-ro"
@@ -42,7 +59,7 @@ mmc_init() {
 
     # Mount the image that corresponds to the boot label as read-only to be used
     # to populate the running directory.
-    boot_label="$(fw_printenv -n bootside)"
+    boot_label="$(mmc_get_primary_label)"
     if ! grep -q "${ro_dir}" /proc/mounts; then
         mount ${base_dir}/hostfw-"${boot_label}" ${ro_dir} -o ro
     fi
@@ -129,7 +146,7 @@ mmc_patch() {
         return 0
     fi
 
-    boot_label="$(fw_printenv -n bootside)"
+    boot_label="$(mmc_get_primary_label)"
     if [ "${boot_label}" = "a" ]; then
         alternate_label="b"
     else
