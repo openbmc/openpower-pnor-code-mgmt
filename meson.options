@@ -31,3 +31,10 @@ option(
     value: '/usr/local/share/hostfw/running/',
     description: 'Firmware patch path',
 )
+
+option(
+    'expose-hbb-pci',
+    type: 'feature',
+    value: 'disabled',
+    description: 'Enable service to expose hbb lid over pcie',
+)

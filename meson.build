@@ -206,8 +206,6 @@ executable(
     install: true,
 )
 
-executable('hbb-lid-mmio', ['hbb-lid-mmio.cpp'], install: true)
-
 fs = import('fs')
 foreach s : extra_scripts
     fs.copyfile(
@@ -221,8 +219,12 @@ endforeach
 unit_files = [
     'op-pnor-msl.service',
     'org.open_power.Software.Host.Updater.service',
-    'hbb-lid-mmio.service',
 ] + extra_unit_files
+
+if get_option('expose-hbb-pci').allowed()
+    executable('hbb-lid-mmio', ['hbb-lid-mmio.cpp'], install: true)
+    unit_files += ['hbb-lid-mmio.service']
+endif
 
 systemd_system_unit_dir = dependency('systemd').get_variable(
     'systemd_system_unit_dir',

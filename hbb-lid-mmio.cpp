@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <format>
 #include <fstream>
+#include <iostream>
 
 constexpr auto DEVICE_PATH = "/dev/bmc-device0";
 
@@ -160,17 +161,25 @@ class Device
 
 int main(int, char**)
 {
-    auto bmc_device = Device::open_path(DEVICE_PATH);
-    auto lid_path = std::filesystem::path(FIRMWARE_PATCH_PATH) / LID_FILE;
-    if (!std::filesystem::exists(lid_path))
+    try
     {
-        lid_path = std::filesystem::path(FIRMWARE_PATH) / LID_FILE;
+        auto bmc_device = Device::open_path(DEVICE_PATH);
+        auto lid_path = std::filesystem::path(FIRMWARE_PATCH_PATH) / LID_FILE;
+        if (!std::filesystem::exists(lid_path))
+        {
+            lid_path = std::filesystem::path(FIRMWARE_PATH) / LID_FILE;
+        }
+
+        const auto lid_size = std::filesystem::file_size(lid_path);
+
+        auto memory = bmc_device.get_region(DEVICE_OFFSET, lid_size);
+        memory.write_file(lid_path);
     }
-
-    const auto lid_size = std::filesystem::file_size(lid_path);
-
-    auto memory = bmc_device.get_region(DEVICE_OFFSET, lid_size);
-    memory.write_file(lid_path);
+    catch (const std::exception& error)
+    {
+        std::cerr << "ERROR: " << error.what() << std::endl;
+        return -1;
+    }
 
     return 0;
 }
