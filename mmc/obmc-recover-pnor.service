@@ -7,7 +7,7 @@ After=openpower-update-bios-attr-table.service
 [Service]
 RemainAfterExit=yes
 Type=oneshot
-ExecStart=/usr/bin/recover_pnor_files
+ExecStart=-/usr/bin/recover_pnor_files
 
 [Install]
 WantedBy=multi-user.target
