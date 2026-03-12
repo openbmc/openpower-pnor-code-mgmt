@@ -7,7 +7,7 @@ Before=mboxd.service
 ExecStart=/usr/bin/openpower-update-manager
 Restart=always
 Type=dbus
-BusName=org.open_power.Software.Host.Updater
+BusName=xyz.openbmc_project.Software.Host.Updater
 
 [Install]
 WantedBy=multi-user.target

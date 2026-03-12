@@ -1,7 +1,7 @@
 [Unit]
 Description=Remount the squashfs and ubi volumes after a reboot
-Wants=org.open_power.Software.Host.Updater.service
-Before=org.open_power.Software.Host.Updater.service
+Wants=xyz.openbmc_project.Software.Host.Updater.service
+Before=xyz.openbmc_project.Software.Host.Updater.service
 
 [Service]
 Type=oneshot
