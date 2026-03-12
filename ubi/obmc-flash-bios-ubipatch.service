@@ -3,7 +3,7 @@ Description=Create a ubi volume for pnor patches
 Before=mboxd.service
 Wants=usr-local.mount
 After=usr-local.mount
-After=org.open_power.Software.Host.Updater.service
+After=xyz.openbmc_project.Software.Host.Updater.service
 
 [Service]
 Type=oneshot
@@ -11,4 +11,4 @@ RemainAfterExit=no
 ExecStart=/usr/bin/obmc-flash-bios ubimount pnor-patch
 
 [Install]
-WantedBy=org.open_power.Software.Host.Updater.service
+WantedBy=xyz.openbmc_project.Software.Host.Updater.service

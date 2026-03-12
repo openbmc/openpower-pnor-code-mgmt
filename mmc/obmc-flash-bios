@@ -6,7 +6,7 @@ bios_reset_if_needed() {
         varstore="/media/hostfw/reset-gpio-val"
         if [ -f "$varstore" ]; then
             if [ "$resetval" != "$(cat $varstore)" ]; then
-                if busctl call org.open_power.Software.Host.Updater /xyz/openbmc_project/software xyz.openbmc_project.Common.FactoryReset Reset; then
+                if busctl call xyz.openbmc_project.Software.Host.Updater /xyz/openbmc_project/software xyz.openbmc_project.Common.FactoryReset Reset; then
                     echo "$resetval" > "$varstore"
                 fi
             fi
