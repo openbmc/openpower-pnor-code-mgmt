@@ -203,7 +203,7 @@ function remount_ubi() {
 function ubi_cleanup() {
     # When ubi_cleanup is run, it expects one or no active version.
     activeVersion=$(busctl --list --no-pager tree \
-            org.open_power.Software.Host.Updater | \
+            xyz.openbmc_project.Software.Host.Updater | \
         grep /xyz/openbmc_project/software/ | tail -c 9)
 
     if [[ -z "$activeVersion" ]]; then

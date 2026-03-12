@@ -53,7 +53,7 @@ subs.set_quoted(
     'ASSOCIATIONS_INTERFACE',
     'xyz.openbmc_project.Association.Definitions',
 )
-subs.set_quoted('BUSNAME_UPDATER', 'org.open_power.Software.Host.Updater')
+subs.set_quoted('BUSNAME_UPDATER', 'xyz.openbmc_project.Software.Host.Updater')
 subs.set_quoted('CHASSIS_STATE_OBJ', 'xyz.openbmc_project.State.Chassis')
 subs.set_quoted(
     'CHASSIS_STATE_OFF',
@@ -214,7 +214,7 @@ endforeach
 
 unit_files = [
     'op-pnor-msl.service',
-    'org.open_power.Software.Host.Updater.service',
+    'xyz.openbmc_project.Software.Host.Updater.service',
 ] + extra_unit_files
 
 systemd_system_unit_dir = dependency('systemd').get_variable(
@@ -235,7 +235,7 @@ dbus_policy_dir = run_command(
 ).stdout().strip()
 
 install_data(
-    'dbus/org.open_power.Software.Host.Updater.conf',
+    'dbus/xyz.openbmc_project.Software.Host.Updater.conf',
     install_dir: dbus_policy_dir,
 )
 
