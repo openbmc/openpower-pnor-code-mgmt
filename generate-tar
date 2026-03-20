@@ -99,55 +99,55 @@ tocfile="pnor.toc"
 machine_name=""
 
 while [[ $# -gt 0 ]]; do
-  key="$1"
-  case $key in
-    -i|--image)
-      image_type="$2"
-      shift 2
-      ;;
-    -f|--file)
-      outfile="$2"
-      shift 2
-      ;;
-    -s|--sign)
-      do_sign=true
-      if [[ -n "${2}"  && "${2}" != -* ]]; then
-        private_key_path="$2"
-        shift 2
-      else
-        shift 1
-      fi
-      ;;
-    -m|--machine)
-      machine_name="$2"
-      shift 2
-      ;;
-    -h|--help)
-      echo "$help"
-      exit
-      ;;
-    *)
-      pnorfile="$1"
-      shift 1
-      ;;
-  esac
+    key="$1"
+    case $key in
+        -i|--image)
+            image_type="$2"
+            shift 2
+            ;;
+        -f|--file)
+            outfile="$2"
+            shift 2
+            ;;
+        -s|--sign)
+            do_sign=true
+            if [[ -n "${2}"  && "${2}" != -* ]]; then
+                private_key_path="$2"
+                shift 2
+            else
+                shift 1
+            fi
+            ;;
+        -m|--machine)
+            machine_name="$2"
+            shift 2
+            ;;
+        -h|--help)
+            echo "$help"
+            exit
+            ;;
+        *)
+            pnorfile="$1"
+            shift 1
+            ;;
+    esac
 done
 
 if [ ! -f "${pnorfile}" ]; then
-  echo "Please enter a valid PNOR file."
-  echo "$help"
-  exit 1
+    echo "Please enter a valid PNOR file."
+    echo "$help"
+    exit 1
 fi
 
 if [[ "${image_type}" == "squashfs" ]]; then
-  echo "Will generate squashfs image for VPNOR"
+    echo "Will generate squashfs image for VPNOR"
 elif [[ "${image_type}" == "static" ]]; then
-  echo "Will use static image for PNOR"
+    echo "Will use static image for PNOR"
 else
-  echo "Please specify the image type, \"squashfs\" or \"static\""
-  echo
-  echo "$help"
-  exit 1
+    echo "Please specify the image type, \"squashfs\" or \"static\""
+    echo
+    echo "$help"
+    exit 1
 fi
 
 if [[ -z $outfile ]]; then
@@ -174,22 +174,22 @@ scratch_dir=$(mktemp -d)
 trap '{ rm -r --interactive=never ${scratch_dir}; }' EXIT
 
 if [[ "${do_sign}" == true ]]; then
-  if [[ -z "${private_key_path}" ]]; then
-    private_key_path=${scratch_dir}/OpenBMC.priv
-    echo "${private_key}" > "${private_key_path}"
-    echo "Image is NOT secure!! Signing with the open private key!"
-  else
-    if [[ ! -f "${private_key_path}" ]]; then
-      echo "Couldn't find private key ${private_key_path}."
-      exit 1
+    if [[ -z "${private_key_path}" ]]; then
+        private_key_path=${scratch_dir}/OpenBMC.priv
+        echo "${private_key}" > "${private_key_path}"
+        echo "Image is NOT secure!! Signing with the open private key!"
+    else
+        if [[ ! -f "${private_key_path}" ]]; then
+            echo "Couldn't find private key ${private_key_path}."
+            exit 1
+        fi
+
+        echo "Signing with ${private_key_path}."
     fi
 
-    echo "Signing with ${private_key_path}."
-  fi
-
-  public_key_file=publickey
-  public_key_path=${scratch_dir}/$public_key_file
-  openssl pkey -in "${private_key_path}" -pubout -out "${public_key_path}"
+    public_key_file=publickey
+    public_key_path=${scratch_dir}/$public_key_file
+    openssl pkey -in "${private_key_path}" -pubout -out "${public_key_path}"
 fi
 
 echo "Parsing PNOR TOC..."
@@ -205,35 +205,35 @@ magic_number=$(xxd -p -l 4 "${pnor_dir}"/VERSION)
 # 4K header starting with the magic number 0x17082011, see:
 # https://github.com/open-power/skiboot/blob/master/libstb/container.h#L47
 if [ "$version_size" == "8192" ] && [ "$magic_number" == "17082011" ]; then
-  # Advance past the STB header (4K, indexed from 1)
-  cp "${pnor_dir}"/VERSION "${pnor_dir}"/VERSION_FULL
-  tail --bytes=+4097 "${pnor_dir}"/VERSION_FULL > "${pnor_dir}"/VERSION
+    # Advance past the STB header (4K, indexed from 1)
+    cp "${pnor_dir}"/VERSION "${pnor_dir}"/VERSION_FULL
+    tail --bytes=+4097 "${pnor_dir}"/VERSION_FULL > "${pnor_dir}"/VERSION
 fi
 {
-  version=$(head -n 1 "${pnor_dir}"/VERSION)
-  echo "version=$version"
-  # shellcheck disable=SC2005,SC2046 # Need the echo to remove new lines, same
-  # reason for not quoting the tail command
-  extended_version=$(echo $(tail -n +2 "${pnor_dir}"/VERSION)|tr ' ' ',')
-  echo "extended_version=$extended_version"
-  while read -r line; do
-    if [[ $line == "ID="* ]]; then
-        # This line looks like
-        # "ID=05 MVPD 000d9000..00169000 (actual=00090000) [ECC]"
-        read -r -a fields <<< "$line"
+    version=$(head -n 1 "${pnor_dir}"/VERSION)
+    echo "version=$version"
+    # shellcheck disable=SC2005,SC2046 # Need the echo to remove new lines, same
+    # reason for not quoting the tail command
+    extended_version=$(echo $(tail -n +2 "${pnor_dir}"/VERSION)|tr ' ' ',')
+    echo "extended_version=$extended_version"
+    while read -r line; do
+        if [[ $line == "ID="* ]]; then
+            # This line looks like
+            # "ID=05 MVPD 000d9000..00169000 (actual=00090000) [ECC]"
+            read -r -a fields <<< "$line"
 
-        id=${fields[0]##*=}
-        offset=$((ffs_entry_size * 10#${id} + vercheck_offset))
-        vercheck=$(xxd -p -l  0x1 -seek ${offset} "${pnor_dir}"/part)
-        # shellcheck disable=SC2155 # Need the export in the same line to avoid
-        # pflash error
-        export flags=$(pflash --detail=$((10#$id)) -F "${pnorfile}" | grep "\[" |
-                sed 's/....$//' | tr '\n' ',' | sed 's/.$//')
-        if [[ $flags != "" ]]; then
-            flags=,$flags
-        fi
+            id=${fields[0]##*=}
+            offset=$((ffs_entry_size * 10#${id} + vercheck_offset))
+            vercheck=$(xxd -p -l  0x1 -seek ${offset} "${pnor_dir}"/part)
+            # shellcheck disable=SC2155 # Need the export in the same line to avoid
+            # pflash error
+            export flags=$(pflash --detail=$((10#$id)) -F "${pnorfile}" | grep "\[" |
+            sed 's/....$//' | tr '\n' ',' | sed 's/.$//')
+            if [[ $flags != "" ]]; then
+                flags=,$flags
+            fi
 
-        if [[ $(echo "$flags" | grep "READONLY") == "" &&
+            if [[ $(echo "$flags" | grep "READONLY") == "" &&
               $(echo "$flags" | grep "PRESERVED") == "" ]]; then
             flags=$flags,READWRITE
         fi
