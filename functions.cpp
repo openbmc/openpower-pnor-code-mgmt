@@ -340,6 +340,13 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
                 attr.insert({path.stem(), lid});
             }
         }
+
+        // Process elements that have no extensions.
+        if (path.extension().empty())
+        {
+            auto keyName = path.filename();
+            attr.insert({keyName, lid});
+        }
     }
     for (const auto& a : attr)
     {
