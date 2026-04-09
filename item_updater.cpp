@@ -26,7 +26,7 @@ void ItemUpdater::createActivation(sdbusplus::message_t& m)
     using SVersion = server::Version;
     using VersionPurpose = SVersion::VersionPurpose;
 
-    sdbusplus::message::object_path objPath;
+    sdbusplus::object_path objPath;
     std::map<std::string, std::map<std::string, std::variant<std::string>>>
         interfaces;
     m.read(objPath, interfaces);
