@@ -131,7 +131,7 @@ void ActivationUbi::startActivation()
 void ActivationUbi::unitStateChange(sdbusplus::message_t& msg)
 {
     uint32_t newStateID{};
-    sdbusplus::message::object_path newStateObjPath;
+    sdbusplus::object_path newStateObjPath;
     std::string newStateUnit{};
     std::string newStateResult{};
 

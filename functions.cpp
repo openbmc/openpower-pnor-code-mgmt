@@ -35,7 +35,7 @@ using InterfacesPropertiesMap =
     std::map<std::string,
              std::map<std::string, std::variant<std::vector<std::string>>>>;
 using ManagedObjectType =
-    std::map<sdbusplus::message::object_path, InterfacesPropertiesMap>;
+    std::map<sdbusplus::object_path, InterfacesPropertiesMap>;
 
 constexpr auto tocName = "pnor.toc";
 
@@ -530,7 +530,7 @@ bool maybeCallMessage(sdbusplus::message_t& message,
     std::map<std::string,
              std::map<std::string, std::variant<std::vector<std::string>>>>
         interfacesAndProperties;
-    sdbusplus::message::object_path _;
+    sdbusplus::object_path _;
     message.read(_, interfacesAndProperties);
     return maybeCall(interfacesAndProperties, callback);
 }
@@ -682,8 +682,7 @@ std::shared_ptr<void> processHostFirmware(
     std::map<std::string,
              std::map<std::string, std::variant<std::vector<std::string>>>>
         interfacesAndProperties;
-    std::map<sdbusplus::message::object_path, decltype(interfacesAndProperties)>
-        objects;
+    std::map<sdbusplus::object_path, decltype(interfacesAndProperties)> objects;
     try
     {
         auto reply = bus.call(getManagedObjects);
