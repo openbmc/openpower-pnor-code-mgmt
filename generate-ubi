@@ -21,41 +21,41 @@ Defaults to 128.
 image_size="128"
 
 while [[ $# -gt 0 ]]; do
-  key="$1"
-  case $key in
-    -f|--file)
-      outfile="$2"
-      shift 2
-      ;;
-    -s|--size)
-      image_size="$2"
-      shift 2
-      ;;
-    -h|--help)
-      echo "$help"
-      exit
-      ;;
-    *)
-      tarball="$1"
-      shift 1
-      ;;
-  esac
+    key="$1"
+    case $key in
+        -f|--file)
+            outfile="$2"
+            shift 2
+            ;;
+        -s|--size)
+            image_size="$2"
+            shift 2
+            ;;
+        -h|--help)
+            echo "$help"
+            exit
+            ;;
+        *)
+            tarball="$1"
+            shift 1
+            ;;
+    esac
 done
 
 if [ ! -f "${tarball}" ]; then
-  echo "Please enter a PNOR SquashFS Tarball."
-  echo "To generate PNOR SquashFS Tarball see generate-tar"
-  echo "$help"
-  exit 1
+    echo "Please enter a PNOR SquashFS Tarball."
+    echo "To generate PNOR SquashFS Tarball see generate-tar"
+    echo "$help"
+    exit 1
 fi
 
 if [[ -z $outfile ]]; then
     # Remove .squashfs.tar from end if present and add .ubi.mtd
     outfile=$(pwd)/${tarball%".squashfs.tar"}.ubi.mtd
 else
-  if [[ $outfile != /* ]]; then
-    outfile=$(pwd)/$outfile
-  fi
+    if [[ $outfile != /* ]]; then
+        outfile=$(pwd)/$outfile
+    fi
 fi
 
 echo "Generating PNOR UBI image."
@@ -76,14 +76,14 @@ tar -xvf "${tarball}" -C "${scratch_dir}" ${squashfs_file_name} ${manifest_file_
 
 # All valid PNOR SquashFS Tarballs have a file named "pnor.xz.squashfs"
 if [ ! -f "${squashfs_file}" ]; then
-  echo "No \"${squashfs_file_name}\" file in the tarball!"
-  exit 1
+    echo "No \"${squashfs_file_name}\" file in the tarball!"
+    exit 1
 fi
 
 # Need the manifest file for calculating the version id
 if [ ! -f "${manifest_file}" ]; then
-  echo "No \"${manifest_file_name}\" file in the tarball!"
-  exit 1
+    echo "No \"${manifest_file_name}\" file in the tarball!"
+    exit 1
 fi
 
 # Flash page size in bytes
@@ -95,38 +95,38 @@ FLASH_PEB_SIZE="64"
 image_size=$((image_size * 1024))
 
 # Create UBI volume
-add_volume()
+function add_volume()
 {
-  config_file=$1
-  vol_id=$2
-  vol_type=$3
-  vol_name=$4
-  image=$5
-  vol_size=$6
+    config_file=$1
+    vol_id=$2
+    vol_type=$3
+    vol_name=$4
+    image=$5
+    vol_size=$6
 
-{
-  echo \["$vol_name"\]
-  echo mode=ubi
-} >> "$config_file"
-  if [ -n "$image" ]; then
-    echo image="$image" >> "$config_file"
-  fi
-{
-  echo vol_type="$vol_type"
-  echo vol_name="$vol_name"
-  echo vol_id="$vol_id"
-} >> "$config_file"
-  if [ -n "$vol_size" ]; then
-    echo vol_size="$vol_size" >> "$config_file"
-  fi
+    {
+        echo \["$vol_name"\]
+        echo mode=ubi
+    } >> "$config_file"
+    if [ -n "$image" ]; then
+        echo image="$image" >> "$config_file"
+    fi
+    {
+        echo vol_type="$vol_type"
+        echo vol_name="$vol_name"
+        echo vol_id="$vol_id"
+    } >> "$config_file"
+    if [ -n "$vol_size" ]; then
+        echo vol_size="$vol_size" >> "$config_file"
+    fi
 }
 
 # Create an image with all 1's
-mk_nor_image()
+function mk_nor_image()
 {
-  image_dst=$1
-  image_size_kb=$2
-  dd if=/dev/zero bs=1k count="$image_size_kb" | tr '\000' '\377' > "$image_dst"
+    image_dst=$1
+    image_size_kb=$2
+    dd if=/dev/zero bs=1k count="$image_size_kb" | tr '\000' '\377' > "$image_dst"
 }
 
 # Used to temporary hold the UBI image
@@ -138,7 +138,7 @@ config_file=${scratch_dir}/ubinize-PNOR.cfg
 # The version is listed in the MANIFEST file as "version=v1.99.10-19"
 # Use the version to calculate the version id, a unique 8 hexadecimal digit id
 version_id=$(sed -ne '/version=/ {s/version=//;p}' "${manifest_file}" | head -n1 | \
-  tr -d '\n' | sha512sum | cut -b 1-8)
+    tr -d '\n' | sha512sum | cut -b 1-8)
 
 add_volume "$config_file" 0 static pnor-ro-"${version_id}" "${squashfs_file}"
 add_volume "$config_file" 1 dynamic pnor-prsv "" 2MiB
