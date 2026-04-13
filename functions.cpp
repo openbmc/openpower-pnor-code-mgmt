@@ -330,10 +330,15 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
             auto attrIt = attr.find(keyName);
             if (attrIt != attr.end())
             {
-                // The existing entry is an ipl entry, therefore create this
-                // entry as a runtime one.
-                auto runtimeKeyName = keyName.string() + runtimeSuffix;
-                attr.insert({runtimeKeyName, lid});
+                // The existing entry could be an ipl entry, therefore create
+                // this entry as a runtime one if the lid number is different,
+                // because this entry may be a duplicate added via the empty
+                // extension check.
+                if (attrIt->second != lid)
+                {
+                    auto runtimeKeyName = keyName.string() + runtimeSuffix;
+                    attr.insert({runtimeKeyName, lid});
+                }
             }
             else
             {
@@ -341,11 +346,16 @@ std::string getBiosAttrStr(const std::filesystem::path& elementsJsonFilePath,
             }
         }
 
-        // Process elements that have no extensions.
+        // Process elements that have no extensions. Only add entries that do
+        // not already exist. A runtime entry may had already been created.
         if (path.extension().empty())
         {
             auto keyName = path.filename();
-            attr.insert({keyName, lid});
+            auto attrIt = attr.find(keyName);
+            if (attrIt == attr.end())
+            {
+                attr.insert({keyName, lid});
+            }
         }
     }
     for (const auto& a : attr)
