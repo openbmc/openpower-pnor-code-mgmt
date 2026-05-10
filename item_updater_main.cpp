@@ -43,6 +43,7 @@ void initializeService(sdbusplus::bus_t& bus)
     static ItemUpdaterStatic updater(bus, SOFTWARE_OBJPATH);
 #endif
     bus.request_name(BUSNAME_UPDATER);
+    bus.request_name(XYZ_BUSNAME_UPDATER);
 }
 } // namespace updater
 } // namespace software
