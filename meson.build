@@ -54,6 +54,10 @@ subs.set_quoted(
     'xyz.openbmc_project.Association.Definitions',
 )
 subs.set_quoted('BUSNAME_UPDATER', 'org.open_power.Software.Host.Updater')
+subs.set_quoted(
+    'XYZ_BUSNAME_UPDATER',
+    'xyz.openbmc_poject.Software.Host.Updater0',
+)
 subs.set_quoted('CHASSIS_STATE_OBJ', 'xyz.openbmc_project.State.Chassis')
 subs.set_quoted(
     'CHASSIS_STATE_OFF',
