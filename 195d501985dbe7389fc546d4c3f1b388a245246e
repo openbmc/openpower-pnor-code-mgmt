@@ -16,6 +16,24 @@
       "message": "Agree that this is the easiest alternative to implement.\nI\u0027ve verified in the p10bmc machine that the Factory Reset busctl call can be done with both busnames.\n\nDon\u0027t have a preference if the new busname ends with \u00270\u0027, maybe there\u0027s a reason. We\u0027ll see if you get any feedback regarding the name in the bmcweb commit.",
       "revId": "195d501985dbe7389fc546d4c3f1b388a245246e",
       "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    },
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "07b8201a_66e24e3c",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1002065
+      },
+      "writtenOn": "2026-05-14T18:37:58Z",
+      "side": 1,
+      "message": "Thank you for the feedback and verification that the new busname works the same on your platform.\n\n\u003e Don\u0027t have a preference if the new busname ends with \u00270\u0027, maybe there\u0027s a reason\n\nNon-indexed busnames are considered legacy and are maintained for backwards compatibility, new services should implement indexed busnames by default (if there is potential need for multiple service instances). \n\nI.e https://github.com/openbmc/phosphor-state-manager/blob/05a58d6c38c93cd507cf877eed030167278debee/host_state_manager_main.cpp#L96",
+      "parentUuid": "6cb628a3_e16e89c5",
+      "revId": "195d501985dbe7389fc546d4c3f1b388a245246e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
     }
   ]
 }
