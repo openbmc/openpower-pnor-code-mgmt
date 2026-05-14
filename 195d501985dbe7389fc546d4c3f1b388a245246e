@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "6cb628a3_e16e89c5",
+        "filename": "/PATCHSET_LEVEL",
+        "patchSetId": 4
+      },
+      "lineNbr": 0,
+      "author": {
+        "id": 1000003
+      },
+      "writtenOn": "2026-05-14T17:57:32Z",
+      "side": 1,
+      "message": "Agree that this is the easiest alternative to implement.\nI\u0027ve verified in the p10bmc machine that the Factory Reset busctl call can be done with both busnames.\n\nDon\u0027t have a preference if the new busname ends with \u00270\u0027, maybe there\u0027s a reason. We\u0027ll see if you get any feedback regarding the name in the bmcweb commit.",
+      "revId": "195d501985dbe7389fc546d4c3f1b388a245246e",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
