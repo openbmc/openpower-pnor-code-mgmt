@@ -34,9 +34,11 @@ build_vpnor = get_option('vpnor').allowed()
 build_pldm = get_option('pldm').allowed()
 build_verify_signature = get_option('verify-signature').allowed()
 
-if not cxx.has_header('CLI/CLI.hpp')
-    error('Could not find CLI.hpp')
-endif
+cli11_dep = dependency(
+    'CLI11',
+    include_type: 'system',
+    default_options: ['tests=disabled'],
+)
 
 summary('building for device type', '@0@'.format(get_option('device-type')))
 summary('building vpnor', build_vpnor)
@@ -179,6 +181,7 @@ executable(
         'utils.cpp',
     ] + extra_sources,
     dependencies: [
+        cli11_dep,
         dependency('libcrypto'),
         dependency('libsystemd'),
         dependency('openssl'),
