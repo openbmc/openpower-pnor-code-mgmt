@@ -40,6 +40,27 @@ cli11_dep = dependency(
     default_options: ['tests=disabled'],
 )
 
+cereal_dep = dependency('cereal', required: false)
+has_cereal = cxx.has_header_symbol(
+    'cereal/cereal.hpp',
+    'cereal::specialize',
+    dependencies: cereal_dep,
+    required: false,
+)
+if not has_cereal
+    cereal_opts = import('cmake').subproject_options()
+    cereal_opts.add_cmake_defines(
+        {'BUILD_TESTS': 'OFF', 'SKIP_PERFORMANCE_COMPARISON': 'ON'},
+    )
+    cereal_proj = import('cmake').subproject(
+        'cereal',
+        options: cereal_opts,
+        required: false,
+    )
+    assert(cereal_proj.found(), 'cereal is required')
+    cereal_dep = cereal_proj.dependency('cereal')
+endif
+
 summary('building for device type', '@0@'.format(get_option('device-type')))
 summary('building vpnor', build_vpnor)
 summary('building pldm', build_pldm)
@@ -181,6 +202,7 @@ executable(
         'utils.cpp',
     ] + extra_sources,
     dependencies: [
+        cereal_dep,
         cli11_dep,
         dependency('libcrypto'),
         dependency('libsystemd'),
@@ -291,11 +313,12 @@ if get_option('tests').allowed()
             'test/test_item_updater_static.cpp',
             'msl_verify.cpp',
             dependencies: [
-                dependency('libcrypto'),
+                cereal_dep,
                 dependency('gtest', main: true),
+                dependency('libcrypto'),
                 dependency('openssl'),
-                dependency('phosphor-logging'),
                 dependency('phosphor-dbus-interfaces'),
+                dependency('phosphor-logging'),
             ],
             implicit_include_directories: false,
             include_directories: '.',
@@ -310,6 +333,7 @@ if get_option('tests').allowed()
             dependencies: [
                 dependency('gtest', main: true),
                 dependency('phosphor-dbus-interfaces'),
+                dependency('phosphor-logging'),
                 dependency('sdbusplus'),
                 dependency('sdeventplus'),
             ],

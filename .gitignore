@@ -1,6 +1,7 @@
 build*/
 subprojects/*
 !subprojects/CLI11.wrap
-!subprojects/sdbusplus.wrap
+!subprojects/cereal.wrap
 !subprojects/phosphor-dbus-interfaces.wrap
 !subprojects/phosphor-logging.wrap
+!subprojects/sdbusplus.wrap
