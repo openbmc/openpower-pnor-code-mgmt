@@ -1,3 +1,5 @@
+#include <sdbusplus/bus.hpp>
+
 #include <filesystem>
 #include <functional>
 #include <map>
@@ -5,15 +7,6 @@
 #include <string>
 #include <variant>
 #include <vector>
-
-namespace sdbusplus
-{
-namespace bus
-{
-class bus;
-} // namespace bus
-using bus_t = bus::bus;
-} // namespace sdbusplus
 
 namespace sdeventplus
 {
