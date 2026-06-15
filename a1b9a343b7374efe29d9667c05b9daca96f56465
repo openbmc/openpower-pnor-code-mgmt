@@ -1,0 +1,7 @@
+Verified+1: OpenBMC CI <openbmcbump-ci@yahoo.com>
+Code-Review+2: Gunnar Mills <gunnar@gmills.xyz>
+Submitted-by: Gunnar Mills <gunnar@gmills.xyz>
+Submitted-at: Mon, 15 Jun 2026 13:58:14 +0000
+Reviewed-on: https://gerrit.openbmc.org/c/openbmc/openpower-pnor-code-mgmt/+/91225
+Project: openbmc/openpower-pnor-code-mgmt
+Branch: refs/heads/master
