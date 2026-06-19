@@ -27,7 +27,7 @@ using VersionInherit = sdbusplus::server::object_t<
 using DeleteInherit = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Object::server::Delete>;
 
-namespace sdbusRule = sdbusplus::bus::match::rules;
+namespace sdbusRule = sdbusplus::match_rules;
 
 class Delete;
 class Version;
@@ -177,7 +177,7 @@ class Version : public VersionInherit
     const std::string versionStr;
 
     /** @brief Used to subscribe to chassis power state changes **/
-    sdbusplus::bus::match_t chassisStateSignals;
+    sdbusplus::match chassisStateSignals;
 };
 
 } // namespace updater

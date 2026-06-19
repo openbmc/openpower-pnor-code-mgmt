@@ -26,7 +26,7 @@ using GardResetInherit = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Common::server::FactoryReset>;
 using ObjectEnable = sdbusplus::server::object_t<
     sdbusplus::xyz::openbmc_project::Object::server::Enable>;
-namespace MatchRules = sdbusplus::bus::match::rules;
+namespace MatchRules = sdbusplus::match_rules;
 
 using AssociationList =
     std::vector<std::tuple<std::string, std::string, std::string>>;
@@ -210,7 +210,7 @@ class ItemUpdater : public ItemUpdaterInherit
     std::map<std::string, std::unique_ptr<Version>> versions;
 
     /** @brief sdbusplus signal match for Software.Version */
-    sdbusplus::bus::match_t versionMatch;
+    sdbusplus::match versionMatch;
 
     /** @brief This entry's associations */
     AssociationList assocs = {};

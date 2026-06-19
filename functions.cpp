@@ -664,11 +664,10 @@ std::shared_ptr<void> processHostFirmware(
 
     // register for a callback in case the Compatible interface has not yet been
     // published by entity manager.
-    auto interfacesAddedMatch = std::make_shared<sdbusplus::bus::match_t>(
+    auto interfacesAddedMatch = std::make_shared<sdbusplus::match>(
         bus,
-        sdbusplus::bus::match::rules::interfacesAdded() +
-            sdbusplus::bus::match::rules::sender(
-                "xyz.openbmc_project.EntityManager"),
+        sdbusplus::match_rules::interfacesAdded() +
+            sdbusplus::match_rules::sender("xyz.openbmc_project.EntityManager"),
         [pExtensionMap, pHostFirmwareDirectory, pErrorCallback,
          &loop](auto& message) {
             // bind the extension map, host firmware directory, and error
@@ -776,11 +775,10 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
 
     // Entity Manager is needed to get the list of supported extensions. Add a
     // match to monitor interfaces added in case it's not running yet.
-    matches.emplace_back(std::make_shared<sdbusplus::bus::match_t>(
+    matches.emplace_back(std::make_shared<sdbusplus::match>(
         bus,
-        sdbusplus::bus::match::rules::interfacesAdded() +
-            sdbusplus::bus::match::rules::sender(
-                "xyz.openbmc_project.EntityManager"),
+        sdbusplus::match_rules::interfacesAdded() +
+            sdbusplus::match_rules::sender("xyz.openbmc_project.EntityManager"),
         [pExtensionMap, pElementsJsonFilePath, maybeSetAttrWithArgsBound,
          &loop](auto& message) {
             if (maybeCallMessage(message, maybeSetAttrWithArgsBound))
@@ -792,11 +790,10 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
     // The BIOS attribute table can only be updated if PLDM is running because
     // PLDM is the one that exposes this property. Add a match to monitor when
     // the PLDM service starts.
-    matches.emplace_back(std::make_shared<sdbusplus::bus::match_t>(
+    matches.emplace_back(std::make_shared<sdbusplus::match>(
         bus,
-        sdbusplus::bus::match::rules::nameOwnerChanged() +
-            sdbusplus::bus::match::rules::arg0namespace(
-                "xyz.openbmc_project.PLDM"),
+        sdbusplus::match_rules::nameOwnerChanged() +
+            sdbusplus::match_rules::arg0namespace("xyz.openbmc_project.PLDM"),
         [pExtensionMap, pElementsJsonFilePath, maybeSetAttrWithArgsBound,
          &loop](auto& message) {
             std::string name;

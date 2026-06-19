@@ -48,7 +48,7 @@ constexpr auto hostStateRebootProp = "RequestedHostTransition";
 constexpr auto hostStateRebootVal =
     "xyz.openbmc_project.State.Host.Transition.Reboot";
 
-namespace sdbusRule = sdbusplus::bus::match::rules;
+namespace sdbusRule = sdbusplus::match_rules;
 
 class ItemUpdater;
 class Activation;
@@ -227,7 +227,7 @@ class Activation : public ActivationInherit
     std::unique_ptr<RedundancyPriority> redundancyPriority;
 
     /** @brief Used to subscribe to dbus systemd signals **/
-    sdbusplus::bus::match_t systemdSignals;
+    sdbusplus::match systemdSignals;
 
     /**
      * @brief Determine the configured image apply time value
