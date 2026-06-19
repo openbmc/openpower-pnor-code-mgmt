@@ -210,7 +210,7 @@ class ItemUpdater : public ItemUpdaterInherit
     std::map<std::string, std::unique_ptr<Version>> versions;
 
     /** @brief sdbusplus signal match for Software.Version */
-    sdbusplus::bus::match_t versionMatch;
+    sdbusplus::match versionMatch;
 
     /** @brief This entry's associations */
     AssociationList assocs = {};

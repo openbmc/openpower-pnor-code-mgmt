@@ -664,7 +664,7 @@ std::shared_ptr<void> processHostFirmware(
 
     // register for a callback in case the Compatible interface has not yet been
     // published by entity manager.
-    auto interfacesAddedMatch = std::make_shared<sdbusplus::bus::match_t>(
+    auto interfacesAddedMatch = std::make_shared<sdbusplus::match>(
         bus,
         sdbusplus::bus::match::rules::interfacesAdded() +
             sdbusplus::bus::match::rules::sender(
@@ -776,7 +776,7 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
 
     // Entity Manager is needed to get the list of supported extensions. Add a
     // match to monitor interfaces added in case it's not running yet.
-    matches.emplace_back(std::make_shared<sdbusplus::bus::match_t>(
+    matches.emplace_back(std::make_shared<sdbusplus::match>(
         bus,
         sdbusplus::bus::match::rules::interfacesAdded() +
             sdbusplus::bus::match::rules::sender(
@@ -792,7 +792,7 @@ std::vector<std::shared_ptr<void>> updateBiosAttrTable(
     // The BIOS attribute table can only be updated if PLDM is running because
     // PLDM is the one that exposes this property. Add a match to monitor when
     // the PLDM service starts.
-    matches.emplace_back(std::make_shared<sdbusplus::bus::match_t>(
+    matches.emplace_back(std::make_shared<sdbusplus::match>(
         bus,
         sdbusplus::bus::match::rules::nameOwnerChanged() +
             sdbusplus::bus::match::rules::arg0namespace(

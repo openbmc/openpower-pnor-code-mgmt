@@ -177,7 +177,7 @@ class Version : public VersionInherit
     const std::string versionStr;
 
     /** @brief Used to subscribe to chassis power state changes **/
-    sdbusplus::bus::match_t chassisStateSignals;
+    sdbusplus::match chassisStateSignals;
 };
 
 } // namespace updater
