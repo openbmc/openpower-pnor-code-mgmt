@@ -32,15 +32,11 @@
 # data within them will be kept sorted.
 
 owners:
-- anoo@us.ibm.com
 - gunnar@gmills.xyz
 
 matchers:
 
 openbmc:
-- name: Adriana Kobylak
-  email: anoo@us.ibm.com
-  discord: anoo
 - name: Gunnar Mills
   email: gunnar@gmills.xyz
   discord: GunnarM
