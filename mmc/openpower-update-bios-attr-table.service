@@ -4,6 +4,7 @@ After=org.open_power.Software.Host.Updater.service
 After=obmc-flash-bios-init.service
 After=openpower-process-host-firmware.service
 Before=mboxd.service
+Before=xyz.openbmc_project.Control.SyncBMCData.service
 
 [Service]
 Type=oneshot
