@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "94c12f13_e8ba8bab",
+        "filename": "mmc/openpower-update-bios-attr-table.service",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 1000004
+      },
+      "writtenOn": "2026-07-15T13:00:31Z",
+      "side": 1,
+      "message": "I know this doesn\u0027t hurt anything when the service doesn\u0027t exist but I don\u0027t think we can reference a service that does not exist in upstream.",
+      "revId": "9fd866785d12d9fd160dbde29f6ae969746cf131",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
