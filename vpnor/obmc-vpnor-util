@@ -101,8 +101,13 @@ function update_symlinks() {
             mkdir -p "${HOSTFW_ACTIVE_PATH}"
         fi
         # Symlinks used by PLDM
-        if [[ $(readlink -f "${HOSTFW_RUNNING_PATH}") != "${MMC_RUNNING_PATH}" ]]; then
-            rm -f ${HOSTFW_RUNNING_PATH}
+        # Check if path exists and remove it (whether it's a symlink or directory)
+        if [ -e "${HOSTFW_RUNNING_PATH}" ] || [ -L "${HOSTFW_RUNNING_PATH}" ]; then
+            if [[ $(readlink -f "${HOSTFW_RUNNING_PATH}") != "${MMC_RUNNING_PATH}" ]]; then
+                rm -rf ${HOSTFW_RUNNING_PATH}
+            fi
+        fi
+        if [ ! -e "${HOSTFW_RUNNING_PATH}" ]; then
             ln -sfv ${MMC_RUNNING_PATH} ${HOSTFW_RUNNING_PATH}
         fi
         if [[ $(readlink -f "${HOSTFW_ALTERNATE_PATH}") != "${MMC_ALTERNATE_PATH}" ]]; then

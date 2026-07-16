@@ -177,7 +177,13 @@ mmc_patch() {
     if [ "$(readlink -f "${symlink_base}/pnor")" != "${running_patch_dir}" ]; then
         ln -s "${running_patch_dir}" "${symlink_base}/pnor"
     fi
-    if [ "$(readlink -f "${hostfw_symlink_base}/running")" != "${running_patch_dir}" ]; then
+    # Check if path exists and remove it (whether it's a symlink or directory)
+    if [ -e "${hostfw_symlink_base}/running" ] || [ -L "${hostfw_symlink_base}/running" ]; then
+        if [ "$(readlink -f "${hostfw_symlink_base}/running")" != "${running_patch_dir}" ]; then
+            rm -rf "${hostfw_symlink_base}/running"
+        fi
+    fi
+    if [ ! -e "${hostfw_symlink_base}/running" ]; then
         ln -s "${running_patch_dir}" "${hostfw_symlink_base}/running"
     fi
     if [ "$(readlink -f "${hostfw_symlink_base}/alternate")" != "${alternate_patch_dir}" ]; then
