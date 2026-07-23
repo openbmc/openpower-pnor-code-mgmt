@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "unresolved": true,
+      "key": {
+        "uuid": "3bbc83a9_d73c5510",
+        "filename": "mmc/obmc-flash-bios",
+        "patchSetId": 1
+      },
+      "lineNbr": 181,
+      "author": {
+        "id": 1000020
+      },
+      "writtenOn": "2026-07-23T18:52:55Z",
+      "side": 1,
+      "message": "This isn\u0027t unique to running right? \n\nThe unchanged alternate, staging, and nvram blocks use the same rm -f plus ln -s pattern...",
+      "range": {
+        "startLine": 181,
+        "startChar": 79,
+        "endLine": 181,
+        "endChar": 86
+      },
+      "revId": "83db35b538efc3414f60a353e102bc9382a27c8b",
+      "serverId": "adbd0a64-1f21-4d83-b585-671fe73cb6e4"
+    }
+  ]
+}
